@@ -27,6 +27,7 @@
 
 ### Nov 8
 
+- **SFT at epoch 1.09:** loss 0.007, token accuracy 0.997, entropy 0.01. The model is memorizing the templated oracle trajectories. **Risk:** GRPO groups whose rollouts all get the same reward give no learning signal. **Check:** run `gate_g1.py` on GRPO-B's first steps. If few groups have reward variance, rerun SFT for 1 epoch (about 32 min).
 - **E4 base result** (2648 trajectories, Wilson 95% CIs):
 
   | Metric | Value |
