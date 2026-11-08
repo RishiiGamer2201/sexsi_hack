@@ -5,7 +5,7 @@
 ## Current state (Nov 8, night)
 
 - **Running on the VM:** full SFT (`scripts/vm_sft.sh`, log `runs/sft.log`): 1386 examples, 2 epochs, about 65 min. It then checks the SFT model's format on 32 test items and powers the VM off itself (`scripts/vm_autostop.sh`), unless a teammate is logged in.
-- **Running locally (RTX 5070 Ti, WSL):** E4 generation for the base model, 331 items × 8 samples (`scripts/local_eval.sh`, output `results/traj_base.jsonl`). The base model needs no training, so this keeps the job off the VM.
+- **E4 base model done** on the local GPU (`results/traj_base.jsonl`, 331 items × 8 samples). The local card ran it in 9 min, so it can run every E4 generation once the merged models are copied over.
 - **Pipeline:** smoke test passes end to end on the team VM. It covers tests, tiny SFT, 2 GRPO steps, adapter merge, eval and scoring (`scripts/vm_smoke.sh`, `scripts/vm_smoke_eval.sh`).
 - **VM `sqlcf-l4`** (asia-south1-a, 1× L4): start it with `bash scripts/vm_start.sh`, which retries through L4 stockouts. Stop it whenever no job is running. SSH from WSL's gcloud (user `admin_wsl`); the Windows gcloud key is not on the VM.
 - **Gates:**
@@ -27,6 +27,19 @@
 
 ### Nov 8
 
+- **E4 base result** (2648 trajectories, Wilson 95% CIs):
+
+  | Metric | Value |
+  |---|---|
+  | Verified accuracy | 0.004 [0.002, 0.007] |
+  | Single-DB accuracy | 0.010 |
+  | Has final SQL | 0.62 |
+  | Silent errors | 0.012 |
+  | Smuggled | 0.000 |
+  | Invalid tool calls | 0.75 |
+  | Tool calls per trajectory | 1.77 |
+
+  The untrained model almost never answers correctly, and 3 in 4 of its tool calls fail.
 - **Gate G1 tooling.** `scripts/gate_g1.py` rescores the check vectors in the reward log under the mean, strict and soft forms. G1 can then be decided from GRPO-B's first steps, with no extra GPU run.
 - **Prepared GRPO launch.** `scripts/vm_grpo.sh REWARD NAME [train.py args]` runs one condition and then powers the VM off.
 - **SFT is learning.** Loss fell from 0.49 to 0.16 by epoch 0.17, and token accuracy reached 0.96.
