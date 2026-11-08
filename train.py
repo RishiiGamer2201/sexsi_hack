@@ -78,7 +78,7 @@ def sft(a):
         processing_class=tok, train_dataset=Dataset.from_list(sft_examples(a.data)),
         peft_config=LoraConfig(**LORA),
         args=SFTConfig(output_dir=str(a.out), num_train_epochs=a.epochs, learning_rate=1e-4,
-                       per_device_train_batch_size=2, gradient_accumulation_steps=8,
+                       per_device_train_batch_size=a.batch, gradient_accumulation_steps=16 // a.batch,
                        gradient_checkpointing=True, bf16=True, max_length=4096,
                        logging_steps=5, save_strategy="no", report_to=[], seed=a.seed))
     trainer.train()
@@ -164,6 +164,7 @@ if __name__ == "__main__":
     ap.add_argument("--prompts", type=int, default=4)
     ap.add_argument("--epochs", type=float, default=2)
     ap.add_argument("--seed", type=int, default=0)
+    ap.add_argument("--batch", type=int, default=2, choices=[1, 2, 4], help="SFT per-device batch; effective batch stays 16 (1 for a 16 GB card)")
     ap.add_argument("--no-vllm", dest="vllm", action="store_false")
     ap.add_argument("--vllm-mem", type=float, default=0.45, help="colocated vLLM share of GPU memory (3.35B bf16 weights ~6.7 GB)")
     a = ap.parse_args()
