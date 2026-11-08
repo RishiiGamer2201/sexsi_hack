@@ -7,13 +7,13 @@
 - **Precision fix verified.** SFT retrained on the local GPU, then merged in fp32 and saved as fp16.
   - On 58 of its own training items (greedy), 1.00 verify [0.94, 1.0]; the bf16 merge got 0.26.
   - Adapter: `runs/sft/adapter` (local); merged model: `runs/sft/merged` (fp16, 6.3 GB, local).
-- **VM: RUNNING GRPO-B** (started 23:06 UTC Nov 8; about 3.2 h for 60 steps, then autostop). Smoke test passed (first rollouts 0.80 mean). G1 rerun pending at 240 rollouts.
+- **VM: RUNNING GRPO-B** (started 23:06 UTC Nov 8; about 3.2 h for 60 steps, then autostop). Smoke test passed. GRPO-C (R_cf_mean) is chained to start when B ends; autostop after C.
 - **Held-out SFT** (3 GRPO-only templates): trained; 170 rollouts where B and C rewards differ (was 8). See log.
 - **GRPO signal: OK** (125 of 445 groups mixed). E4 for base and SFT is done with the fixed model and real samples.
 - **Pipeline:** the smoke test passed before the fix. The fix changes TRL's weight sync (`sqlcf/precision.py`), so GRPO-B's step-1 reward serves as the smoke test (see Next 1).
 - **VM `sqlcf-l4`** (asia-south1-a, 1x L4): start it with `bash scripts/vm_start.sh`, which retries through stockouts. Stop it whenever no job is running. SSH from WSL's gcloud (user `admin_wsl`).
 - **Gates:**
-  - G1 (freeze the reward form): open.
+  - G1 (freeze the reward form): passes. R_cf_mean.
   - G2 (GRPO step time): passes. 190 s per step, so 60 steps take about 3.2 h.
 - **Access:**
   - Aksh: sudo account on the VM, plus IAM rights to start and stop it.
@@ -31,6 +31,13 @@
 ## Log
 
 ### Nov 9
+
+- **Gate G1 passed: reward form for C frozen as R_cf_mean.** From 240 GRPO-B rollouts (40 groups of 6, first 10 steps), counting groups with non-zero reward variance:
+  - R_cf_mean 8/40, R_cf_soft 8/40, R_cf_strict 5/40 (R_exec_rex 8/40). FN on gold is 0 for every form (E0), so the count decides.
+  - Mean and soft tie; mean stays, since GRPO-C was already set up for it and it is the simpler form.
+- **GRPO-C chained after B on the VM** (`scripts/vm_chain_c.sh`), with no stop/start in between, because a restart risks hours of L4 stockouts.
+  - B's `vm_grpo.sh` wrapper was killed so its autostop cannot fire between the runs. B's train.py keeps running.
+  - C uses identical args and the same SFT adapter. The VM autostops after C, about 6.5 h from now.
 
 - **GRPO-B smoke test passed.** The first 96 rollouts average 0.80 R_exec_rex, so vLLM is serving the trained weights; base weights would give about 0.01.
   - Logged step rewards 0.92 / 1.0 / 0.5. Steps take 200-215 s, so 60 steps is about 3.4 h.
