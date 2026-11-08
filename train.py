@@ -103,7 +103,7 @@ def grpo(a):
         gradient_accumulation_steps=1, learning_rate=1e-5, beta=0.02, temperature=1.0,
         max_completion_length=2048, max_steps_per_turn=4, gradient_checkpointing=True,
         bf16=True, logging_steps=1, save_steps=20, report_to=[], seed=a.seed,
-        use_vllm=a.vllm, vllm_mode="colocate", vllm_gpu_memory_utilization=0.3)
+        use_vllm=a.vllm, vllm_mode="colocate", vllm_gpu_memory_utilization=a.vllm_mem)
     trainer.train()
 
 
@@ -133,5 +133,6 @@ if __name__ == "__main__":
     ap.add_argument("--epochs", type=float, default=2)
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--no-vllm", dest="vllm", action="store_false")
+    ap.add_argument("--vllm-mem", type=float, default=0.45, help="colocated vLLM share of GPU memory (3.35B bf16 weights ~6.7 GB)")
     a = ap.parse_args()
     {"sft": sft, "grpo": grpo, "render": render}[a.cmd](a)
