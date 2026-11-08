@@ -25,12 +25,28 @@
    - It copies the local verified SFT adapter up, then launches `vm_grpo.sh R_exec_rex grpo_B`.
    - Step 1 doubles as the smoke test for the TRL sync patch: train-prompt reward should be about 0.9. About 0.01 would mean vLLM is serving base weights.
 2. Gate G1 from GRPO-B's first steps (`scripts/gate_g1.py`). Then GRPO-C with the same arguments, then E4 for B and C on the local GPU.
-3. Done: held-out SFT and its signal check. E4 for it (`sft_ho`) is running locally.
+3. Done: held-out SFT, its signal check and its E4 (`sft_ho`, verified 0.094).
 4. The user chose no zone move: keep retrying in asia-south1-a.
 
 ## Log
 
 ### Nov 9
+
+- **E4, held-out SFT (`sft_ho`)** (331 test items x 8, T=0.7). B and C start from this model, so it is now the SFT baseline.
+
+  | Metric | Base | SFT (all templates) | SFT held out |
+  |---|---|---|---|
+  | Verified | 0.009 | 0.117 | **0.094** [0.084, 0.106] |
+  | Single-DB | 0.014 | 0.151 | 0.145 |
+  | Silent errors | 0.045 | 0.632 | 0.654 |
+  | Inflation (single - verified) | 0.005 | 0.033 | **0.051** |
+  | Invalid tool calls | 0.64 | 0.16 | 0.17 |
+  | Verified, F1 / F2 / F3 / F4 | 0.05 / 0 / 0 / 0.006 | 0.76 / 0.003 / 0.014 / 0.05 | 0.31 / 0.01 / 0 / 0.09 |
+
+  - sft_ho vs base: p=8.4e-06, diff +8.5 pp [6.3, 10.7]. sft vs sft_ho: p=1.9e-01, diff +2.3 pp [0.1, 4.6].
+  - The drop is all F1: test F1 templates resemble the held-out `F1_paying_customers`. F4 went up.
+  - Inflation rose, so there is more for C to fix on test than with the all-templates SFT.
+  - `evaluate.PAIRS` now compares B and C against `sft_ho`.
 
 - **Held-out SFT trained** (353 trajectories, local GPU, 72 min, no crash). Saved to `runs/sft` (local).
 - **Signal check, held-out SFT** (445 GRPO prompts, G=6, T=1.0; `results/grpo_signal_sft_ho.json`):
