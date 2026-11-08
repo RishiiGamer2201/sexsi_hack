@@ -7,11 +7,8 @@
 - **Precision fix verified.** SFT retrained on the local GPU, then merged in fp32 and saved as fp16.
   - On 58 of its own training items (greedy), 1.00 verify [0.94, 1.0]; the bf16 merge got 0.26.
   - Adapter: `runs/sft/adapter` (local); merged model: `runs/sft/merged` (fp16, 6.3 GB, local).
-- **Running locally** (`scripts/local_e4.sh`, about 35 min):
-  - SFT rollouts on the 445 GRPO prompts (G=6, T=1.0), the GRPO signal check, read with `scripts/group_signal.py`.
-  - E4 for SFT and for base, both served in fp16.
 - **VM: TERMINATED.** 60 more L4 stockouts in asia-south1-a (about 2 h), so nothing has run on it since the fix. Moving zones needs the user's OK.
-- **Risk:** SFT and GRPO prompts share templates. The fixed SFT may solve most GRPO prompts, which would leave groups with no reward variance. The signal check answers this before GRPO-B.
+- **GRPO signal: OK** (125 of 445 groups mixed). E4 for base and SFT is done with the fixed model and real samples.
 - **Pipeline:** the smoke test passed before the fix. The fix changes TRL's weight sync (`sqlcf/precision.py`), so run the smoke test again before GRPO-B.
 - **VM `sqlcf-l4`** (asia-south1-a, 1x L4): start it with `bash scripts/vm_start.sh`, which retries through stockouts. Stop it whenever no job is running. SSH from WSL's gcloud (user `admin_wsl`).
 - **Gates:**
@@ -23,31 +20,40 @@
 
 ## Next
 
-1. Read the GRPO signal check. If few groups are mixed, change the prompt set before GRPO-B. Options: GRPO on held-out templates, or keep only mixed prompts.
-2. When the VM starts: copy the local `runs/sft/adapter` up, so GRPO starts from the model that was verified. Then the smoke test, then GRPO-B.
-3. Gate G1 from GRPO-B's first steps (`scripts/gate_g1.py`). Then GRPO-C with the same arguments, then E4 for B and C on the local GPU.
+1. **GRPO-B as soon as the VM starts** (`scripts/laptop_kick_grpo.sh` retries through stockouts).
+   - It copies the local verified SFT adapter up, then launches `vm_grpo.sh R_exec_rex grpo_B`.
+   - Step 1 doubles as the smoke test for the TRL sync patch: train-prompt reward should be about 0.9. About 0.01 would mean vLLM is serving base weights.
+2. Gate G1 from GRPO-B's first steps (`scripts/gate_g1.py`). Then GRPO-C with the same arguments, then E4 for B and C on the local GPU.
+3. **Team decision:** keep the current GRPO prompts (signal is fine, but B and C barely differ), or add templates with a high blind rate so the counterfactual reward matters during training.
+4. **User decision:** L4 stockouts in asia-south1-a have lasted hours. Moving zones needs the user's OK.
 
 ## Log
 
 ### Nov 9
 
-- **E4 with the fixed model** (fp16, 331 test items x 8 samples, local GPU). Replaces the bf16 numbers below.
+- **Eval sampling bug (fixed in 90e8fae).** `SamplingParams(seed=...)` set a per-request seed, so every copy of a prompt sampled identically. 331 of 331 E4 groups and 444 of 445 GRPO-prompt groups were clones.
+  - That made pass^k flat and the CIs effectively n=1, and it hid every mixed GRPO group.
+  - The greedy own-items check (0.26 to 1.00) is not affected. GRPO training samples through TRL, so it is not affected either.
+- **E4, fp16 models, real samples** (331 test items x 8, T=0.7, local GPU). Replaces all earlier E4 numbers.
 
   | Metric | Base | SFT |
   |---|---|---|
-  | Verified | 0.012 | **0.094** [0.083, 0.105] |
-  | Single-DB | 0.015 | 0.109 |
-  | Silent errors | 0.012 | 0.782 |
-  | Has final SQL | 0.62 | 0.97 |
-  | Invalid tool calls | 0.73 | 0.06 |
-  | Verified, F1 / F2 / F3 / F4 | 0.03 / 0 / 0 / 0.01 | **0.83** / 0 / 0 / 0.005 |
+  | Verified | 0.009 | **0.117** [0.106, 0.130] |
+  | Single-DB | 0.014 | 0.151 |
+  | Silent errors | 0.045 | 0.632 |
+  | Has final SQL | 0.46 | 0.985 |
+  | Invalid tool calls | 0.64 | 0.16 |
+  | pass^1 / pass^2 / pass^4 | 0.009 / 0.001 / 0 | 0.117 / 0.075 / 0.046 |
+  | Verified, F1 / F2 / F3 / F4 | 0.05 / 0 / 0 / 0.006 | **0.76** / 0.003 / 0.014 / 0.05 |
 
-  SFT beats base on verified: McNemar p=1.4e-6, paired bootstrap +8.2 pp [4.8, 11.5].
-  - SFT learned the format: 97% end with final SQL, 6% invalid tool calls.
-  - Test templates are new compositions. On them SFT pattern-matches the closest training template and returns plausible but wrong SQL.
+  SFT beats base on verified: McNemar p=3.6e-8, paired bootstrap +10.8 pp [8.3, 13.5].
+  - Test templates are new compositions. On them SFT pattern-matches the closest training template and returns plausible but wrong SQL, hence 63% silent errors.
     - F2_units_paid filters on `order_date` instead of payment date.
     - F3_avg_order averages per item instead of per order.
-  - Hence 78% silent errors. This is the failure mode that counterfactual checks are built to catch, and that GRPO-C should reduce.
+- **GRPO signal check** (SFT, fp16, 445 GRPO prompts, G=6, T=1.0): **125 mixed groups (28%)**, mean verified 0.94, and every train template has mixed groups. So GRPO-B can use the current prompt set.
+  - **Caveat for B vs C:** only 8 of 2670 rollouts pass the original DB but fail a counterfactual, and those are the only rollouts where R_exec and R_cf differ.
+  - So on these prompts B and C get nearly the same reward. Any difference has to come from rollouts that drift into such shortcuts during GRPO, or show up on test.
+  - A prompt mix weighted toward templates with a high blind rate (E1) would sharpen the contrast. That is a design decision; see "Next".
 - **SFT retrained on the local RTX 5070 Ti** (batch 1 x 16 accumulation, otherwise the same config as on the VM).
   - WSL threw `CUDA error: unknown error` mid-run 3 times, at steps 21, 84 and 34. The Windows log shows no driver reset, and CUDA works again right after.
   - Fix: `--save-every 10` with auto-resume in `scripts/local_sft.sh`. The successful run took 2 attempts and 1629 s.

@@ -1,0 +1,17 @@
+{
+ "prompts": 445,
+ "G": 6,
+ "verified_count_hist": {
+  "0": 1,
+  "2": 3,
+  "3": 6,
+  "4": 16,
+  "5": 100,
+  "6": 319
+ },
+ "mixed_verified": 125,
+ "mixed_single": 119,
+ "single_pass_cf_fail_rollouts": 8,
+ "rollouts": 2670,
+ "verified_rate": 0.9370786516853933
+}
