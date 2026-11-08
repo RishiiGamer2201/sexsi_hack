@@ -4,8 +4,8 @@
 
 ## Current state (Nov 8, night)
 
-- **Running on the VM:** GRPO-B (`R_exec_rex`, 60 steps, G=6, 4 prompts per step; log `runs/grpo_B.log`). The VM powers itself off when the run ends.
-- **Running locally:** copying `runs/sft/merged` from the VM to the laptop, for the SFT E4 eval on the local GPU.
+- **VM: stopped.** GRPO-B was aborted after step 1, because the GRPO prompts are already solved (see the log).
+- **Running locally:** the SFT model on all 445 GRPO prompts (G=6, temperature 1.0). It measures how many prompts get mixed outcomes, and how often a rollout passes the original DB but fails a counterfactual. That tells us whether filtering the prompts gives GRPO enough signal.
 - **E4 base model done** on the local GPU (`results/traj_base.jsonl`, 331 items × 8 samples). The local card ran it in 9 min, so it can run every E4 generation once the merged models are copied over.
 - **Pipeline:** smoke test passes end to end on the team VM. It covers tests, tiny SFT, 2 GRPO steps, adapter merge, eval and scoring (`scripts/vm_smoke.sh`, `scripts/vm_smoke_eval.sh`).
 - **VM `sqlcf-l4`** (asia-south1-a, 1× L4): start it with `bash scripts/vm_start.sh`, which retries through L4 stockouts. Stop it whenever no job is running. SSH from WSL's gcloud (user `admin_wsl`); the Windows gcloud key is not on the VM.
@@ -18,16 +18,33 @@
 
 ## Next
 
-1. Time GRPO-B's first steps (gate G2), and check that groups have reward variance.
+1. Fix the GRPO prompt set, either by filtering to prompts with mixed outcomes or by splitting templates between SFT and GRPO. Then relaunch GRPO-B.
 2. Gate G1 from GRPO-B's first steps, with `python scripts/gate_g1.py runs/grpo_B_rewards.jsonl --G 6 --first 96`. FN on gold is 0 for every form, so the tie-break decides: the form with the most groups whose reward has non-zero variance.
 3. GRPO-C with the G1 form and the same budget as B.
-4. E4 eval on the SFT model, run locally.
-5. E4 eval on base, SFT, B and C, then scoring.
+4. E4 eval on base, SFT, B and C, then scoring.
 
 ## Log
 
 ### Nov 8
 
+- **E4 SFT result** (local GPU, 331 items × 8 samples, 13.5 min):
+
+  | Metric | SFT | Base |
+  |---|---|---|
+  | Verified accuracy | 0.019 | 0.004 |
+  | Single-DB accuracy | 0.025 | |
+  | Has final SQL | 0.51 | |
+  | Silent errors | 0.41 | |
+  | Invalid tool calls | 0.37 | |
+
+  SFT beats base on verified accuracy: McNemar p=0.031, paired bootstrap +1.5 pp [0.1, 3.1]. Only 7 of 331 test items get mixed outcomes across their 8 samples.
+
+  VM models fail to load locally, because the VM's newer transformers saves the tokenizer as class `TokenizersBackend`. `local_eval.sh` now copies in the base tokenizer files; fine-tuning does not change the tokenizer.
+- **GRPO-B aborted after step 1** (190 s per step, so G2 itself would pass with 60 steps ≈ 3.2 h).
+  - Reward on the train prompts was 0.96, and 75% of groups had zero reward variance. Every check vector was all-True or all-False.
+  - **Cause:** SFT and GRPO prompts come from the same 11 templates. `SFT_BASES` splits them by base DB only, so after 2 epochs of SFT the GRPO prompts are memorized. Test templates are disjoint and almost always failed.
+  - So GRPO had no signal on the train prompts, and none on unseen templates either. B and C would also see identical rewards.
+  - Stopped to save about 3 h of GPU. This is the "overfitting to templates" case in plan.md.
 - **GRPO-B launched** at about 20:25 IST, with the default config.
 - **SFT done.** 174 steps in 64 min; final train loss 0.042. The VM powered itself off at 14:48Z, and an L4 stockout cost 2 retries when restarting it.
 - **SFT format check** on 32 test items, 1 sample each:
