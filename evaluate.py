@@ -1,8 +1,11 @@
 """E4 evaluation: generate agent trajectories on the test set (GPU, vLLM) and score them (CPU).
 
-  # base model alone; then SFT-merged model with the SFT (no LoRA), GRPO-B and GRPO-C adapters
+  # one model per call; GRPO adapters are pre-merged by train.py (vLLM 0.22 LoRA breaks on
+  # Tiny Aya's tied embeddings: 'VocabParallelEmbeddingWithLoRA' has no 'quant_method')
   python evaluate.py gen --model CohereLabs/tiny-aya-global --name base
-  python evaluate.py gen --model runs/sft/merged --name sft --lora B=runs/grpo_B C=runs/grpo_C
+  python evaluate.py gen --model runs/sft/merged    --name sft
+  python evaluate.py gen --model runs/grpo_B/merged --name B
+  python evaluate.py gen --model runs/grpo_C/merged --name C
   python evaluate.py score --traj results/traj_*.jsonl          # -> results/e4_eval.json
   python evaluate.py selfcheck                                   # CPU: oracle/mutant trajectories
 
@@ -33,28 +36,27 @@ def gen(a):
         fold_tool_messages_into_user)
     from transformers import AutoTokenizer
     from vllm import LLM, SamplingParams
-    from vllm.lora.request import LoRARequest
 
     from train import fallback_system
 
     items = [json.loads(l) for l in open(a.items)][: a.limit or None]
     tok = AutoTokenizer.from_pretrained(a.model)
-    llm = LLM(a.model, enable_lora=bool(a.lora), max_lora_rank=16, max_model_len=8192,
-              gpu_memory_utilization=0.85, seed=a.seed)
+    llm = LLM(a.model, max_model_len=8192, gpu_memory_utilization=0.85, seed=a.seed)
     sp = SamplingParams(temperature=a.temperature, max_tokens=1024, seed=a.seed)
     schema = [_build_tool_schema(run_sql)]
-    loras = [(a.name, None)] + [(n, LoRARequest(n, i + 1, p)) for i, (n, p) in
-                                 enumerate(x.split("=", 1) for x in a.lora)]
-    for name, lora in loras:
+
+    def ids(conv):  # token ids, not text: vLLM would add a second BOS to the rendered string
+        out = _render_chat_template(tok, fold_tool_messages_into_user(conv), schema, tokenize=True, return_tensors=None)
+        return {"prompt_token_ids": list(out["input_ids"] if hasattr(out, "keys") else out)}
+
+    for name in [a.name]:
         convs = [[{"role": "system", "content": fallback_system(SYSTEM)}, {"role": "user", "content": user_message(it)}]
                  for it in items for _ in range(a.n)]
         live = list(range(len(convs)))
         for _ in range(a.max_steps):
             if not live:
                 break
-            prompts = [_render_chat_template(tok, fold_tool_messages_into_user(convs[i]), schema, tokenize=False)
-                       for i in live]
-            outs = llm.generate(prompts, sp, lora_request=lora)
+            outs = llm.generate([ids(convs[i]) for i in live], sp)
             nxt = []
             for i, o in zip(live, outs):
                 raw = o.outputs[0].text
@@ -194,7 +196,6 @@ if __name__ == "__main__":
     ap.add_argument("--items", type=Path, default=Path("data/test/items.jsonl"))
     ap.add_argument("--model", default="CohereLabs/tiny-aya-global")
     ap.add_argument("--name", default="base")
-    ap.add_argument("--lora", nargs="*", default=[], help="NAME=adapter_dir, served on --model")
     ap.add_argument("--n", type=int, default=8)
     ap.add_argument("--temperature", type=float, default=0.7)
     ap.add_argument("--max-steps", type=int, default=5)

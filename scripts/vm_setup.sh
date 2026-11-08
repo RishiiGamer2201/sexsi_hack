@@ -15,6 +15,9 @@ export PATH="$HOME/.local/bin:$PATH" UV_CACHE_DIR="$PWD/.cache/uv" UV_PYTHON_INS
 
 mkdir -p vendor
 [ -d vendor/AgentTune ] || { git clone -q https://github.com/Lexsi-Labs/AgentTune.git vendor/AgentTune && git -C vendor/AgentTune checkout -q d4db4c1; }
+# multi-turn token-stream + double-BOS fix for the vLLM rollout path (idempotent)
+git -C vendor/AgentTune apply --reverse --check ../../patches/agenttune-multiturn-ids.patch 2>/dev/null ||
+  git -C vendor/AgentTune apply ../../patches/agenttune-multiturn-ids.patch
 
 [ -x .venv-train/bin/python ] || uv venv -q --python 3.12 .venv-train
 uv pip install -q --python .venv-train/bin/python -e vendor/AgentTune trl peft datasets pandas scipy matplotlib pytest vllm==0.22.1

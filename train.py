@@ -105,7 +105,16 @@ def grpo(a):
         max_completion_length=2048, max_steps_per_turn=4, gradient_checkpointing=True,
         bf16=True, logging_steps=1, save_steps=20, report_to=[], seed=a.seed,
         use_vllm=a.vllm, vllm_mode="colocate", vllm_gpu_memory_utilization=a.vllm_mem)
-    trainer.train()
+    trainer.train()  # saves the LoRA adapter to a.out
+    del trainer
+    # Eval serves merged weights: vLLM 0.22 LoRA crashes on Tiny Aya's tied embeddings.
+    import torch
+    from peft import PeftModel
+    from transformers import AutoModelForCausalLM, AutoTokenizer
+    torch.cuda.empty_cache()
+    base = AutoModelForCausalLM.from_pretrained(str(a.init), dtype=torch.bfloat16)
+    PeftModel.from_pretrained(base, str(a.out)).merge_and_unload().save_pretrained(str(a.out / "merged"))
+    AutoTokenizer.from_pretrained(str(a.init)).save_pretrained(str(a.out / "merged"))
 
 
 def render(a):

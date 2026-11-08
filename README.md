@@ -7,7 +7,7 @@ Lexsi hackathon, Track 3 (PS #6 + #9), team Teen_khapeetars. Plan and status: [p
 ```bash
 # third-party repos (not committed)
 mkdir -p vendor && cd vendor
-git clone https://github.com/Lexsi-Labs/AgentTune.git && git -C AgentTune checkout d4db4c1
+git clone https://github.com/Lexsi-Labs/AgentTune.git && git -C AgentTune checkout d4db4c1 && git -C AgentTune apply ../../patches/agenttune-multiturn-ids.patch
 git clone https://github.com/Lexsi-Labs/AuditKIT.git  && git -C AuditKIT checkout 9da5838
 git clone https://github.com/UEddy/Kataa.git          && git -C Kataa checkout c0c65a1
 cd ..
@@ -39,7 +39,7 @@ Tiny Aya (`CohereLabs/tiny-aya-global`) is gated: accept the licence and use an 
 .venv-train/bin/python train.py sft  --out runs/sft                        # E2
 .venv-train/bin/python train.py grpo --reward R_exec_rex --out runs/grpo_B # E3 condition B
 .venv-train/bin/python train.py grpo --reward R_cf_mean  --out runs/grpo_C # E3 condition C
-.venv-train/bin/python evaluate.py gen --model runs/sft/merged --name sft --lora B=runs/grpo_B C=runs/grpo_C
+for m in sft grpo_B grpo_C; do .venv-train/bin/python evaluate.py gen --model runs/$m/merged --name ${m#grpo_}; done
 .venv/bin/python evaluate.py score --traj results/traj_*.jsonl             # E4
 ```
 
