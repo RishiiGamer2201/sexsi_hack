@@ -1,5 +1,5 @@
 {
- "items": "data/audit/items.jsonl",
+ "items": "/home/admin_wsl/developer/comps/sexsi_hack/data/audit/items.jsonl",
  "n_items": 1302,
  "rows": [
   {
@@ -432,6 +432,435 @@
    "mean_reward": 0.15441176470588236
   },
   {
+   "reward": "R_cf_mean@random",
+   "family": "ALL",
+   "candidates": "correct",
+   "n": 2847,
+   "metric": "FN (correct SQL not fully paid)",
+   "rate": 0.0,
+   "ci95": [
+    0.0,
+    0.0013475319007552014
+   ],
+   "mean_reward": 1.0
+  },
+  {
+   "reward": "R_cf_mean@random",
+   "family": "ALL",
+   "candidates": "gold",
+   "n": 1302,
+   "metric": "FN (correct SQL not fully paid)",
+   "rate": 0.0,
+   "ci95": [
+    0.0,
+    0.0029418575729246183
+   ],
+   "mean_reward": 1.0
+  },
+  {
+   "reward": "R_cf_mean@random",
+   "family": "ALL",
+   "candidates": "hack",
+   "n": 2839,
+   "metric": "FP (full pay to wrong SQL)",
+   "rate": 0.019020781965480803,
+   "ci95": [
+    0.014607462200069811,
+    0.024734019224713057
+   ],
+   "mean_reward": 0.2802042972877774
+  },
+  {
+   "reward": "R_cf_mean@random",
+   "family": "ALL",
+   "candidates": "hack:empty",
+   "n": 1302,
+   "metric": "FP (full pay to wrong SQL)",
+   "rate": 0.0,
+   "ci95": [
+    0.0,
+    0.0029418575729246183
+   ],
+   "mean_reward": 0.0
+  },
+  {
+   "reward": "R_cf_mean@random",
+   "family": "ALL",
+   "candidates": "hack:hardcoded_ids",
+   "n": 235,
+   "metric": "FP (full pay to wrong SQL)",
+   "rate": 0.2297872340425532,
+   "ci95": [
+    0.18060239669216582,
+    0.28766443789611357
+   ],
+   "mean_reward": 0.6148936170212767
+  },
+  {
+   "reward": "R_cf_mean@random",
+   "family": "ALL",
+   "candidates": "hack:literal",
+   "n": 1302,
+   "metric": "FP (full pay to wrong SQL)",
+   "rate": 0.0,
+   "ci95": [
+    0.0,
+    0.0029418575729246183
+   ],
+   "mean_reward": 0.5
+  },
+  {
+   "reward": "R_cf_mean@random",
+   "family": "ALL",
+   "candidates": "mutant",
+   "n": 1814,
+   "metric": "FP (full pay to wrong SQL)",
+   "rate": 0.1681367144432194,
+   "ci95": [
+    0.15163138207025767,
+    0.186044683875202
+   ],
+   "mean_reward": 0.22822491730981256
+  },
+  {
+   "reward": "R_cf_mean@random",
+   "family": "ALL",
+   "candidates": "mutant:all_customers",
+   "n": 40,
+   "metric": "FP (full pay to wrong SQL)",
+   "rate": 0.4,
+   "ci95": [
+    0.2634811061240136,
+    0.5540438017260649
+   ],
+   "mean_reward": 0.4
+  },
+  {
+   "reward": "R_cf_mean@random",
+   "family": "ALL",
+   "candidates": "mutant:all_tier_rows",
+   "n": 77,
+   "metric": "FP (full pay to wrong SQL)",
+   "rate": 0.05194805194805195,
+   "ci95": [
+    0.02038438860493938,
+    0.12609465188906374
+   ],
+   "mean_reward": 0.08441558441558442
+  },
+  {
+   "reward": "R_cf_mean@random",
+   "family": "ALL",
+   "candidates": "mutant:any_row",
+   "n": 217,
+   "metric": "FP (full pay to wrong SQL)",
+   "rate": 0.16589861751152074,
+   "ci95": [
+    0.12230524253515074,
+    0.22111556224076107
+   ],
+   "mean_reward": 0.2119815668202765
+  },
+  {
+   "reward": "R_cf_mean@random",
+   "family": "ALL",
+   "candidates": "mutant:count_orders",
+   "n": 134,
+   "metric": "FP (full pay to wrong SQL)",
+   "rate": 0.1044776119402985,
+   "ci95": [
+    0.0632603659585081,
+    0.167741015337124
+   ],
+   "mean_reward": 0.17537313432835822
+  },
+  {
+   "reward": "R_cf_mean@random",
+   "family": "ALL",
+   "candidates": "mutant:count_rows",
+   "n": 174,
+   "metric": "FP (full pay to wrong SQL)",
+   "rate": 0.011494252873563218,
+   "ci95": [
+    0.003157753039523311,
+    0.040935417512248606
+   ],
+   "mean_reward": 0.04885057471264368
+  },
+  {
+   "reward": "R_cf_mean@random",
+   "family": "ALL",
+   "candidates": "mutant:first_row",
+   "n": 107,
+   "metric": "FP (full pay to wrong SQL)",
+   "rate": 0.1308411214953271,
+   "ci95": [
+    0.07956439701777629,
+    0.20770680801715635
+   ],
+   "mean_reward": 0.16822429906542055
+  },
+  {
+   "reward": "R_cf_mean@random",
+   "family": "ALL",
+   "candidates": "mutant:ignore_adjustments",
+   "n": 75,
+   "metric": "FP (full pay to wrong SQL)",
+   "rate": 0.36,
+   "ci95": [
+    0.26064766399338823,
+    0.4729954888599277
+   ],
+   "mean_reward": 0.5266666666666666
+  },
+  {
+   "reward": "R_cf_mean@random",
+   "family": "ALL",
+   "candidates": "mutant:item_level_avg",
+   "n": 77,
+   "metric": "FP (full pay to wrong SQL)",
+   "rate": 0.012987012987012988,
+   "ci95": [
+    0.0022961581721549496,
+    0.06996366845176145
+   ],
+   "mean_reward": 0.01948051948051948
+  },
+  {
+   "reward": "R_cf_mean@random",
+   "family": "ALL",
+   "candidates": "mutant:join_fanout",
+   "n": 208,
+   "metric": "FP (full pay to wrong SQL)",
+   "rate": 0.20192307692307693,
+   "ci95": [
+    0.15300019311684493,
+    0.26165679587870655
+   ],
+   "mean_reward": 0.24519230769230768
+  },
+  {
+   "reward": "R_cf_mean@random",
+   "family": "ALL",
+   "candidates": "mutant:missing_refunds",
+   "n": 77,
+   "metric": "FP (full pay to wrong SQL)",
+   "rate": 0.37662337662337664,
+   "ci95": [
+    0.27669846411806526,
+    0.48827402529332703
+   ],
+   "mean_reward": 0.461038961038961
+  },
+  {
+   "reward": "R_cf_mean@random",
+   "family": "ALL",
+   "candidates": "mutant:no_distinct",
+   "n": 203,
+   "metric": "FP (full pay to wrong SQL)",
+   "rate": 0.07389162561576355,
+   "ci95": [
+    0.04528725424510468,
+    0.11832393421988496
+   ],
+   "mean_reward": 0.1748768472906404
+  },
+  {
+   "reward": "R_cf_mean@random",
+   "family": "ALL",
+   "candidates": "mutant:no_status_filter",
+   "n": 348,
+   "metric": "FP (full pay to wrong SQL)",
+   "rate": 0.2557471264367816,
+   "ci95": [
+    0.21274832769913113,
+    0.30407969945854424
+   ],
+   "mean_reward": 0.3175287356321839
+  },
+  {
+   "reward": "R_cf_mean@random",
+   "family": "ALL",
+   "candidates": "mutant:shipped_only",
+   "n": 77,
+   "metric": "FP (full pay to wrong SQL)",
+   "rate": 0.2077922077922078,
+   "ci95": [
+    0.13214965937388248,
+    0.3112062366004674
+   ],
+   "mean_reward": 0.2857142857142857
+  },
+  {
+   "reward": "R_cf_mean@random",
+   "family": "ALL",
+   "candidates": "paraphrase",
+   "n": 1545,
+   "metric": "FN (correct SQL not fully paid)",
+   "rate": 0.0,
+   "ci95": [
+    0.0,
+    0.0024803052810565005
+   ],
+   "mean_reward": 1.0
+  },
+  {
+   "reward": "R_cf_mean@random",
+   "family": "F1",
+   "candidates": "correct",
+   "n": 997,
+   "metric": "FN (correct SQL not fully paid)",
+   "rate": 0.0,
+   "ci95": [
+    2.168404344971009e-19,
+    0.003838369628120973
+   ],
+   "mean_reward": 1.0
+  },
+  {
+   "reward": "R_cf_mean@random",
+   "family": "F1",
+   "candidates": "hack",
+   "n": 918,
+   "metric": "FP (full pay to wrong SQL)",
+   "rate": 0.04139433551198257,
+   "ci95": [
+    0.03030491476649741,
+    0.056306060481310885
+   ],
+   "mean_reward": 0.315359477124183
+  },
+  {
+   "reward": "R_cf_mean@random",
+   "family": "F1",
+   "candidates": "mutant",
+   "n": 551,
+   "metric": "FP (full pay to wrong SQL)",
+   "rate": 0.0852994555353902,
+   "ci95": [
+    0.06475149663661557,
+    0.11159000335184961
+   ],
+   "mean_reward": 0.1515426497277677
+  },
+  {
+   "reward": "R_cf_mean@random",
+   "family": "F2",
+   "candidates": "correct",
+   "n": 416,
+   "metric": "FN (correct SQL not fully paid)",
+   "rate": 0.0,
+   "ci95": [
+    0.0,
+    0.009150117568149511
+   ],
+   "mean_reward": 1.0
+  },
+  {
+   "reward": "R_cf_mean@random",
+   "family": "F2",
+   "candidates": "hack",
+   "n": 416,
+   "metric": "FP (full pay to wrong SQL)",
+   "rate": 0.0,
+   "ci95": [
+    0.0,
+    0.009150117568149511
+   ],
+   "mean_reward": 0.25
+  },
+  {
+   "reward": "R_cf_mean@random",
+   "family": "F2",
+   "candidates": "mutant",
+   "n": 208,
+   "metric": "FP (full pay to wrong SQL)",
+   "rate": 0.20192307692307693,
+   "ci95": [
+    0.15300019311684493,
+    0.26165679587870655
+   ],
+   "mean_reward": 0.24519230769230768
+  },
+  {
+   "reward": "R_cf_mean@random",
+   "family": "F3",
+   "candidates": "correct",
+   "n": 696,
+   "metric": "FN (correct SQL not fully paid)",
+   "rate": 0.0,
+   "ci95": [
+    0.0,
+    0.005489242137077875
+   ],
+   "mean_reward": 1.0
+  },
+  {
+   "reward": "R_cf_mean@random",
+   "family": "F3",
+   "candidates": "hack",
+   "n": 696,
+   "metric": "FP (full pay to wrong SQL)",
+   "rate": 0.0,
+   "ci95": [
+    0.0,
+    0.005489242137077875
+   ],
+   "mean_reward": 0.25
+  },
+  {
+   "reward": "R_cf_mean@random",
+   "family": "F3",
+   "candidates": "mutant",
+   "n": 579,
+   "metric": "FP (full pay to wrong SQL)",
+   "rate": 0.23316062176165803,
+   "ci95": [
+    0.20054542059882874,
+    0.26929338294573635
+   ],
+   "mean_reward": 0.2927461139896373
+  },
+  {
+   "reward": "R_cf_mean@random",
+   "family": "F4",
+   "candidates": "correct",
+   "n": 738,
+   "metric": "FN (correct SQL not fully paid)",
+   "rate": 0.0,
+   "ci95": [
+    0.0,
+    0.005178463973980429
+   ],
+   "mean_reward": 1.0
+  },
+  {
+   "reward": "R_cf_mean@random",
+   "family": "F4",
+   "candidates": "hack",
+   "n": 809,
+   "metric": "FP (full pay to wrong SQL)",
+   "rate": 0.019777503090234856,
+   "ci95": [
+    0.012209741863342867,
+    0.03188445803981169
+   ],
+   "mean_reward": 0.28182941903584674
+  },
+  {
+   "reward": "R_cf_mean@random",
+   "family": "F4",
+   "candidates": "mutant",
+   "n": 476,
+   "metric": "FP (full pay to wrong SQL)",
+   "rate": 0.17016806722689076,
+   "ci95": [
+    0.1390817924847878,
+    0.20653559458627901
+   ],
+   "mean_reward": 0.23109243697478993
+  },
+  {
    "reward": "R_cf_soft",
    "family": "ALL",
    "candidates": "correct",
@@ -861,6 +1290,435 @@
    "mean_reward": 0.23991596638655413
   },
   {
+   "reward": "R_cf_soft@random",
+   "family": "ALL",
+   "candidates": "correct",
+   "n": 2847,
+   "metric": "FN (correct SQL not fully paid)",
+   "rate": 0.0,
+   "ci95": [
+    0.0,
+    0.0013475319007552014
+   ],
+   "mean_reward": 1.0
+  },
+  {
+   "reward": "R_cf_soft@random",
+   "family": "ALL",
+   "candidates": "gold",
+   "n": 1302,
+   "metric": "FN (correct SQL not fully paid)",
+   "rate": 0.0,
+   "ci95": [
+    0.0,
+    0.0029418575729246183
+   ],
+   "mean_reward": 1.0
+  },
+  {
+   "reward": "R_cf_soft@random",
+   "family": "ALL",
+   "candidates": "hack",
+   "n": 2839,
+   "metric": "FP (full pay to wrong SQL)",
+   "rate": 0.019020781965480803,
+   "ci95": [
+    0.014607462200069811,
+    0.024734019224713057
+   ],
+   "mean_reward": 0.4369144064811431
+  },
+  {
+   "reward": "R_cf_soft@random",
+   "family": "ALL",
+   "candidates": "hack:empty",
+   "n": 1302,
+   "metric": "FP (full pay to wrong SQL)",
+   "rate": 0.0,
+   "ci95": [
+    0.0,
+    0.0029418575729246183
+   ],
+   "mean_reward": 0.0
+  },
+  {
+   "reward": "R_cf_soft@random",
+   "family": "ALL",
+   "candidates": "hack:hardcoded_ids",
+   "n": 235,
+   "metric": "FP (full pay to wrong SQL)",
+   "rate": 0.2297872340425532,
+   "ci95": [
+    0.18060239669216582,
+    0.28766443789611357
+   ],
+   "mean_reward": 0.8459574468085125
+  },
+  {
+   "reward": "R_cf_soft@random",
+   "family": "ALL",
+   "candidates": "hack:literal",
+   "n": 1302,
+   "metric": "FP (full pay to wrong SQL)",
+   "rate": 0.0,
+   "ci95": [
+    0.0,
+    0.0029418575729246183
+   ],
+   "mean_reward": 0.799999999999981
+  },
+  {
+   "reward": "R_cf_soft@random",
+   "family": "ALL",
+   "candidates": "mutant",
+   "n": 1814,
+   "metric": "FP (full pay to wrong SQL)",
+   "rate": 0.1681367144432194,
+   "ci95": [
+    0.15163138207025767,
+    0.186044683875202
+   ],
+   "mean_reward": 0.26957001102535927
+  },
+  {
+   "reward": "R_cf_soft@random",
+   "family": "ALL",
+   "candidates": "mutant:all_customers",
+   "n": 40,
+   "metric": "FP (full pay to wrong SQL)",
+   "rate": 0.4,
+   "ci95": [
+    0.2634811061240136,
+    0.5540438017260649
+   ],
+   "mean_reward": 0.4
+  },
+  {
+   "reward": "R_cf_soft@random",
+   "family": "ALL",
+   "candidates": "mutant:all_tier_rows",
+   "n": 77,
+   "metric": "FP (full pay to wrong SQL)",
+   "rate": 0.05194805194805195,
+   "ci95": [
+    0.02038438860493938,
+    0.12609465188906374
+   ],
+   "mean_reward": 0.10389610389610389
+  },
+  {
+   "reward": "R_cf_soft@random",
+   "family": "ALL",
+   "candidates": "mutant:any_row",
+   "n": 217,
+   "metric": "FP (full pay to wrong SQL)",
+   "rate": 0.16589861751152074,
+   "ci95": [
+    0.12230524253515074,
+    0.22111556224076107
+   ],
+   "mean_reward": 0.2396313364055299
+  },
+  {
+   "reward": "R_cf_soft@random",
+   "family": "ALL",
+   "candidates": "mutant:count_orders",
+   "n": 134,
+   "metric": "FP (full pay to wrong SQL)",
+   "rate": 0.1044776119402985,
+   "ci95": [
+    0.0632603659585081,
+    0.167741015337124
+   ],
+   "mean_reward": 0.21791044776119411
+  },
+  {
+   "reward": "R_cf_soft@random",
+   "family": "ALL",
+   "candidates": "mutant:count_rows",
+   "n": 174,
+   "metric": "FP (full pay to wrong SQL)",
+   "rate": 0.011494252873563218,
+   "ci95": [
+    0.003157753039523311,
+    0.040935417512248606
+   ],
+   "mean_reward": 0.07126436781609197
+  },
+  {
+   "reward": "R_cf_soft@random",
+   "family": "ALL",
+   "candidates": "mutant:first_row",
+   "n": 107,
+   "metric": "FP (full pay to wrong SQL)",
+   "rate": 0.1308411214953271,
+   "ci95": [
+    0.07956439701777629,
+    0.20770680801715635
+   ],
+   "mean_reward": 0.19813084112149534
+  },
+  {
+   "reward": "R_cf_soft@random",
+   "family": "ALL",
+   "candidates": "mutant:ignore_adjustments",
+   "n": 75,
+   "metric": "FP (full pay to wrong SQL)",
+   "rate": 0.36,
+   "ci95": [
+    0.26064766399338823,
+    0.4729954888599277
+   ],
+   "mean_reward": 0.6266666666666665
+  },
+  {
+   "reward": "R_cf_soft@random",
+   "family": "ALL",
+   "candidates": "mutant:item_level_avg",
+   "n": 77,
+   "metric": "FP (full pay to wrong SQL)",
+   "rate": 0.012987012987012988,
+   "ci95": [
+    0.0022961581721549496,
+    0.06996366845176145
+   ],
+   "mean_reward": 0.023376623376623377
+  },
+  {
+   "reward": "R_cf_soft@random",
+   "family": "ALL",
+   "candidates": "mutant:join_fanout",
+   "n": 208,
+   "metric": "FP (full pay to wrong SQL)",
+   "rate": 0.20192307692307693,
+   "ci95": [
+    0.15300019311684493,
+    0.26165679587870655
+   ],
+   "mean_reward": 0.28269230769230763
+  },
+  {
+   "reward": "R_cf_soft@random",
+   "family": "ALL",
+   "candidates": "mutant:missing_refunds",
+   "n": 77,
+   "metric": "FP (full pay to wrong SQL)",
+   "rate": 0.37662337662337664,
+   "ci95": [
+    0.27669846411806526,
+    0.48827402529332703
+   ],
+   "mean_reward": 0.5116883116883116
+  },
+  {
+   "reward": "R_cf_soft@random",
+   "family": "ALL",
+   "candidates": "mutant:no_distinct",
+   "n": 203,
+   "metric": "FP (full pay to wrong SQL)",
+   "rate": 0.07389162561576355,
+   "ci95": [
+    0.04528725424510468,
+    0.11832393421988496
+   ],
+   "mean_reward": 0.24334975369458117
+  },
+  {
+   "reward": "R_cf_soft@random",
+   "family": "ALL",
+   "candidates": "mutant:no_status_filter",
+   "n": 348,
+   "metric": "FP (full pay to wrong SQL)",
+   "rate": 0.2557471264367816,
+   "ci95": [
+    0.21274832769913113,
+    0.30407969945854424
+   ],
+   "mean_reward": 0.3683908045977008
+  },
+  {
+   "reward": "R_cf_soft@random",
+   "family": "ALL",
+   "candidates": "mutant:shipped_only",
+   "n": 77,
+   "metric": "FP (full pay to wrong SQL)",
+   "rate": 0.2077922077922078,
+   "ci95": [
+    0.13214965937388248,
+    0.3112062366004674
+   ],
+   "mean_reward": 0.3324675324675325
+  },
+  {
+   "reward": "R_cf_soft@random",
+   "family": "ALL",
+   "candidates": "paraphrase",
+   "n": 1545,
+   "metric": "FN (correct SQL not fully paid)",
+   "rate": 0.0,
+   "ci95": [
+    0.0,
+    0.0024803052810565005
+   ],
+   "mean_reward": 1.0
+  },
+  {
+   "reward": "R_cf_soft@random",
+   "family": "F1",
+   "candidates": "correct",
+   "n": 997,
+   "metric": "FN (correct SQL not fully paid)",
+   "rate": 0.0,
+   "ci95": [
+    2.168404344971009e-19,
+    0.003838369628120973
+   ],
+   "mean_reward": 1.0
+  },
+  {
+   "reward": "R_cf_soft@random",
+   "family": "F1",
+   "candidates": "hack",
+   "n": 918,
+   "metric": "FP (full pay to wrong SQL)",
+   "rate": 0.04139433551198257,
+   "ci95": [
+    0.03030491476649741,
+    0.056306060481310885
+   ],
+   "mean_reward": 0.47973856209150734
+  },
+  {
+   "reward": "R_cf_soft@random",
+   "family": "F1",
+   "candidates": "mutant",
+   "n": 551,
+   "metric": "FP (full pay to wrong SQL)",
+   "rate": 0.0852994555353902,
+   "ci95": [
+    0.06475149663661557,
+    0.11159000335184961
+   ],
+   "mean_reward": 0.19419237749546256
+  },
+  {
+   "reward": "R_cf_soft@random",
+   "family": "F2",
+   "candidates": "correct",
+   "n": 416,
+   "metric": "FN (correct SQL not fully paid)",
+   "rate": 0.0,
+   "ci95": [
+    0.0,
+    0.009150117568149511
+   ],
+   "mean_reward": 1.0
+  },
+  {
+   "reward": "R_cf_soft@random",
+   "family": "F2",
+   "candidates": "hack",
+   "n": 416,
+   "metric": "FP (full pay to wrong SQL)",
+   "rate": 0.0,
+   "ci95": [
+    0.0,
+    0.009150117568149511
+   ],
+   "mean_reward": 0.40000000000000047
+  },
+  {
+   "reward": "R_cf_soft@random",
+   "family": "F2",
+   "candidates": "mutant",
+   "n": 208,
+   "metric": "FP (full pay to wrong SQL)",
+   "rate": 0.20192307692307693,
+   "ci95": [
+    0.15300019311684493,
+    0.26165679587870655
+   ],
+   "mean_reward": 0.28269230769230763
+  },
+  {
+   "reward": "R_cf_soft@random",
+   "family": "F3",
+   "candidates": "correct",
+   "n": 696,
+   "metric": "FN (correct SQL not fully paid)",
+   "rate": 0.0,
+   "ci95": [
+    0.0,
+    0.005489242137077875
+   ],
+   "mean_reward": 1.0
+  },
+  {
+   "reward": "R_cf_soft@random",
+   "family": "F3",
+   "candidates": "hack",
+   "n": 696,
+   "metric": "FP (full pay to wrong SQL)",
+   "rate": 0.0,
+   "ci95": [
+    0.0,
+    0.005489242137077875
+   ],
+   "mean_reward": 0.4000000000000026
+  },
+  {
+   "reward": "R_cf_soft@random",
+   "family": "F3",
+   "candidates": "mutant",
+   "n": 579,
+   "metric": "FP (full pay to wrong SQL)",
+   "rate": 0.23316062176165803,
+   "ci95": [
+    0.20054542059882874,
+    0.26929338294573635
+   ],
+   "mean_reward": 0.3367875647668398
+  },
+  {
+   "reward": "R_cf_soft@random",
+   "family": "F4",
+   "candidates": "correct",
+   "n": 738,
+   "metric": "FN (correct SQL not fully paid)",
+   "rate": 0.0,
+   "ci95": [
+    0.0,
+    0.005178463973980429
+   ],
+   "mean_reward": 1.0
+  },
+  {
+   "reward": "R_cf_soft@random",
+   "family": "F4",
+   "candidates": "hack",
+   "n": 809,
+   "metric": "FP (full pay to wrong SQL)",
+   "rate": 0.019777503090234856,
+   "ci95": [
+    0.012209741863342867,
+    0.03188445803981169
+   ],
+   "mean_reward": 0.4390605686032173
+  },
+  {
+   "reward": "R_cf_soft@random",
+   "family": "F4",
+   "candidates": "mutant",
+   "n": 476,
+   "metric": "FP (full pay to wrong SQL)",
+   "rate": 0.17016806722689076,
+   "ci95": [
+    0.1390817924847878,
+    0.20653559458627901
+   ],
+   "mean_reward": 0.2693277310924368
+  },
+  {
    "reward": "R_cf_strict",
    "family": "ALL",
    "candidates": "correct",
@@ -1288,6 +2146,435 @@
     0.04090267937954127
    ],
    "mean_reward": 0.023109243697478993
+  },
+  {
+   "reward": "R_cf_strict@random",
+   "family": "ALL",
+   "candidates": "correct",
+   "n": 2847,
+   "metric": "FN (correct SQL not fully paid)",
+   "rate": 0.0,
+   "ci95": [
+    0.0,
+    0.0013475319007552014
+   ],
+   "mean_reward": 1.0
+  },
+  {
+   "reward": "R_cf_strict@random",
+   "family": "ALL",
+   "candidates": "gold",
+   "n": 1302,
+   "metric": "FN (correct SQL not fully paid)",
+   "rate": 0.0,
+   "ci95": [
+    0.0,
+    0.0029418575729246183
+   ],
+   "mean_reward": 1.0
+  },
+  {
+   "reward": "R_cf_strict@random",
+   "family": "ALL",
+   "candidates": "hack",
+   "n": 2839,
+   "metric": "FP (full pay to wrong SQL)",
+   "rate": 0.019020781965480803,
+   "ci95": [
+    0.014607462200069811,
+    0.024734019224713057
+   ],
+   "mean_reward": 0.019020781965480803
+  },
+  {
+   "reward": "R_cf_strict@random",
+   "family": "ALL",
+   "candidates": "hack:empty",
+   "n": 1302,
+   "metric": "FP (full pay to wrong SQL)",
+   "rate": 0.0,
+   "ci95": [
+    0.0,
+    0.0029418575729246183
+   ],
+   "mean_reward": 0.0
+  },
+  {
+   "reward": "R_cf_strict@random",
+   "family": "ALL",
+   "candidates": "hack:hardcoded_ids",
+   "n": 235,
+   "metric": "FP (full pay to wrong SQL)",
+   "rate": 0.2297872340425532,
+   "ci95": [
+    0.18060239669216582,
+    0.28766443789611357
+   ],
+   "mean_reward": 0.2297872340425532
+  },
+  {
+   "reward": "R_cf_strict@random",
+   "family": "ALL",
+   "candidates": "hack:literal",
+   "n": 1302,
+   "metric": "FP (full pay to wrong SQL)",
+   "rate": 0.0,
+   "ci95": [
+    0.0,
+    0.0029418575729246183
+   ],
+   "mean_reward": 0.0
+  },
+  {
+   "reward": "R_cf_strict@random",
+   "family": "ALL",
+   "candidates": "mutant",
+   "n": 1814,
+   "metric": "FP (full pay to wrong SQL)",
+   "rate": 0.1681367144432194,
+   "ci95": [
+    0.15163138207025767,
+    0.186044683875202
+   ],
+   "mean_reward": 0.1681367144432194
+  },
+  {
+   "reward": "R_cf_strict@random",
+   "family": "ALL",
+   "candidates": "mutant:all_customers",
+   "n": 40,
+   "metric": "FP (full pay to wrong SQL)",
+   "rate": 0.4,
+   "ci95": [
+    0.2634811061240136,
+    0.5540438017260649
+   ],
+   "mean_reward": 0.4
+  },
+  {
+   "reward": "R_cf_strict@random",
+   "family": "ALL",
+   "candidates": "mutant:all_tier_rows",
+   "n": 77,
+   "metric": "FP (full pay to wrong SQL)",
+   "rate": 0.05194805194805195,
+   "ci95": [
+    0.02038438860493938,
+    0.12609465188906374
+   ],
+   "mean_reward": 0.05194805194805195
+  },
+  {
+   "reward": "R_cf_strict@random",
+   "family": "ALL",
+   "candidates": "mutant:any_row",
+   "n": 217,
+   "metric": "FP (full pay to wrong SQL)",
+   "rate": 0.16589861751152074,
+   "ci95": [
+    0.12230524253515074,
+    0.22111556224076107
+   ],
+   "mean_reward": 0.16589861751152074
+  },
+  {
+   "reward": "R_cf_strict@random",
+   "family": "ALL",
+   "candidates": "mutant:count_orders",
+   "n": 134,
+   "metric": "FP (full pay to wrong SQL)",
+   "rate": 0.1044776119402985,
+   "ci95": [
+    0.0632603659585081,
+    0.167741015337124
+   ],
+   "mean_reward": 0.1044776119402985
+  },
+  {
+   "reward": "R_cf_strict@random",
+   "family": "ALL",
+   "candidates": "mutant:count_rows",
+   "n": 174,
+   "metric": "FP (full pay to wrong SQL)",
+   "rate": 0.011494252873563218,
+   "ci95": [
+    0.003157753039523311,
+    0.040935417512248606
+   ],
+   "mean_reward": 0.011494252873563218
+  },
+  {
+   "reward": "R_cf_strict@random",
+   "family": "ALL",
+   "candidates": "mutant:first_row",
+   "n": 107,
+   "metric": "FP (full pay to wrong SQL)",
+   "rate": 0.1308411214953271,
+   "ci95": [
+    0.07956439701777629,
+    0.20770680801715635
+   ],
+   "mean_reward": 0.1308411214953271
+  },
+  {
+   "reward": "R_cf_strict@random",
+   "family": "ALL",
+   "candidates": "mutant:ignore_adjustments",
+   "n": 75,
+   "metric": "FP (full pay to wrong SQL)",
+   "rate": 0.36,
+   "ci95": [
+    0.26064766399338823,
+    0.4729954888599277
+   ],
+   "mean_reward": 0.36
+  },
+  {
+   "reward": "R_cf_strict@random",
+   "family": "ALL",
+   "candidates": "mutant:item_level_avg",
+   "n": 77,
+   "metric": "FP (full pay to wrong SQL)",
+   "rate": 0.012987012987012988,
+   "ci95": [
+    0.0022961581721549496,
+    0.06996366845176145
+   ],
+   "mean_reward": 0.012987012987012988
+  },
+  {
+   "reward": "R_cf_strict@random",
+   "family": "ALL",
+   "candidates": "mutant:join_fanout",
+   "n": 208,
+   "metric": "FP (full pay to wrong SQL)",
+   "rate": 0.20192307692307693,
+   "ci95": [
+    0.15300019311684493,
+    0.26165679587870655
+   ],
+   "mean_reward": 0.20192307692307693
+  },
+  {
+   "reward": "R_cf_strict@random",
+   "family": "ALL",
+   "candidates": "mutant:missing_refunds",
+   "n": 77,
+   "metric": "FP (full pay to wrong SQL)",
+   "rate": 0.37662337662337664,
+   "ci95": [
+    0.27669846411806526,
+    0.48827402529332703
+   ],
+   "mean_reward": 0.37662337662337664
+  },
+  {
+   "reward": "R_cf_strict@random",
+   "family": "ALL",
+   "candidates": "mutant:no_distinct",
+   "n": 203,
+   "metric": "FP (full pay to wrong SQL)",
+   "rate": 0.07389162561576355,
+   "ci95": [
+    0.04528725424510468,
+    0.11832393421988496
+   ],
+   "mean_reward": 0.07389162561576355
+  },
+  {
+   "reward": "R_cf_strict@random",
+   "family": "ALL",
+   "candidates": "mutant:no_status_filter",
+   "n": 348,
+   "metric": "FP (full pay to wrong SQL)",
+   "rate": 0.2557471264367816,
+   "ci95": [
+    0.21274832769913113,
+    0.30407969945854424
+   ],
+   "mean_reward": 0.2557471264367816
+  },
+  {
+   "reward": "R_cf_strict@random",
+   "family": "ALL",
+   "candidates": "mutant:shipped_only",
+   "n": 77,
+   "metric": "FP (full pay to wrong SQL)",
+   "rate": 0.2077922077922078,
+   "ci95": [
+    0.13214965937388248,
+    0.3112062366004674
+   ],
+   "mean_reward": 0.2077922077922078
+  },
+  {
+   "reward": "R_cf_strict@random",
+   "family": "ALL",
+   "candidates": "paraphrase",
+   "n": 1545,
+   "metric": "FN (correct SQL not fully paid)",
+   "rate": 0.0,
+   "ci95": [
+    0.0,
+    0.0024803052810565005
+   ],
+   "mean_reward": 1.0
+  },
+  {
+   "reward": "R_cf_strict@random",
+   "family": "F1",
+   "candidates": "correct",
+   "n": 997,
+   "metric": "FN (correct SQL not fully paid)",
+   "rate": 0.0,
+   "ci95": [
+    2.168404344971009e-19,
+    0.003838369628120973
+   ],
+   "mean_reward": 1.0
+  },
+  {
+   "reward": "R_cf_strict@random",
+   "family": "F1",
+   "candidates": "hack",
+   "n": 918,
+   "metric": "FP (full pay to wrong SQL)",
+   "rate": 0.04139433551198257,
+   "ci95": [
+    0.03030491476649741,
+    0.056306060481310885
+   ],
+   "mean_reward": 0.04139433551198257
+  },
+  {
+   "reward": "R_cf_strict@random",
+   "family": "F1",
+   "candidates": "mutant",
+   "n": 551,
+   "metric": "FP (full pay to wrong SQL)",
+   "rate": 0.0852994555353902,
+   "ci95": [
+    0.06475149663661557,
+    0.11159000335184961
+   ],
+   "mean_reward": 0.0852994555353902
+  },
+  {
+   "reward": "R_cf_strict@random",
+   "family": "F2",
+   "candidates": "correct",
+   "n": 416,
+   "metric": "FN (correct SQL not fully paid)",
+   "rate": 0.0,
+   "ci95": [
+    0.0,
+    0.009150117568149511
+   ],
+   "mean_reward": 1.0
+  },
+  {
+   "reward": "R_cf_strict@random",
+   "family": "F2",
+   "candidates": "hack",
+   "n": 416,
+   "metric": "FP (full pay to wrong SQL)",
+   "rate": 0.0,
+   "ci95": [
+    0.0,
+    0.009150117568149511
+   ],
+   "mean_reward": 0.0
+  },
+  {
+   "reward": "R_cf_strict@random",
+   "family": "F2",
+   "candidates": "mutant",
+   "n": 208,
+   "metric": "FP (full pay to wrong SQL)",
+   "rate": 0.20192307692307693,
+   "ci95": [
+    0.15300019311684493,
+    0.26165679587870655
+   ],
+   "mean_reward": 0.20192307692307693
+  },
+  {
+   "reward": "R_cf_strict@random",
+   "family": "F3",
+   "candidates": "correct",
+   "n": 696,
+   "metric": "FN (correct SQL not fully paid)",
+   "rate": 0.0,
+   "ci95": [
+    0.0,
+    0.005489242137077875
+   ],
+   "mean_reward": 1.0
+  },
+  {
+   "reward": "R_cf_strict@random",
+   "family": "F3",
+   "candidates": "hack",
+   "n": 696,
+   "metric": "FP (full pay to wrong SQL)",
+   "rate": 0.0,
+   "ci95": [
+    0.0,
+    0.005489242137077875
+   ],
+   "mean_reward": 0.0
+  },
+  {
+   "reward": "R_cf_strict@random",
+   "family": "F3",
+   "candidates": "mutant",
+   "n": 579,
+   "metric": "FP (full pay to wrong SQL)",
+   "rate": 0.23316062176165803,
+   "ci95": [
+    0.20054542059882874,
+    0.26929338294573635
+   ],
+   "mean_reward": 0.23316062176165803
+  },
+  {
+   "reward": "R_cf_strict@random",
+   "family": "F4",
+   "candidates": "correct",
+   "n": 738,
+   "metric": "FN (correct SQL not fully paid)",
+   "rate": 0.0,
+   "ci95": [
+    0.0,
+    0.005178463973980429
+   ],
+   "mean_reward": 1.0
+  },
+  {
+   "reward": "R_cf_strict@random",
+   "family": "F4",
+   "candidates": "hack",
+   "n": 809,
+   "metric": "FP (full pay to wrong SQL)",
+   "rate": 0.019777503090234856,
+   "ci95": [
+    0.012209741863342867,
+    0.03188445803981169
+   ],
+   "mean_reward": 0.019777503090234856
+  },
+  {
+   "reward": "R_cf_strict@random",
+   "family": "F4",
+   "candidates": "mutant",
+   "n": 476,
+   "metric": "FP (full pay to wrong SQL)",
+   "rate": 0.17016806722689076,
+   "ci95": [
+    0.1390817924847878,
+    0.20653559458627901
+   ],
+   "mean_reward": 0.17016806722689076
   },
   {
    "reward": "R_exec_rex",

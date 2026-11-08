@@ -41,12 +41,39 @@ Team **Teen_khapeetars** · Track 3 · Problem statements **#6 (data and databas
 - **Tiny Aya's chat template ignores tools.** AgentTune then appends its fallback tool prompt to the system turn, and the model calls tools as a JSON list `[{"tool_name":…,"parameters":…}]`. Tool results are folded into user turns. `train.py` builds the SFT text with AgentTune's own constants and fold function, so SFT matches the GRPO rollouts; `evaluate.py gen` uses AgentTune's render, parser and fold too.
 - **Reward-call safety:** AgentTune/TRL retry a reward call on `TypeError`. Our rewards raise `ValueError` if the `dbs`/`gold` columns are missing (GRPO must keep `remove_unused_columns=False`), so a silent all-zero reward can't happen.
 
-**Headline numbers so far** (`results/e0_reward_audit.json`, `results/e1_blind_rate.json`, `results/e0_agenttune.json`): see §2 E0/E1. Figures 1–2 are in `results/`.
+**Headline numbers so far** (audit set, 1302 items, 5 base DBs; Wilson 95% CIs; `results/e0_reward_audit.json`, `results/e1_blind_rate.json`, `results/e0_agenttune.json`):
+
+| Reward | FP on gold mutants (n=1814) | FP on hacks (n=2839) | FN on gold + paraphrases (n=2847) |
+|---|---|---|---|
+| R_exec_set (BIRD set EX) | 0.375 [0.353, 0.397] | 0.541 [0.523, 0.560] | 0.000 |
+| R_exec_rex (strict multiset, 1 DB) | 0.295 [0.274, 0.316] | 0.541 | 0.000 |
+| R_cf, **random** CFs (1 changing + 1 preserving, chosen blind to mutants) | **0.168 [0.152, 0.186]** | **0.019 [0.015, 0.025]** | 0.000 |
+| R_cf, greedy CFs (≤3, chosen to kill these same mutants: optimistic) | 0.015 [0.010, 0.022] | 0.020 | 0.000 |
+
+- **H2 is not met on the honest (random) row:** a 43% relative cut in mutant FP vs R_exec_rex, against the pre-registered ≥50%. Hack FP falls 96%. We report this as it is; the greedy row is the CF-selection upper bound, not the H2 test.
+- **Mean rewards** (what GRPO actually sees): R_cf_mean pays mutants 0.148 (greedy) / 0.228 (random) on average, vs 0.295 for R_exec_rex.
+- **AgentTune built-in SQL reward (H3)** (n=360 yes/no items: 314 yes, 46 no):
+
+  | Policy | Reward on yes items | Reward on no items | Overall |
+  |---|---|---|---|
+  | Honest gold SQL | +3.10 | +3.10 | +3.10 |
+  | Trivial WHERE padding, always "yes" | +3.10 | −2.0 | +2.45 |
+  | Same padding, always "no" | −2.0 | +3.10 | −1.35 |
+  | No SQL, always "yes" | −0.90 | −2.5 | −1.10 |
+
+  Padding the WHERE clause and always answering "yes" gets the honest score on every yes item.
+- **E1 blind rate (H1):** S 0.292 [0.266, 0.319] · M 0.008 · L 0.002. By family at S: F1 0.21, F2 0.34, F3 0.36, F4 0.31.
+
+**Compute update (Nov 8, 15:00):** Compute Engine GPU quota approved too (GPUS_ALL_REGIONS = 1). **Team VM `sqlcf-l4`**:
+- Machine: g2-standard-4 + 1× L4 23 GB, zone asia-south1-a.
+- Image: Deep Learning VM (driver 580), 150 GB disk, 15 GB RAM.
+- Cost: ~$0.74/hr while RUNNING. **Stop it whenever nobody is using it**; a stopped VM only bills for its disk.
+- Created by `scripts/make_vm.sh`.
+- The VM replaces the Vertex batch jobs as the main path (interactive SSH, no image build). `vertex/` stays as a fallback.
 
 **Blocked on people, not code:**
-1. Tiny Aya is gated: the local HF token gets a 403. Every teammate must accept the licence at https://huggingface.co/CohereLabs/tiny-aya-global, and the token passed to Vertex needs that access.
-2. The Vertex smoke run (`vertex/submit.sh build` then `job smoke`, ~₹45) needs the lead's go: it builds and pushes an image and starts a billable job on `project-54f35310-8b0b-478f-836` (passed explicitly; the local gcloud default is a different project).
-3. Pre-registration commit (§1): there is no git repo yet.
+1. HF token: the token on the lead's machine is a fine-grained CVPR-org token with no gated-repo access. Create a separate hackathon **read** token with "read access to contents of all public gated repos you can access". Access to Tiny Aya is granted.
+2. Teammates' SSH: send their public keys, or grant their Google accounts IAM access, to get onto `sqlcf-l4`.
 
 ---
 
