@@ -7,7 +7,7 @@
 - **Precision fix verified.** SFT retrained on the local GPU, then merged in fp32 and saved as fp16.
   - On 58 of its own training items (greedy), 1.00 verify [0.94, 1.0]; the bf16 merge got 0.26.
   - Adapter: `runs/sft/adapter` (local); merged model: `runs/sft/merged` (fp16, 6.3 GB, local).
-- **VM: starting.** `scripts/laptop_kick_grpo.sh` is retrying up to 90 times (about 3 h) through L4 stockouts; earlier attempts failed 15 and then 60 times. Once the VM is up, the script launches GRPO-B. Moving zones needs the user's OK.
+- **VM: TERMINATED.** The retry is paused while SFT retrains with the GRPO-only templates held out; 23 more stockouts before the pause. No zone move, per the user.
 - **GRPO signal: OK** (125 of 445 groups mixed). E4 for base and SFT is done with the fixed model and real samples.
 - **Pipeline:** the smoke test passed before the fix. The fix changes TRL's weight sync (`sqlcf/precision.py`), so GRPO-B's step-1 reward serves as the smoke test (see Next 1).
 - **VM `sqlcf-l4`** (asia-south1-a, 1x L4): start it with `bash scripts/vm_start.sh`, which retries through stockouts. Stop it whenever no job is running. SSH from WSL's gcloud (user `admin_wsl`).
@@ -24,13 +24,18 @@
    - It copies the local verified SFT adapter up, then launches `vm_grpo.sh R_exec_rex grpo_B`.
    - Step 1 doubles as the smoke test for the TRL sync patch: train-prompt reward should be about 0.9. About 0.01 would mean vLLM is serving base weights.
 2. Gate G1 from GRPO-B's first steps (`scripts/gate_g1.py`). Then GRPO-C with the same arguments, then E4 for B and C on the local GPU.
-3. **Team decision:** keep the current GRPO prompts (signal is fine, but B and C barely differ), or add templates with a high blind rate so the counterfactual reward matters during training.
-4. **User decision:** L4 stockouts in asia-south1-a have lasted hours. Moving zones needs the user's OK.
+3. Done: 3 GRPO-only templates (see log). After the held-out SFT: check signal on those templates, rerun E4 for SFT, then restart `scripts/laptop_kick_grpo.sh`.
+4. The user chose no zone move: keep retrying in asia-south1-a.
 
 ## Log
 
 ### Nov 9
 
+- **Design change: 3 GRPO-only train templates**, kept out of SFT: `F1_paying_customers`, `F2_refunded_category`, `F3_net_revenue` (`build_sft.GRPO_ONLY`; see plan.md).
+  - Why: with SFT on all 11 templates, only 8 of 2670 GRPO rollouts had R_exec != R_cf, so B and C would train almost identically. On unseen compositions SFT makes silent errors, and at size S about 30% of those pass the original DB (E1).
+  - SFT data drops from 462 to 353 trajectories. Retraining on the local GPU, then the signal check per template (`group_signal.py` now breaks results down by template and adds `cf_frac`, the partial-credit reward C sees).
+  - The all-templates SFT is kept as `runs/sft_alltpl` (local).
+- **User decision: keep the VM in asia-south1-a and keep retrying** (no zone move). The retry is paused while SFT retrains, so it cannot upload a half-written adapter.
 - **Eval sampling bug (fixed in 90e8fae).** `SamplingParams(seed=...)` set a per-request seed, so every copy of a prompt sampled identically. 331 of 331 E4 groups and 444 of 445 GRPO-prompt groups were clones.
   - That made pass^k flat and the CIs effectively n=1, and it hid every mixed GRPO group.
   - The greedy own-items check (0.26 to 1.00) is not affected. GRPO training samples through TRL, so it is not affected either.

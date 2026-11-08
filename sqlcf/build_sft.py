@@ -41,12 +41,18 @@ def trajectory(item: dict, rng: random.Random) -> list[dict]:
     return msgs
 
 
-def main(items_path: Path, out: Path, bases: list[str], seed: int = 0):
-    """bases: base-DB ids reserved for SFT; GRPO uses the other bases (no shared prompts)."""
+# GRPO-only train templates (Nov 9): a template SFT has seen is solved deterministically (0 rollouts where R_exec
+# and R_cf disagree), so B and C would train identically. Unseen compositions draw silent errors, as on test.
+GRPO_ONLY = ("F1_paying_customers", "F2_refunded_category", "F3_net_revenue")
+
+
+def main(items_path: Path, out: Path, bases: list[str], seed: int = 0, exclude=GRPO_ONLY):
+    """bases: base-DB ids reserved for SFT; GRPO uses the other bases (no shared prompts).
+    exclude: templates kept out of SFT entirely (GRPO still trains on them)."""
     rng = random.Random(seed)
     items = [json.loads(l) for l in open(items_path)]
     rows = [{"id": it["id"], "messages": trajectory(it, rng)} for it in items
-            if it["family"] in CHECKS and it["dbs"][0].split("/")[-2] in bases]
+            if it["family"] in CHECKS and it["dbs"][0].split("/")[-2] in bases and it["template"] not in exclude]
     out.write_text("".join(json.dumps(r) + "\n" for r in rows))
     print(f"{len(rows)} SFT trajectories -> {out}")
 
@@ -56,5 +62,6 @@ if __name__ == "__main__":
     ap.add_argument("--items", type=Path, required=True)
     ap.add_argument("--out", type=Path, required=True)
     ap.add_argument("--bases", nargs="+", default=["S_s101", "S_s102", "S_s103"])
+    ap.add_argument("--exclude", nargs="*", default=list(GRPO_ONLY), help="templates kept out of SFT (GRPO-only)")
     a = ap.parse_args()
-    main(a.items, a.out, a.bases)
+    main(a.items, a.out, a.bases, exclude=a.exclude)

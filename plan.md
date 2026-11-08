@@ -29,14 +29,18 @@ Team **Teen_khapeetars** · Track 3 · Problem statements **#6 (data and databas
 | audit | `python -m sqlcf.cf --name audit --split all --seeds 301..305 --size S` | 1302 | all 18 templates, F1–F4 |
 | train | `--name train --split train --seeds 101..106 --size S` | 907 | F1 393 / F2 192 / F3 322; 401/420 base-blind mutants caught by the chosen CFs |
 | test (E4) | `--name test --split test --seeds 501 502 503 --size S --test` | 331 | different generator, see below; F4 (held out) = 214 |
-| SFT | `python -m sqlcf.build_sft` | 462 traj → 1386 prompt/completion pairs | bases S_s101–103 only |
-| GRPO prompts | `train.grpo_rows` | 445 | bases S_s104–106; 0 overlap with SFT |
+| SFT | `python -m sqlcf.build_sft` | 353 traj | bases S_s101–103 only; 3 GRPO-only templates excluded (Nov 9, below) |
+| GRPO prompts | `train.grpo_rows` | 445 | bases S_s104–106; 0 overlap with SFT; 103 of them on the GRPO-only templates |
 
 **Deviations from the plan below (decided on evidence):**
 - **DB size S (50 customers), not M, for train/audit.** E1: the blind rate is ~0.2–0.36 at S, ~0.01 at M, and 0 at L. At M, almost no mutant passes the original DB, so there is nothing for the reward to catch. What drives blindness is the size of the question's slice (city × year × category), more than the DB size.
 - **CF edits are focused on the item's slice** (its city/year/category). With unfocused edits, most blind mutants were uncatchable and 334 items were dropped; with focused edits, 54 items were dropped and 508/535 blind mutants became catchable.
 - **Two CF selections per item:** greedy (≤3 CFs that kill the most mutants; used for training) and **random** (1 changing + 1 preserving, chosen blind to the mutants). E0 reports both. FP on mutants under greedy is optimistic by construction.
 - **Test generator (E4)**: an FK-closed 50-customer sub-DB of a size-M parent, plus 4 family-blind mutations (resample half the customers, clone 25% of subgraphs, flip placed↔cancelled, relabel tiers), all used. It catches only 54 of 103 base-blind mutants, so test "verified" is *less* strict than the training reward. Report that next to E4.
+- **GRPO-only train templates (Nov 9):** `F1_paying_customers`, `F2_refunded_category` and `F3_net_revenue` are kept out of SFT (`build_sft.GRPO_ONLY`).
+  - With all 11 templates in SFT, the SFT model solved the GRPO prompts deterministically. Only 8 of 2670 rollouts passed the original DB but failed a counterfactual, so R_exec and R_cf would have given B and C almost the same reward.
+  - On compositions it has not seen, SFT makes silent errors (63% on test), and at size S about 30% of those pass the original DB. That is where B and C diverge.
+  - Test templates stay untouched.
 - **18 templates, not 10–12 per family:** 11 train and 7 test (4 of them F4). The parameter grids still give 907 train and 331 test items. Add templates only if the SFT/GRPO rollouts show overfitting to templates.
 - **Tiny Aya's chat template ignores tools.** AgentTune then appends its fallback tool prompt to the system turn, and the model calls tools as a JSON list `[{"tool_name":…,"parameters":…}]`. Tool results are folded into user turns. `train.py` builds the SFT text with AgentTune's own constants and fold function, so SFT matches the GRPO rollouts; `evaluate.py gen` uses AgentTune's render, parser and fold too.
 - **Reward-call safety:** AgentTune/TRL retry a reward call on `TypeError`. Our rewards raise `ValueError` if the `dbs`/`gold` columns are missing (GRPO must keep `remove_unused_columns=False`), so a silent all-zero reward can't happen.

@@ -103,7 +103,7 @@ def grade(item, messages) -> dict:
     v = checks(sql, item["dbs"], item["gold"], item["ordered"])
     tools = [m for m in messages if m.get("role") == "tool"]
     bad_tools = sum(str(m.get("content", "")).startswith("ERROR") for m in tools)
-    return {"single": bool(v[0]), "verified": all(v), "has_sql": sql is not None,
+    return {"single": bool(v[0]), "verified": all(v), "cf_frac": sum(map(bool, v)) / len(v), "has_sql": sql is not None,
             "silent_error": bool(tools) and bad_tools == 0 and sql is not None and not all(v),
             "smuggled": smuggled(sql), "tool_calls": len(tools), "bad_tool_calls": bad_tools}
 
