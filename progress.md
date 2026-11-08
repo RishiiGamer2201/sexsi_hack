@@ -2,15 +2,18 @@
 
 > **Rule: update this file after each and every step** (a run launched or finished, a bug found or fixed, a decision made, access changed). Add a dated entry at the top of the log, and keep "Current state" and "Next" accurate. Commit and push it with the work it describes.
 
-## Current state (Nov 8, late night)
+## Current state (Nov 9)
 
-- **Root-cause bug found and fixed (commit 2ae4f3e): bf16 LoRA merge.** The SFT and GRPO numbers so far all came from a broken model. Details in the log.
-- **VM: starting** (`scripts/laptop_kick_verify.sh`, up to 60 tries through L4 stockouts; an earlier 15-try attempt failed).
-  - On the VM, `scripts/vm_verify_merge.sh` re-merges the SFT adapter in fp16 and greedy-evals 58 of SFT's own training items.
-  - If at least 50% verify, it launches GRPO-B (`--init runs/sft/adapter`); otherwise it powers the VM off.
-- **Local GPU: busy** with another project (the Kaggle gemma vLLM server), so local runs wait. `scripts/local_sft.sh` (batch 1 x 16) is ready in case the VM stays unavailable.
-- **Pipeline:** smoke test passed before the fix. The fix touches TRL weight sync (`sqlcf/precision.py`), so the smoke test must run again before GRPO-B.
-- **VM `sqlcf-l4`** (asia-south1-a, 1x L4): start it with `bash scripts/vm_start.sh`, which retries through L4 stockouts. Stop it whenever no job is running. SSH from WSL's gcloud (user `admin_wsl`); the Windows gcloud key is not on the VM.
+- **Precision fix verified.** SFT retrained on the local GPU, then merged in fp32 and saved as fp16.
+  - On 58 of its own training items (greedy), 1.00 verify [0.94, 1.0]; the bf16 merge got 0.26.
+  - Adapter: `runs/sft/adapter` (local); merged model: `runs/sft/merged` (fp16, 6.3 GB, local).
+- **Running locally** (`scripts/local_e4.sh`, about 35 min):
+  - SFT rollouts on the 445 GRPO prompts (G=6, T=1.0), the GRPO signal check, read with `scripts/group_signal.py`.
+  - E4 for SFT and for base, both served in fp16.
+- **VM: TERMINATED.** 60 more L4 stockouts in asia-south1-a (about 2 h), so nothing has run on it since the fix. Moving zones needs the user's OK.
+- **Risk:** SFT and GRPO prompts share templates. The fixed SFT may solve most GRPO prompts, which would leave groups with no reward variance. The signal check answers this before GRPO-B.
+- **Pipeline:** the smoke test passed before the fix. The fix changes TRL's weight sync (`sqlcf/precision.py`), so run the smoke test again before GRPO-B.
+- **VM `sqlcf-l4`** (asia-south1-a, 1x L4): start it with `bash scripts/vm_start.sh`, which retries through stockouts. Stop it whenever no job is running. SSH from WSL's gcloud (user `admin_wsl`).
 - **Gates:**
   - G1 (freeze the reward form): open.
   - G2 (GRPO step time): passes. 190 s per step, so 60 steps take about 3.2 h.
@@ -20,12 +23,19 @@
 
 ## Next
 
-1. Copy the SFT adapter over, then `python train.py merge --init runs/sft/adapter --out runs/sft/merged16`. Re-check it on the 58 SFT training items, greedy; the bf16 copy got 26%.
-2. Rerun E4 for SFT and base in fp16 on the local GPU. Then run the GRPO-prompt variance check again with the fixed model.
-3. On the VM: `git pull`, the smoke test, then GRPO-B (`scripts/vm_grpo.sh R_exec_rex grpo_B`). GRPO now starts from `--init runs/sft/adapter`.
-4. Gate G1 from GRPO-B's first steps (`scripts/gate_g1.py`). Then GRPO-C with the same arguments, then E4 for B and C.
+1. Read the GRPO signal check. If few groups are mixed, change the prompt set before GRPO-B. Options: GRPO on held-out templates, or keep only mixed prompts.
+2. When the VM starts: copy the local `runs/sft/adapter` up, so GRPO starts from the model that was verified. Then the smoke test, then GRPO-B.
+3. Gate G1 from GRPO-B's first steps (`scripts/gate_g1.py`). Then GRPO-C with the same arguments, then E4 for B and C on the local GPU.
 
 ## Log
+
+### Nov 9
+
+- **SFT retrained on the local RTX 5070 Ti** (batch 1 x 16 accumulation, otherwise the same config as on the VM).
+  - WSL threw `CUDA error: unknown error` mid-run 3 times, at steps 21, 84 and 34. The Windows log shows no driver reset, and CUDA works again right after.
+  - Fix: `--save-every 10` with auto-resume in `scripts/local_sft.sh`. The successful run took 2 attempts and 1629 s.
+- **Fix verified:** the fp32-to-fp16 merge verifies 1.00 on SFT's own 58 items (bf16: 0.26). It also has 0 silent errors and 0 invalid tool calls.
+- `scripts/group_signal.py` counts, per GRPO group, how many rollouts verify. On the old bf16 rollouts: 370 of 445 prompts all-fail, 66 all-pass, 9 mixed.
 
 ### Nov 8
 
