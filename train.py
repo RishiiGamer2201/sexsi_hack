@@ -98,6 +98,7 @@ def grpo(a):
         "grpo", backend="trl", model=str(a.init), reward_funcs=[REWARDS[a.reward]],
         tools=[run_sql], train_dataset=Dataset.from_list(rows).shuffle(seed=a.seed),
         output_dir=str(a.out), peft_config=LoraConfig(**LORA),
+        model_init_kwargs={"dtype": "bfloat16"},  # TRL loads a path in fp32 by default (13 GB, no room for vLLM)
         remove_unused_columns=False,  # rewards read dbs/gold/ordered (rewards._need fails loudly)
         max_steps=a.steps, num_generations=a.G, per_device_train_batch_size=a.G * a.prompts,
         gradient_accumulation_steps=1, learning_rate=1e-5, beta=0.02, temperature=1.0,
