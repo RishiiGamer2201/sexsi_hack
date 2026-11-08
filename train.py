@@ -80,8 +80,10 @@ def sft(a):
         args=SFTConfig(output_dir=str(a.out), num_train_epochs=a.epochs, learning_rate=1e-4,
                        per_device_train_batch_size=a.batch, gradient_accumulation_steps=16 // a.batch,
                        gradient_checkpointing=True, bf16=True, max_length=4096,
-                       logging_steps=5, save_strategy="no", report_to=[], seed=a.seed))
-    trainer.train()
+                       logging_steps=5, save_strategy="steps" if a.save_every else "no",
+                       save_steps=a.save_every or 500, save_total_limit=2, report_to=[], seed=a.seed))
+    # ponytail: resumes from the newest checkpoint; a checkpoint half-written by a crash breaks the resume (delete it)
+    trainer.train(resume_from_checkpoint=bool(a.save_every and any(a.out.glob("checkpoint-*"))) or None)
     trainer.save_model(str(a.out / "adapter"))  # GRPO continues this adapter on the exact bf16 base
     del trainer
     torch.cuda.empty_cache()
@@ -164,6 +166,7 @@ if __name__ == "__main__":
     ap.add_argument("--prompts", type=int, default=4)
     ap.add_argument("--epochs", type=float, default=2)
     ap.add_argument("--seed", type=int, default=0)
+    ap.add_argument("--save-every", type=int, default=0, help="SFT checkpoint interval in steps, resumed on restart (0 = none)")
     ap.add_argument("--batch", type=int, default=2, choices=[1, 2, 4], help="SFT per-device batch; effective batch stays 16 (1 for a 16 GB card)")
     ap.add_argument("--no-vllm", dest="vllm", action="store_false")
     ap.add_argument("--vllm-mem", type=float, default=0.45, help="colocated vLLM share of GPU memory (3.35B bf16 weights ~6.7 GB)")
