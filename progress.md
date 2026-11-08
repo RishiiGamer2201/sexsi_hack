@@ -5,7 +5,10 @@
 ## Current state (Nov 8, late night)
 
 - **Root-cause bug found and fixed (commit 2ae4f3e): bf16 LoRA merge.** The SFT and GRPO numbers so far all came from a broken model. Details in the log.
-- **VM: starting** (L4 stockouts, retrying) to copy `runs/sft/adapter` to the laptop; it is stopped right after.
+- **VM: starting** (`scripts/laptop_kick_verify.sh`, up to 60 tries through L4 stockouts; an earlier 15-try attempt failed).
+  - On the VM, `scripts/vm_verify_merge.sh` re-merges the SFT adapter in fp16 and greedy-evals 58 of SFT's own training items.
+  - If at least 50% verify, it launches GRPO-B (`--init runs/sft/adapter`); otherwise it powers the VM off.
+- **Local GPU: busy** with another project (the Kaggle gemma vLLM server), so local runs wait. `scripts/local_sft.sh` (batch 1 x 16) is ready in case the VM stays unavailable.
 - **Pipeline:** smoke test passed before the fix. The fix touches TRL weight sync (`sqlcf/precision.py`), so the smoke test must run again before GRPO-B.
 - **VM `sqlcf-l4`** (asia-south1-a, 1x L4): start it with `bash scripts/vm_start.sh`, which retries through L4 stockouts. Stop it whenever no job is running. SSH from WSL's gcloud (user `admin_wsl`); the Windows gcloud key is not on the VM.
 - **Gates:**
@@ -26,6 +29,9 @@
 
 ### Nov 8
 
+- **The VM couldn't be started:** 15 L4 stockouts in a row, so the adapter was not fetched; the VM is TERMINATED.
+  - The local GPU is taken by another project, so the merge check moved to the VM (`vm_verify_merge.sh`). It is chained to GRPO-B so the VM does not have to be restarted through stockouts again.
+  - Local venv: pinned `datasets<5`; 5.1.0 needs a newer `huggingface_hub` than transformers 4.57 allows.
 - **Root cause of the weak SFT results: the LoRA merge in bf16 (fixed in 2ae4f3e).**
   - A LoRA update is about 0.4% of a weight, roughly one bf16 rounding step. Adding it in bf16 rounds most of it away: 38-61% of the weights in `runs/sft/merged` are bit-identical to base.
   - The merged model got only 26% of its own SFT training items right under greedy decoding. Key tokens there have a teacher-forced loss of 4-8.5 nats, against a training loss of 0.007.
