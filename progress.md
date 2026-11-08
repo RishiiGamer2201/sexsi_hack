@@ -7,7 +7,8 @@
 - **Precision fix verified.** SFT retrained on the local GPU, then merged in fp32 and saved as fp16.
   - On 58 of its own training items (greedy), 1.00 verify [0.94, 1.0]; the bf16 merge got 0.26.
   - Adapter: `runs/sft/adapter` (local); merged model: `runs/sft/merged` (fp16, 6.3 GB, local).
-- **VM: TERMINATED.** The retry is paused while SFT retrains with the GRPO-only templates held out; 23 more stockouts before the pause. No zone move, per the user.
+- **VM: retrying start** (`laptop_kick_grpo.sh 90`, asia-south1-a, no zone move per the user). Then the script uploads the held-out SFT adapter and launches GRPO-B.
+- **Held-out SFT** (3 GRPO-only templates): trained; 170 rollouts where B and C rewards differ (was 8). See log.
 - **GRPO signal: OK** (125 of 445 groups mixed). E4 for base and SFT is done with the fixed model and real samples.
 - **Pipeline:** the smoke test passed before the fix. The fix changes TRL's weight sync (`sqlcf/precision.py`), so GRPO-B's step-1 reward serves as the smoke test (see Next 1).
 - **VM `sqlcf-l4`** (asia-south1-a, 1x L4): start it with `bash scripts/vm_start.sh`, which retries through stockouts. Stop it whenever no job is running. SSH from WSL's gcloud (user `admin_wsl`).
@@ -24,12 +25,28 @@
    - It copies the local verified SFT adapter up, then launches `vm_grpo.sh R_exec_rex grpo_B`.
    - Step 1 doubles as the smoke test for the TRL sync patch: train-prompt reward should be about 0.9. About 0.01 would mean vLLM is serving base weights.
 2. Gate G1 from GRPO-B's first steps (`scripts/gate_g1.py`). Then GRPO-C with the same arguments, then E4 for B and C on the local GPU.
-3. Done: 3 GRPO-only templates (see log). After the held-out SFT: check signal on those templates, rerun E4 for SFT, then restart `scripts/laptop_kick_grpo.sh`.
+3. Done: held-out SFT and its signal check. E4 for it (`sft_ho`) is running locally.
 4. The user chose no zone move: keep retrying in asia-south1-a.
 
 ## Log
 
 ### Nov 9
+
+- **Held-out SFT trained** (353 trajectories, local GPU, 72 min, no crash). Saved to `runs/sft` (local).
+- **Signal check, held-out SFT** (445 GRPO prompts, G=6, T=1.0; `results/grpo_signal_sft_ho.json`):
+  - **170 rollouts pass the original DB but fail a counterfactual (was 8).** These are where R_exec and R_cf differ, so B and C now train on different rewards.
+  - Groups: 140 mixed on single-DB pass, 147 mixed on cf_frac, 117 mixed on verified.
+
+  | Template | Verified | Single-DB | Pass orig, fail CF |
+  |---|---|---|---|
+  | F1_paying_customers (held out) | 0.10 | 0.17 | 19 |
+  | F2_refunded_category (held out) | 0.15 | 0.42 | 26 |
+  | F3_net_revenue (held out) | 0.00 | 0.47 | 123 |
+  | 8 seen templates | 0.44 to 0.97 | same | 2 |
+
+  - On F3_net_revenue, B rewards about half the rollouts for SQL that is wrong on every counterfactual; only C's partial credit (16 mixed groups) points away from it. This is the shortcut the project is about.
+  - Every seen template still has mixed groups.
+- **E4 for held-out SFT** running locally (`sft_ho`). **VM retry restarted** (`laptop_kick_grpo.sh 90`): it uploads the new adapter and launches GRPO-B.
 
 - **Design change: 3 GRPO-only train templates**, kept out of SFT: `F1_paying_customers`, `F2_refunded_category`, `F3_net_revenue` (`build_sft.GRPO_ONLY`; see plan.md).
   - Why: with SFT on all 11 templates, only 8 of 2670 GRPO rollouts had R_exec != R_cf, so B and C would train almost identically. On unseen compositions SFT makes silent errors, and at size S about 30% of those pass the original DB (E1).

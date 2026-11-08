@@ -1,0 +1,121 @@
+{
+ "all": {
+  "prompts": 445,
+  "G": 6,
+  "rollouts": 2670,
+  "verified_count_hist": {
+   "0": 78,
+   "1": 19,
+   "2": 6,
+   "3": 1,
+   "4": 18,
+   "5": 73,
+   "6": 250
+  },
+  "mixed_verified": 117,
+  "mixed_single": 140,
+  "mixed_cf_frac": 147,
+  "single_pass_cf_fail_rollouts": 170,
+  "verified_rate": 0.7382022471910112,
+  "single_rate": 0.80187265917603
+ },
+ "F1_customer_list": {
+  "prompts": 124,
+  "mixed_verified": 21,
+  "mixed_single": 21,
+  "mixed_cf_frac": 21,
+  "single_pass_cf_fail_rollouts": 0,
+  "verified_rate": 0.969,
+  "single_rate": 0.969
+ },
+ "F1_ordered_customers": {
+  "prompts": 22,
+  "mixed_verified": 13,
+  "mixed_single": 13,
+  "mixed_cf_frac": 13,
+  "single_pass_cf_fail_rollouts": 0,
+  "verified_rate": 0.856,
+  "single_rate": 0.856
+ },
+ "F1_paying_customers": {
+  "prompts": 43,
+  "mixed_verified": 15,
+  "mixed_single": 22,
+  "mixed_cf_frac": 25,
+  "single_pass_cf_fail_rollouts": 19,
+  "verified_rate": 0.097,
+  "single_rate": 0.171
+ },
+ "F1_products_sold": {
+  "prompts": 6,
+  "mixed_verified": 6,
+  "mixed_single": 6,
+  "mixed_cf_frac": 6,
+  "single_pass_cf_fail_rollouts": 0,
+  "verified_rate": 0.444,
+  "single_rate": 0.444
+ },
+ "F2_item_value_paid": {
+  "prompts": 44,
+  "mixed_verified": 7,
+  "mixed_single": 7,
+  "mixed_cf_frac": 7,
+  "single_pass_cf_fail_rollouts": 0,
+  "verified_rate": 0.973,
+  "single_rate": 0.973
+ },
+ "F2_paid_for_category": {
+  "prompts": 36,
+  "mixed_verified": 9,
+  "mixed_single": 9,
+  "mixed_cf_frac": 9,
+  "single_pass_cf_fail_rollouts": 0,
+  "verified_rate": 0.958,
+  "single_rate": 0.958
+ },
+ "F2_refunded_category": {
+  "prompts": 16,
+  "mixed_verified": 10,
+  "mixed_single": 14,
+  "mixed_cf_frac": 14,
+  "single_pass_cf_fail_rollouts": 26,
+  "verified_rate": 0.146,
+  "single_rate": 0.417
+ },
+ "F3_active_orders": {
+  "prompts": 44,
+  "mixed_verified": 20,
+  "mixed_single": 20,
+  "mixed_cf_frac": 20,
+  "single_pass_cf_fail_rollouts": 0,
+  "verified_rate": 0.905,
+  "single_rate": 0.905
+ },
+ "F3_gross_revenue": {
+  "prompts": 44,
+  "mixed_verified": 10,
+  "mixed_single": 8,
+  "mixed_cf_frac": 10,
+  "single_pass_cf_fail_rollouts": 2,
+  "verified_rate": 0.962,
+  "single_rate": 0.97
+ },
+ "F3_net_revenue": {
+  "prompts": 44,
+  "mixed_verified": 0,
+  "mixed_single": 14,
+  "mixed_cf_frac": 16,
+  "single_pass_cf_fail_rollouts": 123,
+  "verified_rate": 0.0,
+  "single_rate": 0.466
+ },
+ "F3_top_customers": {
+  "prompts": 22,
+  "mixed_verified": 6,
+  "mixed_single": 6,
+  "mixed_cf_frac": 6,
+  "single_pass_cf_fail_rollouts": 0,
+  "verified_rate": 0.947,
+  "single_rate": 0.947
+ }
+}
