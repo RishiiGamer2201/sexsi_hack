@@ -2,31 +2,41 @@
 
 > **Rule: update this file after each and every step** (a run launched or finished, a bug found or fixed, a decision made, access changed). Add a dated entry at the top of the log, and keep "Current state" and "Next" accurate. Commit and push it with the work it describes.
 
-## Current state (Nov 8, night)
+## Current state (Nov 8, late night)
 
-- **VM: stopped.** GRPO-B was aborted after step 1, because the GRPO prompts are already solved (see the log).
-- **Running locally:** the SFT model on all 445 GRPO prompts (G=6, temperature 1.0). It measures how many prompts get mixed outcomes, and how often a rollout passes the original DB but fails a counterfactual. That tells us whether filtering the prompts gives GRPO enough signal.
-- **E4 base model done** on the local GPU (`results/traj_base.jsonl`, 331 items × 8 samples). The local card ran it in 9 min, so it can run every E4 generation once the merged models are copied over.
-- **Pipeline:** smoke test passes end to end on the team VM. It covers tests, tiny SFT, 2 GRPO steps, adapter merge, eval and scoring (`scripts/vm_smoke.sh`, `scripts/vm_smoke_eval.sh`).
-- **VM `sqlcf-l4`** (asia-south1-a, 1× L4): start it with `bash scripts/vm_start.sh`, which retries through L4 stockouts. Stop it whenever no job is running. SSH from WSL's gcloud (user `admin_wsl`); the Windows gcloud key is not on the VM.
+- **Root-cause bug found and fixed (commit 2ae4f3e): bf16 LoRA merge.** The SFT and GRPO numbers so far all came from a broken model. Details in the log.
+- **VM: starting** (L4 stockouts, retrying) to copy `runs/sft/adapter` to the laptop; it is stopped right after.
+- **Pipeline:** smoke test passed before the fix. The fix touches TRL weight sync (`sqlcf/precision.py`), so the smoke test must run again before GRPO-B.
+- **VM `sqlcf-l4`** (asia-south1-a, 1x L4): start it with `bash scripts/vm_start.sh`, which retries through L4 stockouts. Stop it whenever no job is running. SSH from WSL's gcloud (user `admin_wsl`); the Windows gcloud key is not on the VM.
 - **Gates:**
   - G1 (freeze the reward form): open.
-  - G2 (GRPO step time): open. It needs real-config steps (G=6, 4 prompts).
+  - G2 (GRPO step time): passes. 190 s per step, so 60 steps take about 3.2 h.
 - **Access:**
   - Aksh: sudo account on the VM, plus IAM rights to start and stop it.
   - Shreshth: no SSH key on the VM yet.
 
 ## Next
 
-1. Fix the GRPO prompt set, either by filtering to prompts with mixed outcomes or by splitting templates between SFT and GRPO. Then relaunch GRPO-B.
-2. Gate G1 from GRPO-B's first steps, with `python scripts/gate_g1.py runs/grpo_B_rewards.jsonl --G 6 --first 96`. FN on gold is 0 for every form, so the tie-break decides: the form with the most groups whose reward has non-zero variance.
-3. GRPO-C with the G1 form and the same budget as B.
-4. E4 eval on base, SFT, B and C, then scoring.
+1. Copy the SFT adapter over, then `python train.py merge --init runs/sft/adapter --out runs/sft/merged16`. Re-check it on the 58 SFT training items, greedy; the bf16 copy got 26%.
+2. Rerun E4 for SFT and base in fp16 on the local GPU. Then run the GRPO-prompt variance check again with the fixed model.
+3. On the VM: `git pull`, the smoke test, then GRPO-B (`scripts/vm_grpo.sh R_exec_rex grpo_B`). GRPO now starts from `--init runs/sft/adapter`.
+4. Gate G1 from GRPO-B's first steps (`scripts/gate_g1.py`). Then GRPO-C with the same arguments, then E4 for B and C.
 
 ## Log
 
 ### Nov 8
 
+- **Root cause of the weak SFT results: the LoRA merge in bf16 (fixed in 2ae4f3e).**
+  - A LoRA update is about 0.4% of a weight, roughly one bf16 rounding step. Adding it in bf16 rounds most of it away: 38-61% of the weights in `runs/sft/merged` are bit-identical to base.
+  - The merged model got only 26% of its own SFT training items right under greedy decoding. Key tokens there have a teacher-forced loss of 4-8.5 nats, against a training loss of 0.007.
+  - Ruled out: HF and vLLM give the same loss, and the SFT and eval prompt renderings match (`scripts/check_render_match.py`).
+  - TRL's vLLM weight sync has the same flaw: it merges and unmerges in place in bf16 every step. Rollouts lose the update, and the base weights drift.
+  - **Fix (`sqlcf/precision.py`):**
+    - Merges are computed in fp32 and saved in fp16. fp16 matches fp32 on Tiny Aya (loss 1.3558 vs 1.3557; bf16 gives 1.3636).
+    - GRPO continues the SFT adapter on the original bf16 base; TRL keeps a frozen copy as the KL reference.
+    - vLLM runs in fp16 and gets fp16(W + dW), computed out of place.
+    - `evaluate.py` serves in fp16. Test: `tests/test_precision.py`.
+  - **Correction to the GRPO-B entry below:** the prompts were not memorized. Over all 445 GRPO prompts (G=6), 354 failed every rollout and only 12 had mixed outcomes. The 0.96 reward at step 1 was a small sample. All E4 SFT numbers below come from the broken bf16 model and will be redone.
 - **E4 SFT result** (local GPU, 331 items × 8 samples, 13.5 min):
 
   | Metric | SFT | Base |
