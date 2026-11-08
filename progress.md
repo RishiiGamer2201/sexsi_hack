@@ -18,14 +18,18 @@
 ## Next
 
 1. When SFT finishes, read the format check: has_sql rate, tool calls per trajectory, invalid tool calls.
-2. GRPO-B (`R_exec_rex`). Time its first steps to decide gate G2.
-3. GRPO-C (`R_cf_mean`) with the same budget as B.
-4. E4 eval on base, SFT, B and C, then scoring.
+2. GRPO-B (`R_exec_rex`) with `scripts/vm_grpo.sh R_exec_rex grpo_B`. Time its first steps to decide gate G2.
+3. Gate G1 from GRPO-B's first steps, with `python scripts/gate_g1.py runs/grpo_B_rewards.jsonl --G 6 --first 96`. FN on gold is 0 for every form, so the tie-break decides: the form with the most groups whose reward has non-zero variance.
+4. GRPO-C with the G1 form and the same budget as B.
+5. E4 eval on base, SFT, B and C, then scoring.
 
 ## Log
 
 ### Nov 8
 
+- **Gate G1 tooling.** `scripts/gate_g1.py` rescores the check vectors in the reward log under the mean, strict and soft forms. G1 can then be decided from GRPO-B's first steps, with no extra GPU run.
+- **Prepared GRPO launch.** `scripts/vm_grpo.sh REWARD NAME [train.py args]` runs one condition and then powers the VM off.
+- **SFT is learning.** Loss fell from 0.49 to 0.16 by epoch 0.17, and token accuracy reached 0.96.
 - **Base eval moved to the local GPU.**
   - Installed vLLM 0.22.1 in the local `.venv-train`.
   - Added `evaluate.py --gpu-mem`; the local card uses 0.75 because the desktop holds about 2 GB.
