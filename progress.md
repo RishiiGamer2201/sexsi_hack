@@ -7,7 +7,7 @@
 - **Precision fix verified.** SFT retrained on the local GPU, then merged in fp32 and saved as fp16.
   - On 58 of its own training items (greedy), 1.00 verify [0.94, 1.0]; the bf16 merge got 0.26.
   - Adapter: `runs/sft/adapter` (local); merged model: `runs/sft/merged` (fp16, 6.3 GB, local).
-- **VM: RUNNING GRPO-B** (started 23:06 UTC Nov 8; about 3.2 h for 60 steps, then autostop). Waiting on the step-1 reward as the sync smoke test.
+- **VM: RUNNING GRPO-B** (started 23:06 UTC Nov 8; about 3.2 h for 60 steps, then autostop). Smoke test passed (first rollouts 0.80 mean). G1 rerun pending at 240 rollouts.
 - **Held-out SFT** (3 GRPO-only templates): trained; 170 rollouts where B and C rewards differ (was 8). See log.
 - **GRPO signal: OK** (125 of 445 groups mixed). E4 for base and SFT is done with the fixed model and real samples.
 - **Pipeline:** the smoke test passed before the fix. The fix changes TRL's weight sync (`sqlcf/precision.py`), so GRPO-B's step-1 reward serves as the smoke test (see Next 1).
@@ -31,6 +31,11 @@
 ## Log
 
 ### Nov 9
+
+- **GRPO-B smoke test passed.** The first 96 rollouts average 0.80 R_exec_rex, so vLLM is serving the trained weights; base weights would give about 0.01.
+  - Logged step rewards 0.92 / 1.0 / 0.5. Steps take 200-215 s, so 60 steps is about 3.4 h.
+  - Policy entropy is low (0.01-0.02 at T=1.0); 3 of 16 early groups have non-zero reward variance.
+- **G1, first pass (96 rollouts, 16 groups):** every form ties at 3/16 non-zero-variance groups (mean, strict, soft, and R_exec_rex). Too few to decide; rerunning at 240 rollouts. If they still tie, R_cf_mean stays, as GRPO-C already uses it.
 
 - **VM started** after 4 more stockouts; the held-out SFT adapter was uploaded, and **GRPO-B launched** at 23:06 UTC (Nov 8).
 - **Stale-log bug, caught before G1.** The aborted 15:01 GRPO-B run had left `runs/grpo_B_rewards.jsonl` (24 rollouts) and `runs/grpo_B/trajectories.jsonl`, and the reward log is opened in append mode.
