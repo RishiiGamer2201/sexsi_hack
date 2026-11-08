@@ -71,9 +71,17 @@ Team **Teen_khapeetars** · Track 3 · Problem statements **#6 (data and databas
 - Created by `scripts/make_vm.sh`.
 - The VM replaces the Vertex batch jobs as the main path (interactive SSH, no image build). `vertex/` stays as a fallback.
 
-**Blocked on people, not code:**
-1. HF token: the token on the lead's machine is a fine-grained CVPR-org token with no gated-repo access. Create a separate hackathon **read** token with "read access to contents of all public gated repos you can access". Access to Tiny Aya is granted.
-2. Teammates' SSH: send their public keys, or grant their Google accounts IAM access, to get onto `sqlcf-l4`.
+**Access (resolved):** hackathon HF read token on the VM (`.cache/hf/token`); Aksh has a sudo account on the VM and IAM to start/stop it. Shreshth: still needs an SSH key.
+
+**VM smoke test passed (Nov 8, evening):** tests → render → tiny SFT → 2 GRPO steps (vLLM colocate) → merge → eval on 4 items → scoring, end to end on the L4 (`scripts/vm_smoke.sh`, `vm_smoke_eval.sh`). Fixes needed on the way:
+- TRL loads a model path in fp32 by default (no room for vLLM): `model_init_kwargs={"dtype": "bfloat16"}`.
+- AgentTune's multi-turn stream dropped the chat-template tokens between turns, so the trainer scored tokens in a context vLLM never saw (importance ratio ~1e-5), and vLLM got a double BOS. Fixed by `patches/agenttune-multiturn-ids.patch` (re-render the finished conversation; loss on assistant spans; CPU check `scripts/check_token_gap.py`). Consequence: vLLM importance-sampling correction is off (on-policy GRPO).
+- 4 GiB logits OOM: batch 1 + gradient accumulation G×prompts. vLLM sleep mode segfaults on wake-up in vLLM 0.22.1, so it is off.
+- vLLM LoRA crashes on Tiny Aya's tied embeddings: GRPO adapters are merged; eval serves merged models. FlashInfer sampler JIT fails on the VM: disabled for eval.
+
+Smoke numbers (G=2, 1 prompt): SFT 22 s/step (16 examples); GRPO step 9.6 s and 18.4 s; eval gen ~2 min per model for 4 items. Rewards were 0 (wrong or missing final SQL after 0.05 SFT epochs), so no GRPO gradient yet; the model also writes a tool call and a final ```sql block in one turn. Both should change after full SFT. **G2 still open:** time real-config steps (G=6, 4 prompts) at the start of GRPO-B.
+
+**Compute risk:** asia-south1-a had an L4 stockout for ~1.5 h on Nov 8 (`scripts/vm_start.sh` retries). Moving the VM to asia-south1-b/c needs the lead's OK.
 
 ---
 
