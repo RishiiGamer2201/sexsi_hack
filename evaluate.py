@@ -44,7 +44,9 @@ def gen(a):
     items = [json.loads(l) for l in open(a.items)][: a.limit or None]
     tok = AutoTokenizer.from_pretrained(a.model)
     llm = LLM(a.model, dtype="float16", max_model_len=8192, gpu_memory_utilization=a.gpu_mem, seed=a.seed)  # fp16: see sqlcf/precision.py
-    sp = SamplingParams(temperature=a.temperature, max_tokens=1024, seed=a.seed)
+    # no per-request seed: it makes the n copies of a prompt sample identically (Nov 9 bug: every group of
+    # n was n clones, so pass^k was flat and no group was mixed); LLM(seed=) keeps the run reproducible
+    sp = SamplingParams(temperature=a.temperature, max_tokens=1024)
     schema = [_build_tool_schema(run_sql)]
 
     def ids(conv):  # token ids, not text: vLLM would add a second BOS to the rendered string
