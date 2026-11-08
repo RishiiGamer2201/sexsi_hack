@@ -43,7 +43,7 @@ def gen(a):
 
     items = [json.loads(l) for l in open(a.items)][: a.limit or None]
     tok = AutoTokenizer.from_pretrained(a.model)
-    llm = LLM(a.model, max_model_len=8192, gpu_memory_utilization=0.85, seed=a.seed)
+    llm = LLM(a.model, max_model_len=8192, gpu_memory_utilization=a.gpu_mem, seed=a.seed)
     sp = SamplingParams(temperature=a.temperature, max_tokens=1024, seed=a.seed)
     schema = [_build_tool_schema(run_sql)]
 
@@ -203,6 +203,7 @@ if __name__ == "__main__":
     ap.add_argument("--max-steps", type=int, default=5)
     ap.add_argument("--limit", type=int, default=0)
     ap.add_argument("--seed", type=int, default=0)
+    ap.add_argument("--gpu-mem", type=float, default=0.85, help="vLLM share of GPU memory (0.75 on a 16 GB desktop card)")
     ap.add_argument("--out-dir", default="results")
     ap.add_argument("--traj", type=Path, nargs="*", default=[])
     a = ap.parse_args()

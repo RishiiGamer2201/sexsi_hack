@@ -2,10 +2,12 @@
 
 > **Rule: update this file after each and every step** (a run launched or finished, a bug found or fixed, a decision made, access changed). Add a dated entry at the top of the log, and keep "Current state" and "Next" accurate. Commit and push it with the work it describes.
 
-## Current state (Nov 8, evening)
+## Current state (Nov 8, night)
 
+- **Running on the VM:** full SFT (`scripts/vm_sft.sh`, log `runs/sft.log`): 1386 examples, 2 epochs, about 65 min. It then checks the SFT model's format on 32 test items and powers the VM off itself (`scripts/vm_autostop.sh`), unless a teammate is logged in.
+- **Running locally (RTX 5070 Ti, WSL):** E4 generation for the base model, 331 items × 8 samples (`scripts/local_eval.sh`, output `results/traj_base.jsonl`). The base model needs no training, so this keeps the job off the VM.
 - **Pipeline:** smoke test passes end to end on the team VM. It covers tests, tiny SFT, 2 GRPO steps, adapter merge, eval and scoring (`scripts/vm_smoke.sh`, `scripts/vm_smoke_eval.sh`).
-- **VM `sqlcf-l4`** (asia-south1-a, 1× L4): **stopped**. Start it with `bash scripts/vm_start.sh`, which retries through L4 stockouts. Stop it whenever no job is running.
+- **VM `sqlcf-l4`** (asia-south1-a, 1× L4): start it with `bash scripts/vm_start.sh`, which retries through L4 stockouts. Stop it whenever no job is running. SSH from WSL's gcloud (user `admin_wsl`); the Windows gcloud key is not on the VM.
 - **Gates:**
   - G1 (freeze the reward form): open.
   - G2 (GRPO step time): open. It needs real-config steps (G=6, 4 prompts).
@@ -15,7 +17,7 @@
 
 ## Next
 
-1. Full SFT, about 65 min on the L4. Then check that the SFT model writes the right tool-call and final-SQL format.
+1. When SFT finishes, read the format check: has_sql rate, tool calls per trajectory, invalid tool calls.
 2. GRPO-B (`R_exec_rex`). Time its first steps to decide gate G2.
 3. GRPO-C (`R_cf_mean`) with the same budget as B.
 4. E4 eval on base, SFT, B and C, then scoring.
@@ -24,6 +26,11 @@
 
 ### Nov 8
 
+- **Base eval moved to the local GPU.**
+  - Installed vLLM 0.22.1 in the local `.venv-train`.
+  - Added `evaluate.py --gpu-mem`; the local card uses 0.75 because the desktop holds about 2 GB.
+  - A 4-item test ran in 317 s, most of it model load and compile.
+- **Full SFT launched** on the VM at about 19:00 IST (`scripts/vm_sft.sh`).
 - **Smoke test passed** on the VM. Timings:
   - SFT: 22 s/step (16 examples per step).
   - GRPO: 9.6 s and 18.4 s per step (G=2, 1 prompt).
