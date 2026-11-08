@@ -8,6 +8,10 @@ cd ~/sexsi_hack
 export HF_HOME="$PWD/.cache/hf" TOKENIZERS_PARALLELISM=false PYTHONUNBUFFERED=1 PATH="$PWD/.venv-train/bin:$PATH"
 reward=$1; name=$2; shift 2
 echo "== grpo $name $reward $*"
+# the reward log and trajectories are appended to; leftovers from an aborted run would corrupt gate G1
+t=$(date +%s)
+[ -f "runs/${name}_rewards.jsonl" ] && mv "runs/${name}_rewards.jsonl" "runs/stale_${name}_rewards_$t.jsonl"
+[ -d "runs/$name" ] && mv "runs/$name" "runs/stale_${name}_$t"
 SQLCF_REWARD_LOG=runs/${name}_rewards.jsonl /usr/bin/time -f "grpo %e s" .venv-train/bin/python train.py grpo \
   --reward "$reward" --init runs/sft/adapter --out "runs/$name" "$@" && echo "== GRPO OK"
 bash scripts/vm_autostop.sh
