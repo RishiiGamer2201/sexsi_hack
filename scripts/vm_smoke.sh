@@ -4,6 +4,7 @@
 set -euo pipefail
 cd ~/sexsi_hack
 export HF_HOME="$PWD/.cache/hf" TOKENIZERS_PARALLELISM=false PYTHONUNBUFFERED=1
+export PATH="$PWD/.venv-train/bin:$PATH"  # vLLM JIT-compiles kernels with the venv's ninja
 PY=.venv-train/bin/python
 mkdir -p runs results
 nvidia-smi --query-gpu=name,memory.total --format=csv,noheader
