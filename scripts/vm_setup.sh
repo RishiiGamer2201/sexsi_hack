@@ -6,6 +6,7 @@ set -euo pipefail
 mkdir -p ~/.ssh
 grep -q sexsi_deploy ~/.ssh/config 2>/dev/null ||
   printf 'Host github.com\n  IdentityFile ~/.ssh/sexsi_deploy\n  IdentitiesOnly yes\n' >> ~/.ssh/config
+chmod 600 ~/.ssh/config  # ssh rejects a group-writable config once teammates share the group
 grep -q github.com ~/.ssh/known_hosts 2>/dev/null || ssh-keyscan -t ed25519 github.com >> ~/.ssh/known_hosts 2>/dev/null
 [ -d ~/sexsi_hack/.git ] || git clone -q git@github.com:RishiiGamer2201/sexsi_hack.git ~/sexsi_hack
 cd ~/sexsi_hack && git pull -q --ff-only

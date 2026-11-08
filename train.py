@@ -100,11 +100,17 @@ def grpo(a):
         output_dir=str(a.out), peft_config=LoraConfig(**LORA),
         model_init_kwargs={"dtype": "bfloat16"},  # TRL loads a path in fp32 by default (13 GB, no room for vLLM)
         remove_unused_columns=False,  # rewards read dbs/gold/ordered (rewards._need fails loudly)
-        max_steps=a.steps, num_generations=a.G, per_device_train_batch_size=a.G * a.prompts,
-        gradient_accumulation_steps=1, learning_rate=1e-5, beta=0.02, temperature=1.0,
+        # one sequence per forward (262k-vocab logits of a 4k-token sequence are 4 GiB); one
+        # generation batch of G*prompts rollouts per optimizer step
+        max_steps=a.steps, num_generations=a.G, per_device_train_batch_size=1,
+        gradient_accumulation_steps=a.G * a.prompts, learning_rate=1e-5, beta=0.02, temperature=1.0,
         max_completion_length=2048, max_steps_per_turn=4, gradient_checkpointing=True,
         bf16=True, logging_steps=1, save_steps=20, report_to=[], seed=a.seed,
-        use_vllm=a.vllm, vllm_mode="colocate", vllm_gpu_memory_utilization=a.vllm_mem)
+        use_vllm=a.vllm, vllm_mode="colocate", vllm_gpu_memory_utilization=a.vllm_mem,
+        vllm_enable_sleep_mode=True,  # free vLLM's share of the L4 during the backward pass
+        # the patched rollout re-renders trajectories (patches/agenttune-multiturn-ids.patch),
+        # so there are no matching vLLM sampling logprobs to importance-correct against
+        vllm_importance_sampling_correction=False)
     trainer.train()  # saves the LoRA adapter to a.out
     del trainer
     # Eval serves merged weights: vLLM 0.22 LoRA crashes on Tiny Aya's tied embeddings.

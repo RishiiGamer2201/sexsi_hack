@@ -1,20 +1,44 @@
 diff --git a/src/agenttune/agentic/rollout_engines/rollout_factory.py b/src/agenttune/agentic/rollout_engines/rollout_factory.py
-index 503615e..afbcdef 100644
+index 503615e..8f14c94 100644
 --- a/src/agenttune/agentic/rollout_engines/rollout_factory.py
 +++ b/src/agenttune/agentic/rollout_engines/rollout_factory.py
-@@ -1866,6 +1866,11 @@ def _execute_trajectory(
-     all_completion_ids: list[int] = []
-     all_logprobs: list[tuple] = []
-     all_tool_mask: list[int] = []
-+    # sqlcf patch: on the vLLM trainer path the token stream is rebuilt from vLLM's own
-+    # per-turn prompt_ids, so the trainer scores exactly the context each turn was sampled
-+    # from (template tokens between turns included, masked 0). p0 = turn-0 prompt ids.
-+    _vllm_ctx: dict = {}
-+    _vllm_path = trainer is not None and getattr(trainer, "use_vllm", False)
+@@ -434,6 +434,35 @@ def _keep_tool_results(
+     return conversation
  
-     # ── Prompt-id helper ──────────────────────────────────────────────────────
-     def _compute_prompt_ids(conversation: list[dict], schemas: list[dict]) -> list[int]:
-@@ -1947,6 +1952,16 @@ def _execute_trajectory(
+ 
++def _rerender_stream(tokenizer, conversation, schemas, enable_thinking, tool_result_format):
++    """sqlcf patch: (prompt_ids, completion_ids, mask) for a finished multi-turn trajectory,
++    taken from the chat-template rendering of the whole conversation, i.e. exactly the
++    context every next turn was generated from (turn headers, folded tool results), with
++    mask=1 only on assistant turns. Concatenating per-turn sampled ids + raw tool text
++    (the default) drops the template tokens between turns, so the trainer scored tokens
++    against a context vLLM never saw. None if the template is not prefix-consistent."""
++
++    def ids(conv, gen):
++        out = _render_chat_template(
++            tokenizer, conv, schemas, enable_thinking=enable_thinking,
++            tool_result_format=tool_result_format, tokenize=True, return_tensors=None,
++            add_generation_prompt=gen,
++        )
++        return _ids_to_list(out["input_ids"] if hasattr(out, "keys") else out)
++
++    turns = [i for i, m in enumerate(conversation) if m.get("role") == "assistant"]
++    if not turns:
++        return None
++    p0, full = ids(conversation[: turns[0]], True), ids(conversation, False)
++    mask = [0] * len(full)
++    for i in turns:
++        a, b = len(ids(conversation[:i], True)), len(ids(conversation[: i + 1], False))
++        mask[a:b] = [1] * (b - a)
++    if full[: len(p0)] != p0 or not any(mask[len(p0):]):
++        return None
++    return p0, full[len(p0):], mask[len(p0):]
++
++
+ def _render_chat_template(
+     tokenizer,
+     conversation: list[dict],
+@@ -1947,6 +1976,16 @@ def _execute_trajectory(
              if getattr(trainer, "use_vllm", False):
                  from trl.experimental.openenv import generate_rollout_completions
  
@@ -31,47 +55,23 @@ index 503615e..afbcdef 100644
                  try:
                      rollout_outputs = generate_rollout_completions(trainer, [prompt_text])[0]
                  except Exception as e:
-@@ -1982,6 +1997,20 @@ def _execute_trajectory(
-                 raw_lps = rollout_outputs["logprobs"]
-                 lp_tuples = _ensure_logprob_tuples(_normalise_logprobs(raw_lps, comp_ids))
-                 raw_prompt_ids = rollout_outputs.get("prompt_ids", [])
-+                # sqlcf patch: fill the tokens between turns (turn ends/headers, tool-result
-+                # wrapper) from this turn's real prompt, masked out of the loss.
-+                _p = _ids_to_list(raw_prompt_ids)
-+                if "p0" not in _vllm_ctx:
-+                    _vllm_ctx["p0"] = _p
-+                else:
-+                    _seen = _vllm_ctx["p0"] + all_completion_ids
-+                    if _p[: len(_seen)] == _seen:
-+                        _gap = _p[len(_seen):]
-+                        all_completion_ids.extend(_gap)
-+                        all_logprobs.extend([(0.0, t) for t in _gap])
-+                        all_tool_mask.extend([0] * len(_gap))
-+                    else:  # context was truncated/rewritten: stream no longer valid
-+                        _vllm_ctx["broken"] = True
-                 meta = {
-                     "prompt_ids": _ids_to_list(raw_prompt_ids),
-                     "completion_ids": comp_ids,
-@@ -2358,7 +2387,7 @@ def _execute_trajectory(
-                     _seen_chunk_ids.add(_cid)
-                     retrieved_chunk_ids.append(_cid)
+@@ -2576,6 +2615,19 @@ def _execute_trajectory(
+             post_step_hook(terminal_step)
+     steps.append(terminal_step)
  
--            if tokenizer is not None:
-+            if tokenizer is not None and not _vllm_path:  # vLLM path: filled from next prompt
-                 tool_ids = _ids_to_list(tokenizer.encode(str(result), add_special_tokens=False))
-                 all_completion_ids.extend(tool_ids)
-                 all_logprobs.extend([(0.0, tid) for tid in tool_ids])
-@@ -2584,10 +2613,11 @@ def _execute_trajectory(
-         metadata={
-             "conversation": conversation,
-             "completions_list": completions_list,
--            "tool_mask": list(all_tool_mask),
-+            # sqlcf patch: a broken stream trains on nothing rather than on a wrong context
-+            "tool_mask": [0] * len(all_tool_mask) if _vllm_ctx.get("broken") else list(all_tool_mask),
-             "tool_call_count": tool_call_count,
-             "tool_failure_count": tool_failure_count,
--            "prompt_ids": initial_prompt_ids,
-+            "prompt_ids": _vllm_ctx.get("p0", initial_prompt_ids),
-             "completion_ids": list(all_completion_ids),
-             "retrieved_chunk_ids": retrieved_chunk_ids,
-             "answer": gold,
++    # sqlcf patch: on the vLLM trainer path, train on the re-rendered conversation (see
++    # _rerender_stream). Its sampling logprobs are unknown (zeros), so run GRPO with
++    # vllm_importance_sampling_correction=False. Unrenderable -> nothing trained.
++    if trainer is not None and getattr(trainer, "use_vllm", False) and tokenizer is not None:
++        _rr = _rerender_stream(tokenizer, conversation, tool_schemas, enable_thinking, tool_result_format)
++        if _rr is None:
++            warnings.warn("sqlcf: trajectory not prefix-consistent; masked out", UserWarning, stacklevel=2)
++            all_tool_mask[:] = [0] * len(all_tool_mask)
++        else:
++            initial_prompt_ids, _ids, _mask = _rr
++            all_completion_ids[:], all_tool_mask[:] = _ids, _mask
++            all_logprobs[:] = [(0.0, t) for t in _ids]
++
+     return Trajectory(
+         task=prompt,
+         steps=steps,
