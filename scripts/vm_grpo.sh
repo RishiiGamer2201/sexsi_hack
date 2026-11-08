@@ -9,5 +9,5 @@ export HF_HOME="$PWD/.cache/hf" TOKENIZERS_PARALLELISM=false PYTHONUNBUFFERED=1 
 reward=$1; name=$2; shift 2
 echo "== grpo $name $reward $*"
 SQLCF_REWARD_LOG=runs/${name}_rewards.jsonl /usr/bin/time -f "grpo %e s" .venv-train/bin/python train.py grpo \
-  --reward "$reward" --init runs/sft/merged --out "runs/$name" "$@" && echo "== GRPO OK"
+  --reward "$reward" --init runs/sft/adapter --out "runs/$name" "$@" && echo "== GRPO OK"
 bash scripts/vm_autostop.sh

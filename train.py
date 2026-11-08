@@ -1,8 +1,9 @@
 """SFT warm-start and GRPO (conditions B/C) for Tiny Aya Global + LoRA. GPU-side (Vertex L4).
 
   python train.py sft  --out runs/sft
-  python train.py grpo --reward R_exec_rex --init runs/sft/merged --out runs/grpo_B
-  python train.py grpo --reward R_cf_mean  --init runs/sft/merged --out runs/grpo_C
+  python train.py grpo --reward R_exec_rex --init runs/sft/adapter --out runs/grpo_B
+  python train.py grpo --reward R_cf_mean  --init runs/sft/adapter --out runs/grpo_C
+  python train.py merge --init runs/sft/adapter --out runs/sft/merged   # fp16 eval copy (sqlcf/precision.py)
   python train.py render                 # CPU check: print one SFT example as the model sees it
 
 Tiny Aya's chat template ignores `tools`, so AgentTune's rollout appends its fallback tool prompt
@@ -81,24 +82,44 @@ def sft(a):
                        gradient_checkpointing=True, bf16=True, max_length=4096,
                        logging_steps=5, save_strategy="no", report_to=[], seed=a.seed))
     trainer.train()
-    trainer.save_model(str(a.out / "adapter"))
-    merged = trainer.model.merge_and_unload()  # GRPO trains a fresh LoRA on the SFT-merged model
-    merged.save_pretrained(str(a.out / "merged"))
-    tok.save_pretrained(str(a.out / "merged"))
+    trainer.save_model(str(a.out / "adapter"))  # GRPO continues this adapter on the exact bf16 base
+    del trainer
+    torch.cuda.empty_cache()
+    merge(a.out / "adapter", a.out / "merged")
+
+
+def merge(adapter: Path, out: Path):
+    """Eval copy: base + adapter merged in fp32, saved fp16 (sqlcf/precision.py; vLLM 0.22 LoRA
+    serving crashes on Tiny Aya's tied embeddings, so eval needs merged weights)."""
+    import torch
+    from peft import PeftModel
+    from transformers import AutoModelForCausalLM, AutoTokenizer
+    from sqlcf.precision import merge_to_fp16
+
+    base = AutoModelForCausalLM.from_pretrained(MODEL, dtype=torch.bfloat16)
+    merge_to_fp16(PeftModel.from_pretrained(base, str(adapter))).save_pretrained(str(out))
+    AutoTokenizer.from_pretrained(MODEL).save_pretrained(str(out))
 
 
 def grpo(a):
+    import torch
     from datasets import Dataset
-    from peft import LoraConfig
+    from peft import PeftModel
+    from transformers import AutoModelForCausalLM
     from agenttune import create_agentic_trainer
+    from sqlcf.precision import patch_trl_vllm_fp16
 
+    patch_trl_vllm_fp16()  # vLLM rollouts in fp16 from fp32-merged weights; no in-place bf16 merges
     rows = grpo_rows(a.items)
     print(f"{len(rows)} GRPO prompts, reward={a.reward}")
+    # continue the SFT adapter on the original bf16 base (exact policy; TRL copies it to a frozen
+    # "ref" adapter for the KL term) instead of a bf16-merged SFT model, which rounds the SFT away
+    policy = PeftModel.from_pretrained(AutoModelForCausalLM.from_pretrained(MODEL, dtype=torch.bfloat16),
+                                       str(a.init), is_trainable=True)
     trainer = create_agentic_trainer(
-        "grpo", backend="trl", model=str(a.init), reward_funcs=[REWARDS[a.reward]],
+        "grpo", backend="trl", model=policy, reward_funcs=[REWARDS[a.reward]],
         tools=[run_sql], train_dataset=Dataset.from_list(rows).shuffle(seed=a.seed),
-        output_dir=str(a.out), peft_config=LoraConfig(**LORA),
-        model_init_kwargs={"dtype": "bfloat16"},  # TRL loads a path in fp32 by default (13 GB, no room for vLLM)
+        output_dir=str(a.out),
         remove_unused_columns=False,  # rewards read dbs/gold/ordered (rewards._need fails loudly)
         # one sequence per forward (262k-vocab logits of a 4k-token sequence are 4 GiB); one
         # generation batch of G*prompts rollouts per optimizer step
@@ -111,16 +132,11 @@ def grpo(a):
         # the patched rollout re-renders trajectories (patches/agenttune-multiturn-ids.patch),
         # so there are no matching vLLM sampling logprobs to importance-correct against
         vllm_importance_sampling_correction=False)
-    trainer.train()  # saves the LoRA adapter to a.out
-    del trainer
-    # Eval serves merged weights: vLLM 0.22 LoRA crashes on Tiny Aya's tied embeddings.
-    import torch
-    from peft import PeftModel
-    from transformers import AutoModelForCausalLM, AutoTokenizer
+    trainer.train()
+    trainer.trainer.save_model(str(a.out / "adapter"))
+    del trainer, policy
     torch.cuda.empty_cache()
-    base = AutoModelForCausalLM.from_pretrained(str(a.init), dtype=torch.bfloat16)
-    PeftModel.from_pretrained(base, str(a.out)).merge_and_unload().save_pretrained(str(a.out / "merged"))
-    AutoTokenizer.from_pretrained(str(a.init)).save_pretrained(str(a.out / "merged"))
+    merge(a.out / "adapter", a.out / "merged")
 
 
 def render(a):
@@ -137,10 +153,10 @@ def render(a):
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
-    ap.add_argument("cmd", choices=["sft", "grpo", "render"])
+    ap.add_argument("cmd", choices=["sft", "grpo", "merge", "render"])
     ap.add_argument("--data", type=Path, default=Path("data/sft.jsonl"))
     ap.add_argument("--items", type=Path, default=Path("data/train/items.jsonl"))
-    ap.add_argument("--init", type=Path, default=Path("runs/sft/merged"))
+    ap.add_argument("--init", type=Path, default=Path("runs/sft/adapter"), help="SFT adapter (grpo); adapter to merge (merge)")
     ap.add_argument("--out", type=Path, default=Path("runs/out"))
     ap.add_argument("--reward", choices=sorted(REWARDS), default="R_cf_mean")
     ap.add_argument("--steps", type=int, default=60)
@@ -151,4 +167,4 @@ if __name__ == "__main__":
     ap.add_argument("--no-vllm", dest="vllm", action="store_false")
     ap.add_argument("--vllm-mem", type=float, default=0.45, help="colocated vLLM share of GPU memory (3.35B bf16 weights ~6.7 GB)")
     a = ap.parse_args()
-    {"sft": sft, "grpo": grpo, "render": render}[a.cmd](a)
+    {"sft": sft, "grpo": grpo, "render": render, "merge": lambda a: merge(a.init, a.out)}[a.cmd](a)

@@ -15,7 +15,7 @@ echo "== sft";    /usr/bin/time -f "sft %e s" $PY train.py sft --out runs/smoke_
 fi
 rm -f runs/smoke_rewards.jsonl
 echo "== grpo";   SQLCF_REWARD_LOG=runs/smoke_rewards.jsonl /usr/bin/time -f "grpo %e s" $PY train.py grpo \
-                    --reward R_cf_mean --init runs/smoke_sft/merged --out runs/smoke_grpo --steps 2 --G 2 --prompts 1
+                    --reward R_cf_mean --init runs/smoke_sft/adapter --out runs/smoke_grpo --steps 2 --G 2 --prompts 1
 echo "== rewards"; head -c 2000 runs/smoke_rewards.jsonl; echo
 echo "== eval";   $PY evaluate.py gen --model runs/smoke_sft/merged --name smoke_sft --n 1 --limit 4 --out-dir runs
 $PY evaluate.py gen --model runs/smoke_grpo/merged --name smoke_C --n 1 --limit 4 --out-dir runs

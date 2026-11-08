@@ -1,6 +1,6 @@
 """E4 evaluation: generate agent trajectories on the test set (GPU, vLLM) and score them (CPU).
 
-  # one model per call; GRPO adapters are pre-merged by train.py (vLLM 0.22 LoRA breaks on
+  # one model per call; adapters are pre-merged in fp32 and saved fp16 by train.py (vLLM 0.22 LoRA breaks on
   # Tiny Aya's tied embeddings: 'VocabParallelEmbeddingWithLoRA' has no 'quant_method')
   python evaluate.py gen --model CohereLabs/tiny-aya-global --name base
   python evaluate.py gen --model runs/sft/merged    --name sft
@@ -43,7 +43,7 @@ def gen(a):
 
     items = [json.loads(l) for l in open(a.items)][: a.limit or None]
     tok = AutoTokenizer.from_pretrained(a.model)
-    llm = LLM(a.model, max_model_len=8192, gpu_memory_utilization=a.gpu_mem, seed=a.seed)
+    llm = LLM(a.model, dtype="float16", max_model_len=8192, gpu_memory_utilization=a.gpu_mem, seed=a.seed)  # fp16: see sqlcf/precision.py
     sp = SamplingParams(temperature=a.temperature, max_tokens=1024, seed=a.seed)
     schema = [_build_tool_schema(run_sql)]
 
