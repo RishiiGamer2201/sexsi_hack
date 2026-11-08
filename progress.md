@@ -31,6 +31,23 @@
 
 ### Nov 9
 
+- **E4 with the fixed model** (fp16, 331 test items x 8 samples, local GPU). Replaces the bf16 numbers below.
+
+  | Metric | Base | SFT |
+  |---|---|---|
+  | Verified | 0.012 | **0.094** [0.083, 0.105] |
+  | Single-DB | 0.015 | 0.109 |
+  | Silent errors | 0.012 | 0.782 |
+  | Has final SQL | 0.62 | 0.97 |
+  | Invalid tool calls | 0.73 | 0.06 |
+  | Verified, F1 / F2 / F3 / F4 | 0.03 / 0 / 0 / 0.01 | **0.83** / 0 / 0 / 0.005 |
+
+  SFT beats base on verified: McNemar p=1.4e-6, paired bootstrap +8.2 pp [4.8, 11.5].
+  - SFT learned the format: 97% end with final SQL, 6% invalid tool calls.
+  - Test templates are new compositions. On them SFT pattern-matches the closest training template and returns plausible but wrong SQL.
+    - F2_units_paid filters on `order_date` instead of payment date.
+    - F3_avg_order averages per item instead of per order.
+  - Hence 78% silent errors. This is the failure mode that counterfactual checks are built to catch, and that GRPO-C should reduce.
 - **SFT retrained on the local RTX 5070 Ti** (batch 1 x 16 accumulation, otherwise the same config as on the VM).
   - WSL threw `CUDA error: unknown error` mid-run 3 times, at steps 21, 84 and 34. The Windows log shows no driver reset, and CUDA works again right after.
   - Fix: `--save-every 10` with auto-resume in `scripts/local_sft.sh`. The successful run took 2 attempts and 1629 s.
