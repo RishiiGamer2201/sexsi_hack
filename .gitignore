@@ -1,0 +1,18 @@
+# environments / caches (all regenerable)
+.venv/
+.venv-train/
+.cache/
+__pycache__/
+.pytest_cache/
+*.pyc
+.env
+
+# generated data (rebuild with the commands in README.md) and third-party repos
+data/
+vendor/
+runs/
+results/_selfcheck_*
+
+# Windows download metadata / chat screenshots
+*:Zone.Identifier
+*.jpeg
