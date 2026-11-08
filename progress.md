@@ -7,9 +7,9 @@
 - **Precision fix verified.** SFT retrained on the local GPU, then merged in fp32 and saved as fp16.
   - On 58 of its own training items (greedy), 1.00 verify [0.94, 1.0]; the bf16 merge got 0.26.
   - Adapter: `runs/sft/adapter` (local); merged model: `runs/sft/merged` (fp16, 6.3 GB, local).
-- **VM: TERMINATED.** 60 more L4 stockouts in asia-south1-a (about 2 h), so nothing has run on it since the fix. Moving zones needs the user's OK.
+- **VM: starting.** `scripts/laptop_kick_grpo.sh` is retrying up to 90 times (about 3 h) through L4 stockouts; earlier attempts failed 15 and then 60 times. Once the VM is up, the script launches GRPO-B. Moving zones needs the user's OK.
 - **GRPO signal: OK** (125 of 445 groups mixed). E4 for base and SFT is done with the fixed model and real samples.
-- **Pipeline:** the smoke test passed before the fix. The fix changes TRL's weight sync (`sqlcf/precision.py`), so run the smoke test again before GRPO-B.
+- **Pipeline:** the smoke test passed before the fix. The fix changes TRL's weight sync (`sqlcf/precision.py`), so GRPO-B's step-1 reward serves as the smoke test (see Next 1).
 - **VM `sqlcf-l4`** (asia-south1-a, 1x L4): start it with `bash scripts/vm_start.sh`, which retries through stockouts. Stop it whenever no job is running. SSH from WSL's gcloud (user `admin_wsl`).
 - **Gates:**
   - G1 (freeze the reward form): open.
