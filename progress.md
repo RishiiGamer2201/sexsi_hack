@@ -4,7 +4,8 @@
 
 ## Current state (Nov 8, night)
 
-- **Running on the VM:** full SFT (`scripts/vm_sft.sh`, log `runs/sft.log`): 1386 examples, 2 epochs, about 65 min. It then checks the SFT model's format on 32 test items and powers the VM off itself (`scripts/vm_autostop.sh`), unless a teammate is logged in.
+- **Running on the VM:** GRPO-B (`R_exec_rex`, 60 steps, G=6, 4 prompts per step; log `runs/grpo_B.log`). The VM powers itself off when the run ends.
+- **Running locally:** copying `runs/sft/merged` from the VM to the laptop, for the SFT E4 eval on the local GPU.
 - **E4 base model done** on the local GPU (`results/traj_base.jsonl`, 331 items × 8 samples). The local card ran it in 9 min, so it can run every E4 generation once the merged models are copied over.
 - **Pipeline:** smoke test passes end to end on the team VM. It covers tests, tiny SFT, 2 GRPO steps, adapter merge, eval and scoring (`scripts/vm_smoke.sh`, `scripts/vm_smoke_eval.sh`).
 - **VM `sqlcf-l4`** (asia-south1-a, 1× L4): start it with `bash scripts/vm_start.sh`, which retries through L4 stockouts. Stop it whenever no job is running. SSH from WSL's gcloud (user `admin_wsl`); the Windows gcloud key is not on the VM.
@@ -17,16 +18,29 @@
 
 ## Next
 
-1. When SFT finishes, read the format check: has_sql rate, tool calls per trajectory, invalid tool calls.
-2. GRPO-B (`R_exec_rex`) with `scripts/vm_grpo.sh R_exec_rex grpo_B`. Time its first steps to decide gate G2.
-3. Gate G1 from GRPO-B's first steps, with `python scripts/gate_g1.py runs/grpo_B_rewards.jsonl --G 6 --first 96`. FN on gold is 0 for every form, so the tie-break decides: the form with the most groups whose reward has non-zero variance.
-4. GRPO-C with the G1 form and the same budget as B.
+1. Time GRPO-B's first steps (gate G2), and check that groups have reward variance.
+2. Gate G1 from GRPO-B's first steps, with `python scripts/gate_g1.py runs/grpo_B_rewards.jsonl --G 6 --first 96`. FN on gold is 0 for every form, so the tie-break decides: the form with the most groups whose reward has non-zero variance.
+3. GRPO-C with the G1 form and the same budget as B.
+4. E4 eval on the SFT model, run locally.
 5. E4 eval on base, SFT, B and C, then scoring.
 
 ## Log
 
 ### Nov 8
 
+- **GRPO-B launched** at about 20:25 IST, with the default config.
+- **SFT done.** 174 steps in 64 min; final train loss 0.042. The VM powered itself off at 14:48Z, and an L4 stockout cost 2 retries when restarting it.
+- **SFT format check** on 32 test items, 1 sample each:
+
+  | Metric | Value |
+  |---|---|
+  | Has final SQL | 1.00 |
+  | Tool calls per trajectory | 2.0 |
+  | Invalid tool calls | 0.19 |
+  | Correct on the test DB | 0/32 |
+  | Verified | 0/32 |
+
+  The model follows the oracle pattern rigidly: one probe query, the answer query, then the final answer. When the answer query returns `ERROR`, it submits the same SQL anyway, because the oracle trajectories never show a repair. Its mistakes are near misses, such as `oi.customer_id` where `o.customer_id` is right. GRPO should fix this if sampled groups contain some correct rollouts.
 - **SFT at epoch 1.09:** loss 0.007, token accuracy 0.997, entropy 0.01. The model is memorizing the templated oracle trajectories. **Risk:** GRPO groups whose rollouts all get the same reward give no learning signal. **Check:** run `gate_g1.py` on GRPO-B's first steps. If few groups have reward variance, rerun SFT for 1 epoch (about 32 min).
 - **E4 base result** (2648 trajectories, Wilson 95% CIs):
 
