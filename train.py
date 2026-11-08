@@ -107,7 +107,7 @@ def grpo(a):
         max_completion_length=2048, max_steps_per_turn=4, gradient_checkpointing=True,
         bf16=True, logging_steps=1, save_steps=20, report_to=[], seed=a.seed,
         use_vllm=a.vllm, vllm_mode="colocate", vllm_gpu_memory_utilization=a.vllm_mem,
-        vllm_enable_sleep_mode=True,  # free vLLM's share of the L4 during the backward pass
+        # no vllm_enable_sleep_mode: TRL's wake-up reload_weights segfaults (vLLM 0.22.1, smoke #4)
         # the patched rollout re-renders trajectories (patches/agenttune-multiturn-ids.patch),
         # so there are no matching vLLM sampling logprobs to importance-correct against
         vllm_importance_sampling_correction=False)

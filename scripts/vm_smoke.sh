@@ -7,9 +7,11 @@ export HF_HOME="$PWD/.cache/hf" TOKENIZERS_PARALLELISM=false PYTHONUNBUFFERED=1
 PY=.venv-train/bin/python
 mkdir -p runs results
 nvidia-smi --query-gpu=name,memory.total --format=csv,noheader
+if [ -z "${SKIP_SFT:-}" ]; then  # SKIP_SFT=1 reuses runs/smoke_sft from a previous smoke run
 echo "== tests";  $PY -m pytest -q tests 2>&1 | tail -1
 echo "== render"; $PY -W ignore train.py render | tail -3
 echo "== sft";    /usr/bin/time -f "sft %e s" $PY train.py sft --out runs/smoke_sft --epochs 0.05
+fi
 rm -f runs/smoke_rewards.jsonl
 echo "== grpo";   SQLCF_REWARD_LOG=runs/smoke_rewards.jsonl /usr/bin/time -f "grpo %e s" $PY train.py grpo \
                     --reward R_cf_mean --init runs/smoke_sft/merged --out runs/smoke_grpo --steps 2 --G 2 --prompts 1
