@@ -35,6 +35,8 @@ def gen(a):
         _build_tool_schema, _extract_tool_calls, _render_chat_template, _strip_special_tokens,
         fold_tool_messages_into_user)
     from transformers import AutoTokenizer
+    import os
+    os.environ.setdefault("VLLM_USE_FLASHINFER_SAMPLER", "0")  # its JIT kernel build fails on the VM
     from vllm import LLM, SamplingParams
 
     from train import fallback_system
