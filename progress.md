@@ -16,7 +16,7 @@
 ## Next
 
 1. **User approval to go public** before submission (deadline Nov 14 AoE). Then: `scripts/push_models.py --public --gated` (models gated, auto-approve), and make the Space, dataset and collection public.
-2. User: confirm Command A price at docs.cohere.com; invite AkshAgg and hi-phi-r25i to `sqlcf-lexsi` (write).
+2. User: confirm Command A price at docs.cohere.com. (Done: AkshAgg and hi-phi-r25i are `sqlcf-lexsi` members, checked via the API on Nov 9.)
 3. User decision on the null: accept and polish (recommended) / second seed (about 7 h VM) / redesigned C.
 4. Publish the HF Article from ARTICLE.md; final submission form.
 
@@ -24,6 +24,7 @@
 
 ### Nov 9
 
+- **HF org members:** AkshAgg and hi-phi-r25i joined `sqlcf-lexsi` (API member list: AkshAgg, LogicPalette, hi-phi-r25i). Space, dataset and models still private.
 - **Model repos pushed, private:** `scripts/push_models.py` uploads the three LoRA adapters (sft_ho, B, C; no `ref/`, no `training_args.bin`) with the base model's CC-BY-NC-4.0 text as `LICENSE` (`docs/LICENSE-CC-BY-NC-4.0.txt`), a `NOTICE` naming Cohere's licence addendum and Acceptable Use Policy, and a card (base_model, G3 label, verified / single / silent error / F4 with 95% CIs), plus B and C's provenance, config and training stats. It also builds one private collection with Space, dataset and the 3 models. Verified via the API: all 6 private, models not gated. `--public --gated` will make the models public with automatic-approval gating, per the organisers' ruling.
 - **L4 re-timing done (ROI item 1):** GRPO-B's 331 x 8 test generation took 785 s on the L4 vs 524 s on the laptop (ratio 1.50), same accuracy (12.5% vs 12.7% verified; `results/e5_l4_check.json`). VM TERMINATED after copy. ROI now priced at L4 speed: Tiny Aya B $0.061 per 1k (SFT $0.054, C $0.052, scaled by the ratio) vs Command A $4.25: about 70x cheaper per query, 11x per verified answer. Article, README and abstract updated.
 - **README "judge's 60-second view" and ABSTRACT.md (about 430 words) written.** Correction: Command A's F2 failure is mostly caught by the single-DB check too (32/36); the counterfactual copies catch the other 4 lucky passes. Article and abstract say so.
