@@ -38,7 +38,8 @@
   - `evaluate.py`: comparisons now also test silent error (McNemar + bootstrap), since H4 was pre-registered on it. B vs sft_ho silent error −1.4 pts [−3.6, +0.9], p=0.06.
   - `ARTICLE.md`: HF Article / README draft (12 sections, C and E5 cells marked TBD).
   - `vm_autostop.sh` waits (max 30 min) while `runs/HOLD_AUTOSTOP` exists, so the laptop watcher can copy C's adapter and logs off before the VM powers down.
-  - E5 slowed to about 1 call/min (trial rate limit; the script backs off): 170/331.
+  - E5 at 170/331. Command A calls take median 10 s, p90 38 s, so the run is slow from model latency, not only rate limits.
+  - `scripts/e5_roi.py`: ROI table from billed tokens ($2.50 / $10.00 per 1M) and measured local generation time x GPU $/hr. Partial: Command A $3.94 per 1k queries; Tiny Aya B $0.04 per 1k (5070 Ti throughput priced at the L4 VM rate, $0.74/hr).
 - **E4 for GRPO-B done** (local merge 129 s, generation 524 s; 331 test items x 4 samples):
   - verified (passes original + all counterfactual DBs): base 0.9%, sft_ho 9.4%, **B 12.7%** (B vs sft_ho +3.2 pts, 95% CI [1.8, 4.8], McNemar p=0.006).
   - inflation (single-DB pass minus verified): sft_ho 5.1%, B 5.1%, so GRPO with the single-DB reward raised accuracy but not the lucky-pass rate. C (R_cf_mean) is the test of whether that drops.
