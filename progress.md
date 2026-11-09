@@ -32,6 +32,9 @@
 
 ### Nov 9
 
+- **E5 done: Command A on all 331 test items** (single-turn, schema in the prompt, 1 sample per item, T=0.7):
+  - verified **81.0%** [76.4, 84.8], single-DB 82.8%, lucky passes 1.8%. By family: F1 100%, F2 0%, F3 64%, F4 95%. Silent error is 0 by definition (no tool calls), so it is not comparable.
+  - ROI (`results/e5_roi.json`): Command A $4.25 per 1k queries (median 9.7 s, p90 42 s); Tiny Aya B $0.04 per 1k. Per 1k *verified-correct* answers: Command A about $5.2, B about $0.32, but B's 12.7% accuracy is far from usable.
 - **While GRPO-C trains (step 46/60 at 05:17 UTC):**
   - `scripts/figure3.py`: per-step share of training rollouts paid by the single-DB check but failing a counterfactual. B: 86% of rollouts pass the original DB; 8.2% of those are lucky (10.7% in the first half, 5.9% in the second).
   - `scripts/push_dataset.py`: **private** HF dataset `sqlcf-lexsi/counterfactual-sql-data` (items, DBs as one tar.gz per split, SFT data, results, B's rollout log). Re-run after C and E5.
