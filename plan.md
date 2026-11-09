@@ -237,7 +237,7 @@ train.py         # SFT (TRL, prompt/completion per assistant turn) + GRPO (Agent
 evaluate.py      # E4: gen (vLLM multi-LoRA, AgentTune render/parse) + score (stats) + selfcheck
 vertex/          # Dockerfile (vllm 0.22.1 base, py3.12), run.sh stages, submit.sh (billable)
 tests/test_rewards.py   # gold=1, mutant=0 on CF, literal=0, malformed/missing tool call=0
-app.py           # Gradio demo (recorded trajectories + live SQLite; no GPU needed)
+demo/index.html  # static demo: sqlcf/demo.py in the browser via Pyodide (free static Space; no GPU)
 verify_all.py    # regenerate every number in the write-up from stored runs
 ```
 

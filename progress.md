@@ -32,6 +32,11 @@
 
 ### Nov 9
 
+- **GRPO-B done:** 60/60 steps in 3.5 h (12,561 s), adapter saved; the VM chain started GRPO-C at 02:36 UTC (step 36/60 at 05:00 UTC). B's adapter was copied to the laptop for a local fp16 merge and E4.
+- **Demo rebuilt without Gradio.** Gradio-Lite failed in the browser (its gradio pins `huggingface-hub<1.0`, the runtime has 2.4.0; Gradio-Lite's last release is Sep 2025).
+  - Now `demo/index.html` loads pinned Pyodide 0.27.7 and runs `sqlcf/demo.py` (plain Python: scoring core plus a JSON API). The UI is hand-written HTML. `app.py` was removed.
+  - Checked headless in Node with Pyodide 0.27.7 (`runs/pyodide_test/test.mjs`): the same showcase checks and rewards as desktop Python.
+
 - **Credentials set by the user** in `.secrets.env` (gitignored): `CO_API_KEY` (Cohere trial) and `HF_TOKEN_HACK` (account LogicPalette, write only on org `sqlcf-lexsi`; plus "repos created by this token" in the personal namespace). The CVPR token is never used.
 - **HF org `sqlcf-lexsi`** created by the user. Members to invite: AkshAgg, hi-phi-r25i (in the web UI; the token has no member permissions).
 - **Licence question posted** in Discord #hackathon-lexsi to @_1024_m (adapters un-gated or gated?). Waiting for the reply.

@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Counterfactual SQL Rewards</title>
+<!-- Runs sqlcf/demo.py in the browser (Pyodide = Python + SQLite in WebAssembly). Files listed in files.json. -->
+<script src="https://cdn.jsdelivr.net/pyodide/v0.27.7/full/pyodide.js"></script>
+<style>
+  :root { --bg:#fbfbfa; --fg:#1d1d1f; --muted:#6b6b70; --card:#fff; --line:#e3e3e0; --accent:#3b5bdb;
+          --ok:#2b8a3e; --bad:#c92a2a; --code:#f3f3f1; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#141416; --fg:#ececee; --muted:#9a9aa2; --card:#1c1c1f;
+          --line:#2e2e33; --accent:#7c94ff; --ok:#69db7c; --bad:#ff8787; --code:#232327; } }
+  * { box-sizing:border-box }
+  body { margin:0; background:var(--bg); color:var(--fg); font:15px/1.5 system-ui, sans-serif }
+  main { max-width:1150px; margin:0 auto; padding:24px 16px 48px }
+  h1 { font-size:24px; margin:0 0 6px } p.lead { color:var(--muted); margin:0 0 20px; max-width:780px }
+  label { display:block; font-size:13px; color:var(--muted); margin:14px 0 4px }
+  select, textarea, button { font:inherit; color:inherit; background:var(--card); border:1px solid var(--line); border-radius:8px }
+  select { width:100%; padding:8px } textarea { width:100%; min-height:150px; padding:10px; font-family:ui-monospace, monospace; font-size:13px }
+  button { padding:8px 18px; background:var(--accent); color:#fff; border:0; cursor:pointer; margin-top:8px }
+  .grid { display:grid; grid-template-columns:1fr 1fr; gap:20px } @media (max-width:820px) { .grid { grid-template-columns:1fr } }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:14px 16px }
+  .q { font-size:17px; margin:4px 0 } .tag { color:var(--muted); font-size:13px }
+  pre { background:var(--code); padding:10px; border-radius:6px; overflow-x:auto; white-space:pre-wrap; word-break:break-word; font-size:12.5px; margin:4px 0 10px }
+  .role { font-size:12px; font-weight:600; color:var(--muted); text-transform:uppercase }
+  #traj { max-height:560px; overflow-y:auto }
+  table { width:100%; border-collapse:collapse; font-size:13.5px } td, th { text-align:left; padding:6px 8px; border-bottom:1px solid var(--line); vertical-align:top }
+  th { color:var(--muted); font-weight:500 } .ok { color:var(--ok); font-weight:600 } .bad { color:var(--bad); font-weight:600 }
+  .num { font-variant-numeric:tabular-nums; font-weight:600 } #status { color:var(--muted) }
+</style>
+</head>
+<body>
+<main>
+  <h1>Counterfactual SQL rewards</h1>
+  <p class="lead">A SQL query can match the answer on the one database an agent explored and still be wrong.
+    Counterfactual databases, never shown to the agent, catch it. Pick a test question and a recorded run of
+    Tiny Aya Global (base / SFT / GRPO), or edit the SQL, and see the checks and the reward each function gives.
+    Questions marked ★ have a run that the single-DB reward accepts but a counterfactual rejects.</p>
+  <p id="status">Loading Python in your browser (about 20–60 s on first visit)…</p>
+  <div id="ui" hidden>
+    <label for="item">Test question</label><select id="item"></select>
+    <div class="card" style="margin-top:10px"><div class="tag" id="tag"></div><div class="q" id="question"></div></div>
+    <div class="grid">
+      <div>
+        <label for="run">Recorded run (model #sample)</label><select id="run"></select>
+        <label>Trajectory</label><div class="card" id="traj"></div>
+      </div>
+      <div>
+        <label for="sql">Final SQL (edit it and press Score)</label><textarea id="sql" spellcheck="false"></textarea>
+        <button id="score">Score</button>
+        <label>Per-database checks</label>
+        <div class="card"><table><thead><tr><th>Database</th><th>Gold</th><th>This query</th><th>Check</th></tr></thead><tbody id="checks"></tbody></table></div>
+        <label>Reward each function gives</label>
+        <div class="card"><table><tbody id="rewards"></tbody></table></div>
+        <label>Gold SQL</label><pre id="gold"></pre>
+      </div>
+    </div>
+  </div>
+</main>
+<script>
+const NOTE = {R_exec_set: "one DB, set match (BIRD-style)", R_exec_rex: "one DB, strict multiset — condition B",
+  R_cf_mean: "one DB × mean of counterfactual checks — condition C", R_cf_strict: "one DB × all counterfactuals pass",
+  R_cf_soft: "one DB × (1 − 0.2 if any counterfactual fails)"};
+const $ = id => document.getElementById(id);
+let py;
+const call = (fn, ...args) => { py.globals.set("_a", py.toPy(args)); return JSON.parse(py.runPython(`demo.${fn}(*_a)`)); };
+const el = (tag, text, cls) => { const e = document.createElement(tag); e.textContent = text; if (cls) e.className = cls; return e; };
+
+function showScore() {
+  const r = call("api_score", $("item").value, $("sql").value);
+  $("checks").replaceChildren(...r.checks.map(c => { const tr = document.createElement("tr");
+    tr.append(el("td", c.db), el("td", c.gold), el("td", c.got), el("td", c.ok ? "pass" : "FAIL", c.ok ? "ok" : "bad")); return tr; }));
+  $("rewards").replaceChildren(...Object.entries(r.rewards).map(([n, s]) => { const tr = document.createElement("tr");
+    tr.append(el("td", n), el("td", s.toFixed(2), "num"), el("td", NOTE[n] || "", "tag")); return tr; }));
+}
+function showRun() {
+  const r = call("api_run", $("item").value, $("run").value);
+  $("traj").replaceChildren(...r.messages.flatMap(m => [el("div", m.role, "role"), el("pre", m.content)]));
+  $("sql").value = r.sql; showScore();
+}
+function showItem() {
+  const v = call("api_item", $("item").value);
+  $("tag").textContent = `${v.family} / ${v.template} · database ${v.db}`; $("question").textContent = v.question;
+  $("gold").textContent = v.gold_sql;
+  $("run").replaceChildren(...v.runs.map(r => new Option(r, r, false, r === v.default))); showRun();
+}
+(async () => {
+  try {
+    py = await loadPyodide({indexURL: "https://cdn.jsdelivr.net/pyodide/v0.27.7/full/"});
+    await py.loadPackage("sqlite3");
+    const files = await (await fetch("files.json")).json();
+    const bufs = await Promise.all(files.map(async f => new Uint8Array(await (await fetch(f)).arrayBuffer())));
+    files.forEach((f, i) => { py.FS.mkdirTree("/app/" + f.split("/").slice(0, -1).join("/")); py.FS.writeFile("/app/" + f, bufs[i]); });
+    py.runPython("import sys; sys.path.insert(0, '/app'); from sqlcf import demo");
+    $("item").replaceChildren(...call("api_items").map(x => new Option((x.blind ? "★ " : "") + x.id, x.id)));
+    $("item").onchange = showItem; $("run").onchange = showRun; $("score").onclick = showScore;
+    showItem(); $("status").hidden = true; $("ui").hidden = false;
+  } catch (e) { $("status").textContent = "Failed to load: " + e; console.error(e); }
+})();
+</script>
+</body>
+</html>
