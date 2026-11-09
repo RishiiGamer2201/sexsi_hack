@@ -18,7 +18,7 @@ A text-to-SQL agent is usually rewarded for matching the gold answer on **one** 
 | Test verified accuracy: base → SFT → GRPO-B (single-DB reward) | 0.9% → 9.4% → **12.7%** (B vs SFT +3.2 pts [1.8, 4.8], McNemar p = 0.006) | `results/e4_eval.json` |
 | Test verified accuracy, GRPO-C (counterfactual reward) | ⟨TBD⟩ | same |
 | Lucky passes (single-DB pass − verified): SFT 5.1%, B 5.1%, C ⟨TBD⟩ | | same |
-| Command A (single-turn) verified accuracy, $/1k queries vs self-hosted Tiny Aya | ⟨TBD⟩ | `results/e5_roi.json` |
+| Command A (single-turn) verified accuracy, cost per 1k queries | 81.0% [76.4, 84.8], $4.25; Tiny Aya B $0.04 | `results/e5_roi.json` |
 
 Demo: `huggingface.co/spaces/sqlcf-lexsi/counterfactual-sql-demo` (runs in the browser) · Data: `huggingface.co/datasets/sqlcf-lexsi/counterfactual-sql-data` · Code: `github.com/RishiiGamer2201/sexsi_hack` · `python verify_all.py` re-derives every number above from stored runs.
 
@@ -98,7 +98,18 @@ Share of gold-mutants that pass the single-DB check: **29.2%** at 50 customers, 
 - Caveat: the test generator catches 54 of 103 base-blind mutants, so test "verified" is *less* strict than the training reward.
 
 ### E5: ROI vs Command A
-⟨TBD: accuracy, $/1k queries from billed tokens, latency; Tiny Aya self-hosted cost = GPU $/hr ÷ measured throughput (2648 trajectories in 466 s on one RTX 5070 Ti).⟩
+Command A (`command-a-03-2025`, trial API) answers each test item once, single-turn, with the schema and column definitions in the prompt and no tools. Tiny Aya runs as the multi-turn agent. Command A cost = billed tokens × list price ($2.50 / $10.00 per 1M input / output). Tiny Aya cost = GPU $/hr × measured generation time ÷ trajectories.
+
+| Model | Verified | Single-DB | $ per 1k queries | Speed |
+|---|---|---|---|---|
+| Command A | 81.0% [76.4, 84.8] | 82.8% | $4.25 | median 9.7 s, p90 42 s per query |
+| Tiny Aya SFT | 9.4% [8.4, 10.6] | 14.5% | $0.036 | 5.7 trajectories/s batched |
+| Tiny Aya GRPO-B | 12.7% [11.5, 14.0] | 17.8% | $0.041 | 5.1 trajectories/s batched |
+| Tiny Aya GRPO-C | ⟨TBD⟩ | | | |
+
+- The small model is about 100× cheaper per query, and about 16× cheaper per *verified-correct* answer, but at 13% accuracy it is not a usable replacement. The honest ROI reading: counterfactual rewards are a cheap way to make a small model's training signal trustworthy, not a way to match a frontier model in 60 GRPO steps.
+- Throughput was measured on an RTX 5070 Ti laptop GPU (vLLM) and priced at our L4 VM's on-demand rate ($0.74/hr). Per-query latency was not measured for Tiny Aya.
+- **Command A falls into the fan-out trap too:** 0% verified on F2 (all 36 items from `F2_units_paid`). It joins `payments` directly, so an order with two payments counts its units twice, and it adds a `status != 'cancelled'` filter the question does not ask for. Lucky passes on the original DB: 1.8%.
 
 ### Nulls and what else we tried
 - H2 missed its pre-registered threshold (above).
