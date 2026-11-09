@@ -32,6 +32,12 @@
 
 ### Nov 9
 
+- **Credentials set by the user** in `.secrets.env` (gitignored): `CO_API_KEY` (Cohere trial) and `HF_TOKEN_HACK` (account LogicPalette, write only on org `sqlcf-lexsi`; plus "repos created by this token" in the personal namespace). The CVPR token is never used.
+- **HF org `sqlcf-lexsi`** created by the user. Members to invite: AkshAgg, hi-phi-r25i (in the web UI; the token has no member permissions).
+- **Licence question posted** in Discord #hackathon-lexsi to @_1024_m (adapters un-gated or gated?). Waiting for the reply.
+- **Demo Space: `sqlcf-lexsi/counterfactual-sql-demo`, private, static.** HF now bills Gradio and Docker Spaces (402 for free orgs and for free personal accounts), so the same `app.py` runs in the visitor's browser via Gradio-Lite 5.45.0 (Pyodide; SQLite in WebAssembly). `scripts/push_space.py` builds and uploads it.
+- **E5 started:** Command A (`command-a-03-2025`) on the 331 test items, single-turn, T=0.7 (`scripts/e5_command_a.py`). A 3-item trial was 3/3 verified, at about 10 s and about 670 input / 155 output tokens per call.
+
 - **Gradio demo: `app.py`** (CPU only; needs `data/test`, 1.2 MB, and `results/traj_*.jsonl`).
   - Pick a test question and a recorded run, or type your own SQL. It shows the per-DB checks (original plus each counterfactual) and the score each reward function gives.
   - Questions with a run that the single-DB reward accepts but a counterfactual rejects are listed first: 72 of 331.
