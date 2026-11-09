@@ -16,17 +16,22 @@
 
 ## Next
 
-1. **User approval to go public** before submission (deadline Nov 14 AoE). Then: `scripts/push_models.py --public --gated` (models gated, auto-approve), and make the Space, dataset and collection public.
-2. User: confirm Command A price at docs.cohere.com. (Done: AkshAgg and hi-phi-r25i are `sqlcf-lexsi` members, checked via the API on Nov 9.)
-3. User decision on the null: accept and polish (recommended) / second seed (about 7 h VM) / redesigned C.
-4. Publish the HF Article from ARTICLE.md; final submission form.
-5. User: OK to post the AgentTune issue (`docs/agenttune_sql_reward_issue.md`) upstream? Nothing posted yet.
-6. Update ABSTRACT.md with E6–E8 (under 500 words); refresh the dataset upload with the new results files; demo could add the "shaky answer" flag (D5).
-7. GPU items in plan §9B (B2 calibration ~$0.75 is the cheapest useful one) need the user's go.
+1. **Go public right AFTER the submission form is sent, not before** (user, Nov 9). Must be done before judging's validity check (deadline Nov 14 AoE; private repos count as missing): `scripts/push_models.py --public --gated`, then Space, dataset, collection public; GitHub repo public too if linked.
+2. Publish the HF Article from ARTICLE.md (needs public repos, so same moment); final submission form.
+3. Null decision made: **accept and polish** (user, Nov 9). No GPU runs; VM stays off.
+4. Watch Lexsi-Labs/AgentTune#11 for a reply; open a PR if maintainers want it.
+5. Optional polish: demo "shaky answer" flag (D5).
 
 ## Log
 
 ### Nov 9
+
+- **User decisions + follow-ups.**
+  - AgentTune issue **posted** from RishiiGamer2201: https://github.com/Lexsi-Labs/AgentTune/issues/11 (self-contained repro, checked against the installed package: 3.1 / 3.1; patch inlined). Patch comment no longer points at our private doc; test and repro rerun, same numbers.
+  - **Command A price confirmed** from the user's Cohere dashboard screenshots: trial key, real charge $0.00; run-day usage 222,578 input / 85,815 output tokens vs our logged 220,580 / 85,348 (within 1%; the extra is probe calls). List price $2.50 / $10.00 per 1M confirmed, so $4.27 vs our $4.24 per 1k queries. Note added to ARTICLE E5.
+  - E6 results file now stores question indices only (ESMp has no licence, so its SQL text is not redistributed); same numbers, 292K → 72K.
+  - **HF dataset re-pushed, still private** (45 files, includes a2/a3/a4 results; card lists them).
+  - Null: accept and polish. Go-public: right after submission.
 
 - **Plan §9 A2–A5 and C1–C6 done (zero GPU).** Commit has scripts, results and write-up.
   - **A2 / E6 Spider dev** (`scripts/a2_spider_lucky.py`, `results/a2_spider_lucky.json`): 8 published systems' predictions (ESM+ repo) scored on the original DB vs Zhong et al.'s test-suite DBs. Lucky share of EX passes 8.1% (Graphix) to 14.9% (Claude). A hand check of 40: 27 row-count, 13 value differences; mostly real bugs, some ties or ambiguous gold. Our strict comparator keeps DISTINCT, so absolute EX/TS sit below the official script.

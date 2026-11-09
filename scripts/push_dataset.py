@@ -32,6 +32,9 @@ Lexsi hackathon, Track 3 (PS #6 + #9). Code: github.com/RishiiGamer2201/sexsi_ha
 | `results/e0_*.json`, `results/e1_*.json`, `figure*.png` | Reward audit (FP/FN per reward) and blind rate vs DB size |
 | `results/traj_<model>.jsonl` | Test trajectories: base, sft, sft_ho, GRPO B, GRPO C, Command A |
 | `results/e4_eval.json` | Verified / single-DB accuracy, silent error, smuggling, pass^k, McNemar, bootstrap |
+| `results/a2_spider_lucky.json` | E6: Spider-dev lucky passes of 8 published systems (question indices only; predictions from bossben/ESMp, DBs from Zhong et al. 2020) |
+| `results/a3_skyrl_audit.json` | E7: SkyRL-SQL reward audit on the E0 candidates |
+| `results/a4_selfconsistency.json` | E8: gold-free majority vote and shaky-answer flag on the test trajectories |
 | `runs/grpo_<B,C>_rewards.jsonl` | Every GRPO rollout: final SQL, reward, per-DB pass vector |
 | `runs/grpo_<B,C>/` | `lexsi_provenance.json`, training config and stats |
 

@@ -7,7 +7,7 @@
 +
 +
 +# A WHERE clause only counts as a filter if it mentions a column. "where 1 = 1" or "where 'a' = 'a'" filters
-+# nothing and must not earn the WHERE bonus (see docs/agenttune_sql_reward_issue.md in sqlcf).
++# nothing and must not earn the WHERE bonus.
 +_WHERE_BODY_RE = re.compile(r"\bwhere\b(.*?)(?=\bgroup\s+by\b|\border\s+by\b|\bhaving\b|\blimit\b|\bunion\b|$)", re.DOTALL)
 +_SQL_WORDS = {"and", "or", "not", "is", "null", "in", "like", "glob", "between", "true", "false", "exists", "select",
 +              "case", "when", "then", "else", "end", "cast", "as", "integer", "text", "real", "escape"}

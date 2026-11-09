@@ -47,7 +47,7 @@ Question: *"How many units of grocery products were in orders that received a pa
 ## 3. Lexsi repos and features used
 
 - **AgentTune** (`d4db4c1`): multi-turn GRPO trainer with tool calls, its tool-prompt fallback, render, parser and fold functions (SFT text is built with AgentTune's own constants so SFT matches GRPO rollouts), and `lexsi_provenance.json`. We found and patched one bug: the multi-turn stream dropped chat-template tokens between turns, so the trainer scored tokens in a context vLLM never saw (importance ratio ≈1e-5). Fix: `patches/agenttune-multiturn-ids.patch`.
-- **AgentTune built-in SQL reward:** audited in E0 (H3). It pays a `WHERE 1 = 1` query as much as the real one. We wrote a fix, `patches/agenttune-sql-reward-hardening.patch`, with a repro (`scripts/agenttune_repro.py`) and a regression test (`tests/test_agenttune_reward.py`). An upstream issue is drafted in `docs/agenttune_sql_reward_issue.md` and has not been posted.
+- **AgentTune built-in SQL reward:** audited in E0 (H3). It pays a `WHERE 1 = 1` query as much as the real one. We wrote a fix, `patches/agenttune-sql-reward-hardening.patch`, with a repro (`scripts/agenttune_repro.py`) and a regression test (`tests/test_agenttune_reward.py`). Reported upstream as [Lexsi-Labs/AgentTune#11](https://github.com/Lexsi-Labs/AgentTune/issues/11), with the patch.
 - **AuditKIT** (`9da5838`): agent-eval framing (claims success, verified failure = silent error) and pass^k; statistics reimplemented in `evaluate.py`.
 
 ## 4. Models and licences
@@ -162,7 +162,7 @@ Only about 7% of rollouts (86% × 8%) got a different reward under C than under 
 - Caveat: the test generator catches 54 of 103 base-blind mutants, so test "verified" is *less* strict than the training reward.
 
 ### E5: ROI vs Command A
-Command A (`command-a-03-2025`, trial API) answers each test item once, single-turn, with the schema and column definitions in the prompt and no tools. Tiny Aya runs as the multi-turn agent. Command A cost = billed tokens × list price ($2.50 / $10.00 per 1M input / output). Tiny Aya cost = GPU $/hr × measured generation time ÷ trajectories.
+Command A (`command-a-03-2025`, trial API) answers each test item once, single-turn, with the schema and column definitions in the prompt and no tools. Tiny Aya runs as the multi-turn agent. Command A cost = billed tokens × list price ($2.50 / $10.00 per 1M input / output). We ran on a free trial key, so the real charge was $0; the Cohere dashboard shows 222,578 input and 85,815 output tokens for the run day, within 1% of our logged 220,580 / 85,348, which prices at $4.27 vs our $4.24 per 1k queries. Tiny Aya cost = GPU $/hr × measured generation time ÷ trajectories.
 
 | Model | Verified | Single-DB | $ per 1k queries | Speed |
 |---|---|---|---|---|

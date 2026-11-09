@@ -1,4 +1,6 @@
-# Draft issue for AgentTune (not posted; needs team OK)
+# AgentTune issue (posted Nov 9 as https://github.com/Lexsi-Labs/AgentTune/issues/11, from RishiiGamer2201)
+
+The posted body is self-contained (inline repro against the installed package, patch inlined); this is the original draft.
 
 **Title:** Built-in SQL reward pays a "WHERE 1 = 1, answer yes" policy the same as the correct query
 

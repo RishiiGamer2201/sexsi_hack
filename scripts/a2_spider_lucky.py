@@ -74,7 +74,8 @@ if __name__ == "__main__":
             lucky = ex - ts
             out["systems"][s] = {"EX": ex / n, "TS": ts / n, "lucky": lucky, "EX_pass": ex,
                                  "lucky_share_of_EX_ci95": wilson(lucky, ex),
-                                 "lucky_cases": [{"q": i, "db": gold[i][1], "gold": gold[i][0], "pred": preds[i], "failed_on": r[2]}
+                                 # indices only: ESMp ships no licence, so its SQL text is not redistributed here
+                                 "lucky_cases": [{"q": i, "db": gold[i][1], "failed_on": r[2]}
                                                  for i, r in enumerate(res) if r[0] and not r[1]]}
             v = out["systems"][s]
             print(f"{s:13} EX {v['EX']:.3f}  TS {v['TS']:.3f}  lucky {lucky}/{ex} = "
