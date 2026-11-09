@@ -32,6 +32,14 @@
 
 ### Nov 9
 
+- **Gradio demo: `app.py`** (CPU only; needs `data/test`, 1.2 MB, and `results/traj_*.jsonl`).
+  - Pick a test question and a recorded run, or type your own SQL. It shows the per-DB checks (original plus each counterfactual) and the score each reward function gives.
+  - Questions with a run that the single-DB reward accepts but a counterfactual rejects are listed first: 72 of 331.
+  - Example: on `F1_category_buyers|electronics|2024|S_s501`, `sft #7` filters `o.status` although the question says "any status". It passes the original DB, so R_exec_rex = 1; the `flip_status` counterfactual catches it, so R_cf_mean = 0.75 and R_cf_strict = 0.
+  - Not deployed yet: a Space needs the hackathon HF token (not the CVPR one).
+- **`verify_all.py`:** reruns E0, E1, the AgentTune audit and the E4 scoring, then checks `git diff` on `results/*.json`. It passes; every committed number reproduces exactly (17 s, CPU).
+- **Blocked on user credentials:** E5 ROI needs a Cohere trial key; HF Space and collections need the hackathon HF token.
+
 - **Gate G1 passed: reward form for C frozen as R_cf_mean.** From 240 GRPO-B rollouts (40 groups of 6, first 10 steps), counting groups with non-zero reward variance:
   - R_cf_mean 8/40, R_cf_soft 8/40, R_cf_strict 5/40 (R_exec_rex 8/40). FN on gold is 0 for every form (E0), so the count decides.
   - Mean and soft tie; mean stays, since GRPO-C was already set up for it and it is the simpler form.
