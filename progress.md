@@ -4,9 +4,10 @@
 
 ## Current state (Nov 9)
 
-- **All experiments done** (E0, E1, E2, E3 B + C, E4, E5, manual audit). Training comparison is a null: B 12.7% verified, C 9.0%, SFT 9.4%. `verify_all.py` passes.
+- **All experiments done** (E0, E1, E2, E3 B + C, E4, E5, manual audit, plus zero-GPU E6 Spider, E7 SkyRL, E8 self-consistency, AgentTune patch). Training comparison is a null: B 12.7% verified, C 9.0%, SFT 9.4%.
 - **VM `sqlcf-l4`: TERMINATED**, no job queued. Start with `bash scripts/vm_start.sh` only if a new run is approved.
-- **Write-up:** ARTICLE.md (12 sections, all numbers), ABSTRACT.md, README judge's view.
+- **Write-up:** ARTICLE.md revised per plan §9C (TL;DR leads with the audit, before/after table, hack catalogue, E6–E8, null paragraph, prior art, threats box, pre-registered §10). README judge's view updated. ABSTRACT.md not yet updated with E6–E8.
+- **Report to user:** `reports/Strengthening results Nov 9.md`.
 - **Hugging Face, org `sqlcf-lexsi`, ALL PRIVATE** (user: nothing public until approved):
   - Space `counterfactual-sql-demo`, dataset `counterfactual-sql-data`.
   - Models `tiny-aya-global-sqlcf-sft`, `-grpo-b`, `-grpo-c` (LoRA adapters + LICENSE + NOTICE + card).
@@ -19,11 +20,20 @@
 2. User: confirm Command A price at docs.cohere.com. (Done: AkshAgg and hi-phi-r25i are `sqlcf-lexsi` members, checked via the API on Nov 9.)
 3. User decision on the null: accept and polish (recommended) / second seed (about 7 h VM) / redesigned C.
 4. Publish the HF Article from ARTICLE.md; final submission form.
-5. Zero-GPU strengtheners from plan.md §9A (A2 Spider lucky-pass rates, A3 SkyRL reward audit, A4 gold-free multi-DB voting, A5 AgentTune repro and patch), then the write-up changes in §9C. GPU items in §9B need the user's go.
+5. User: OK to post the AgentTune issue (`docs/agenttune_sql_reward_issue.md`) upstream? Nothing posted yet.
+6. Update ABSTRACT.md with E6–E8 (under 500 words); refresh the dataset upload with the new results files; demo could add the "shaky answer" flag (D5).
+7. GPU items in plan §9B (B2 calibration ~$0.75 is the cheapest useful one) need the user's go.
 
 ## Log
 
 ### Nov 9
+
+- **Plan §9 A2–A5 and C1–C6 done (zero GPU).** Commit has scripts, results and write-up.
+  - **A2 / E6 Spider dev** (`scripts/a2_spider_lucky.py`, `results/a2_spider_lucky.json`): 8 published systems' predictions (ESM+ repo) scored on the original DB vs Zhong et al.'s test-suite DBs. Lucky share of EX passes 8.1% (Graphix) to 14.9% (Claude). A hand check of 40: 27 row-count, 13 value differences; mostly real bugs, some ties or ambiguous gold. Our strict comparator keeps DISTINCT, so absolute EX/TS sit below the official script.
+  - **A3 / E7 SkyRL-SQL** (`scripts/audit_skyrl.py`; comparison transcribed from SkyRL @ d870046, not executed): pays 37.5% of mutants and 53.2% of hacks; with copies 27.2% / 1.9%; with copies + strict 16.8% / 1.9%. Comparator hole = dropped DISTINCT (188/203).
+  - **A4 / E8 self-consistency** (`scripts/a4_selfconsistency.py`): majority vote over 8 samples lifts B 13.9→16.9%, C 6.3→13.6%, SFT 8.5→11.8%; voting on 5 DBs adds nothing over 1 DB (±1 pt). Shaky flag (share < 0.5) recall 53–59%, precision 94–98%, no gain from extra DBs. Reported as a null.
+  - **A5 AgentTune** : `patches/agenttune-sql-reward-hardening.patch` (WHERE must name a column; opt-in `result_match_reward`), `scripts/agenttune_repro.py` (hack 3.10 → 2.20 patched; residual `customer_id > 0` hack 3.10, caught by result match), `tests/test_agenttune_reward.py` (patches a temp copy; vendor untouched). Issue draft in `docs/`, not posted. `load_agenttune_sql` takes a path now. Tests: 9 passed (test_precision.py needs torch, skipped in `.venv`).
+  - `verify_all.py` now also reruns E7 and E8.
 
 - **Deep research done** (4 parallel tracks: literature, training techniques, cheap extensions, framing/judging). Report: `reports/Stronger counterfactual SQL entry.md`; notes in `research_notes/`. Summaries added to research.md §9 (prior art, why the null, real-benchmark routes) and plan.md §9 (A–D action plan).
   - Judging is official: validity check, then double-blind scoring on write-up clarity, practical usefulness, code quality and overall review. Before/after metrics and "meaningfully better for usage" are required. Shortlisted teams get Nov 16–21 and $200 HF credits.

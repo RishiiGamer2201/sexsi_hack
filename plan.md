@@ -349,10 +349,10 @@ Source: [reports/Stronger counterfactual SQL entry.md](reports/Stronger%20counte
 | # | Task | Cost | Status |
 |---|---|---|---|
 | A1 | Replay training rewards: split the disagreement into lucky vs lenient | 10 min | **Done.** Lucky 7.1/7.2%, lenient 0.1/0.3%; C was truly stricter. Still to do: advantage sign flips under mean / min / penalty, with and without std scaling. |
-| A2 | Real-benchmark lucky-pass rates: Spider-dev predictions (ESM+, 9 systems; OmniSQL 7B/14B/32B) scored on the original DB vs Zhong test-suite DBs | 2–3 h CPU | todo |
-| A3 | Audit SkyRL-SQL's reward with our mutants and hacks: single DB, min over copies, and a multiset/ordered comparator ablation | 2 h CPU | todo |
-| A4 | Gold-free multi-DB voting on `results/traj_*.jsonl`. Compare first sample, single-DB majority, result-vector majority, and oracle pass@8. Add a "split cluster" flag for silent errors and report its precision/recall. | 3 h CPU | todo |
-| A5 | AgentTune reward exploit as a minimal repro, patch and regression test, with the AuditKIT tie-in. Offer it upstream; post nothing without the user's OK. | 2 h | todo |
+| A2 | Real-benchmark lucky-pass rates: Spider-dev predictions (ESM+, 9 systems; OmniSQL 7B/14B/32B) scored on the original DB vs Zhong test-suite DBs | 2–3 h CPU | **Done** (8 ESM+ systems; OmniSQL skipped). Lucky share 8.1–14.9%. ARTICLE E6. |
+| A3 | Audit SkyRL-SQL's reward with our mutants and hacks: single DB, min over copies, and a multiset/ordered comparator ablation | 2 h CPU | **Done.** 37.5% → 27.2% → 16.8% mutants. ARTICLE E7. |
+| A4 | Gold-free multi-DB voting on `results/traj_*.jsonl`. Compare first sample, single-DB majority, result-vector majority, and oracle pass@8. Add a "split cluster" flag for silent errors and report its precision/recall. | 3 h CPU | **Done; null** (5-DB vote = 1-DB vote). ARTICLE E8. |
+| A5 | AgentTune reward exploit as a minimal repro, patch and regression test, with the AuditKIT tie-in. Offer it upstream; post nothing without the user's OK. | 2 h | **Done**, issue drafted, not posted. |
 | A6 | Novelty sweep: arXiv check for multi-DB RL rewards after Sep 2026 | 30 min | todo |
 
 ### B. Small GPU, before Nov 14 (under $10 total; needs user go; stop the VM between jobs)
@@ -362,7 +362,7 @@ Source: [reports/Stronger counterfactual SQL entry.md](reports/Stronger%20counte
 | B2 | Calibration: sample SFT 8× on small-slice (~50-customer) train items. Measure the lucky share of passes and the mixed-group fraction, and build a prefiltered (1–7 of 8 pass) item list. | ~$0.75, ~1 h | Feeds D1 |
 | B3 | One C-min or C-penalty run on the B2 curriculum | ~$2.5 | Optional |
 
-### C. Write-up changes (before Nov 14)
+### C. Write-up changes (before Nov 14) — **all 6 done in ARTICLE.md (Nov 9)**; ABSTRACT.md still to update
 1. TL;DR leads with the audit: 54.1%→1.9% hacks, 29.5%→16.8% mutants, 0/2847 false rejects, the AgentTune exploit, and A2/A3 numbers when done. Say "H4/H5 not supported" in the TL;DR.
 2. Before→after table: base 0.9 → SFT 9.4 → B 12.7 (C 9.0) with CIs, silent error, lucky-pass rate. ROI per *verified-correct* answer: about $5.25 vs $0.47 per 1k, ~11× (not 70× per query).
 3. Null paragraph: C was strictly stricter (the A1 replay); the training prompts were too easy (86% pass on the original DB). Give the exact CI with the seed caveat. Cite DualSQL's +0.4 / +3.0 as the parallel. Call the result neither noise nor "C hurts".

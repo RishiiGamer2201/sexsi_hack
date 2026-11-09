@@ -17,3 +17,4 @@ results/_selfcheck_*
 # Windows download metadata / chat screenshots
 *:Zone.Identifier
 *.jpeg
+external/

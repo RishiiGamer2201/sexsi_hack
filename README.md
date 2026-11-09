@@ -12,7 +12,9 @@ A text-to-SQL agent is usually rewarded for matching the gold answer on **one** 
 | Same mutants paid by the counterfactual reward (CFs chosen blind to the mutants) | 16.8% [15.2, 18.6]: a 43% cut; pre-registered target 50%, not met |
 | Reward hacks (literal smuggling, hard-coded IDs, ...) paid: single-DB → counterfactual | 54.1% → 1.9% |
 | Correct queries rejected by the counterfactual reward | 0 / 2847 |
-| AgentTune's built-in SQL reward: padded WHERE + always "yes" | +2.45 vs +3.10 for honest SQL |
+| AgentTune's built-in SQL reward: `WHERE 1 = 1` + always "yes" | 3.10, same as honest SQL on yes-questions; 2.20 with our patch |
+| SkyRL-SQL's reward (set compare, one DB): mutants / hacks paid | 37.5% / 53.2%; with copies + strict compare 16.8% / 1.9% |
+| Spider dev, 8 published systems: share of correct-looking answers that fail a test-suite DB | 8.1% – 14.9% |
 | Test verified accuracy (Tiny Aya 3.35B): base / SFT / GRPO-B single-DB reward / GRPO-C counterfactual reward | 0.9% / 9.4% / **12.7%** / 9.0% |
 | GRPO-C vs GRPO-B (pre-registered H4) | **null**: C is not better (−3.7 pts verified, p < 0.001; silent error p = 0.61) |
 | Why: rollouts on which B's and C's rewards differed during training | about 7% |
@@ -63,6 +65,12 @@ for m in sft grpo_B grpo_C; do .venv-train/bin/python evaluate.py gen --model ru
 source .secrets.env && .venv/bin/python scripts/e5_command_a.py            # E5: Command A on the test set (CO_API_KEY)
 .venv/bin/python scripts/e5_roi.py                                         # E5 ROI table
 .venv/bin/python scripts/audit_sample.py && .venv/bin/python scripts/audit_labels.py  # manual audit
+.venv/bin/python scripts/audit_skyrl.py                                    # E7: SkyRL-SQL reward audit
+.venv/bin/python scripts/a4_selfconsistency.py                             # E8: gold-free voting + shaky-answer flag
+.venv/bin/python scripts/agenttune_repro.py                                # AgentTune reward exploit: before / after patch
+# E6 needs external/testsuite_db/database (Zhong et al. test-suite DBs, Google Drive 1mkCx2GOFIqNesD4y8TDAO1yX1QZORP5w)
+# and external/ESMp (git clone https://github.com/bossben/ESMp, checkout 91dd85b)
+.venv/bin/python scripts/a2_spider_lucky.py                                # E6: Spider-dev lucky passes
 .venv/bin/python verify_all.py                                             # re-derive every results/*.json
 source .secrets.env && .venv/bin/python scripts/push_models.py             # adapters + licence + collection (private; --public --gated later)
 ```

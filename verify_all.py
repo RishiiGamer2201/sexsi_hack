@@ -1,6 +1,6 @@
 """Regenerate every committed number from stored data and runs, then check nothing changed.
 
-CPU only. Reruns E0, E1 and the AgentTune audit, and rescores E4 from the stored trajectories
+CPU only. Reruns E0, E1, the AgentTune and SkyRL audits, rescores E4 and E8 from the stored trajectories
 (results/traj_*.jsonl); then `git diff` on results/*.json must be empty. Exit 1 on any drift.
 
   .venv-train/bin/python verify_all.py
@@ -18,7 +18,9 @@ STEPS = [
     [PY, "-m", "sqlcf.audit", "e1"],
     [PY, "-m", "sqlcf.audit", "agenttune"],
     [PY, "evaluate.py", "score", "--traj", *TRAJ],
-]
+    [PY, "scripts/audit_skyrl.py"],
+    [PY, "scripts/a4_selfconsistency.py"],
+]  # scripts/a2_spider_lucky.py is left out: it needs the external Spider test-suite DBs
 
 for cmd in STEPS:
     print("==", " ".join(cmd[1:4]), flush=True)

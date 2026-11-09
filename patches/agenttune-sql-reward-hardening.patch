@@ -1,0 +1,67 @@
+--- a/src/agenttune/agentic/rewards/builtin_rewards/sql.py
++++ b/src/agenttune/agentic/rewards/builtin_rewards/sql.py
+@@ -20,6 +20,22 @@
+     Harmony analysis) so only the answer itself is scored. Text without them is
+     returned unchanged."""
+     return _OPEN_THINK_RE.sub("", _THINK_BLOCK_RE.sub("", text))
++
++
++# A WHERE clause only counts as a filter if it mentions a column. "where 1 = 1" or "where 'a' = 'a'" filters
++# nothing and must not earn the WHERE bonus (see docs/agenttune_sql_reward_issue.md in sqlcf).
++_WHERE_BODY_RE = re.compile(r"\bwhere\b(.*?)(?=\bgroup\s+by\b|\border\s+by\b|\bhaving\b|\blimit\b|\bunion\b|$)", re.DOTALL)
++_SQL_WORDS = {"and", "or", "not", "is", "null", "in", "like", "glob", "between", "true", "false", "exists", "select",
++              "case", "when", "then", "else", "end", "cast", "as", "integer", "text", "real", "escape"}
++
++
++def _has_real_where(sql: str) -> bool:
++    """True if the query has a WHERE clause that references at least one identifier (column)."""
++    m = _WHERE_BODY_RE.search(sql.lower())
++    if not m:
++        return False
++    body = re.sub(r"'(?:[^']|'')*'", " ", m.group(1))
++    return any(w not in _SQL_WORDS for w in re.findall(r"[a-z_][a-z0-9_.]*", body))
+ 
+ 
+ # ── Individual reward functions ───────────────────────────────────────────────
+@@ -103,9 +119,9 @@
+             if "limit 1" in q:
+                 reward -= 1.0
+                 reasons.append(f"query {q!r} uses 'limit 1' -> -1.0")
+-            if " where " not in q:
++            if not _has_real_where(q):
+                 reward -= 0.5
+-                reasons.append(f"query {q!r} has no WHERE clause -> -0.5")
++                reasons.append(f"query {q!r} has no WHERE clause that references a column -> -0.5")
+             else:
+                 where_count += 1
+         if where_count:
+@@ -268,4 +284,29 @@
+     return scores
+ 
+ 
++def result_match_reward(completions, gold_rows=None, **kwargs):
++    """Compare the rows of the last successful tool result with the gold query's rows (order-blind multiset).
++
++    Pass ``gold_rows`` (one list of rows per completion) from the dataset. Unlike ``query_reward``'s
++    has_hits check, a query that returns *some* rows only scores when it returns the *right* rows."""
++    rewards = []
++    for i, completion in enumerate(completions):
++        gold = (gold_rows or [None] * len(completions))[i]
++        last = None
++        for turn in completion if isinstance(completion, list) else []:
++            if turn.get("role") == "tool" and isinstance(turn.get("content"), list):
++                last = turn["content"]
++        if gold is None:
++            score, reason = 0.0, "no gold_rows given -> 0.0"
++        elif last is None:
++            score, reason = -1.0, "no tool result rows -> -1.0"
++        else:
++            same = sorted(map(repr, map(tuple, last))) == sorted(map(repr, map(tuple, gold)))
++            score = 2.0 if same else -1.0
++            reason = f"last result rows {'match' if same else 'differ from'} gold rows -> {score}"
++        log_score("sql.result_match_reward", score, reasons=[reason], meta={"index": i})
++        rewards.append(score)
++    return rewards
++
++
+ # ── Registry — add new functions here, nothing else needs to change ───────────

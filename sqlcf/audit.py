@@ -173,8 +173,8 @@ def e1(seeds: list[int], sizes="SML"):
 
 
 # ---------------- AgentTune built-in SQL reward (H3) ----------------
-def load_agenttune_sql():
-    """Import AgentTune's builtin SQL rewards without installing AgentTune (stub its two imports)."""
+def load_agenttune_sql(path=AGENTTUNE_SQL):
+    """Import AgentTune's builtin SQL rewards (or a patched copy at `path`) without installing AgentTune."""
     import re
     stubs = {"agenttune": None, "agenttune.agentic": None, "agenttune.agentic.rollout_engines": None,
              "agenttune.agentic.rollout_engines.tool_call_parse": {"_THINK_BLOCK_RE": re.compile(r"<think>.*?</think>", re.S)},
@@ -183,7 +183,7 @@ def load_agenttune_sql():
         mod = sys.modules.setdefault(name, types.ModuleType(name))
         for k, v in (attrs or {}).items():
             setattr(mod, k, v)
-    spec = importlib.util.spec_from_file_location("agenttune_sql_rewards", AGENTTUNE_SQL)
+    spec = importlib.util.spec_from_file_location(f"agenttune_sql_rewards_{abs(hash(str(path)))}", path)
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
     return mod

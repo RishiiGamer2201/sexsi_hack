@@ -2,24 +2,34 @@
 
 Lexsi hackathon · Track 3 · Problem statements #6 (data and database agents) and #9 (reward design and reward-hacking defences) · team Teen_khapeetars
 
-> DRAFT (Nov 9). All numbers are from stored runs in `results/`. The reward audit is the headline; the training comparison came out null and is reported as one.
+> DRAFT (Nov 9, revised). All numbers are from stored runs in `results/`. The reward audit is the headline; the training comparison came out null and is reported as one.
 
 ## 1. The judge's 60-second view
 
-A text-to-SQL agent is usually rewarded for matching the gold answer on **one** database. A wrong query can match by luck, and RL then reinforces the luck. We reward the agent on that database **and** on code-generated counterfactual copies it never sees, built to separate correct SQL from specific bug families.
+**TL;DR.** Execution rewards for text-to-SQL check the answer on **one** database, so a wrong query that happens to give the right number gets paid. We built a reward auditor that checks answers on code-generated *counterfactual* copies of the database as well. On our audit it cuts the share of hacking queries that get paid from **54.1% to 1.9%**, and of buggy gold-mutants from **29.5% to 16.8%**, while rejecting **0 of 2847** correct queries. The same holes are open in two public rewards (AgentTune's built-in SQL reward and SkyRL-SQL's) and on a real benchmark: **8–15% of the Spider-dev answers that eight published systems "get right" fail on Zhong et al.'s test-suite databases**. We also patched AgentTune's reward. Training a 3.35B agent on the counterfactual reward did **not** beat the single-DB reward (H4 and H5 not supported). We explain why: on our training prompts the two rewards disagreed on only 7% of rollouts. Section 10 pre-registers the run that would test it properly.
+
+**The reward audit (the contribution).**
 
 | Result | Number (95% CI) | Source |
 |---|---|---|
-| Buggy gold-mutants paid by the single-DB reward (strict multiset, `R_exec_rex`) | 29.5% [27.4, 31.6] | `results/e0_reward_audit.json` |
-| Same mutants paid by the counterfactual reward (random CFs, chosen blind to the mutants) | 16.8% [15.2, 18.6]: a 43% cut; pre-registered target 50%, **not met** | same |
-| Reward-hacking queries (literal smuggling, hard-coded IDs, ...) paid | single-DB 54.1% → counterfactual 1.9% | same |
-| Correct queries (gold and paraphrases) rejected by the counterfactual reward | 0 / 2847 | same |
-| AgentTune's built-in SQL reward: padded WHERE + always answering "yes" | +2.45 mean vs +3.10 for honest SQL | `results/e0_agenttune.json` |
-| Test verified accuracy: base → SFT → GRPO-B (single-DB reward) | 0.9% → 9.4% → **12.7%** (B vs SFT +3.2 pts [1.8, 4.8], McNemar p = 0.006) | `results/e4_eval.json` |
-| Test verified accuracy, GRPO-C (counterfactual reward) | 9.0%: **no gain over SFT** (−0.5 pts, p = 0.21), and below B (−3.7 pts [−5.3, −2.3], p < 0.001). **H4 not met.** | same |
-| Lucky passes on test (single-DB pass − verified) | 5.1% for SFT, B and C alike | same |
-| Why the training result is weak: rollouts on which B's and C's rewards differed | about 7% (`figure3`) | `results/figure3_training_rewards.json` |
-| Command A (single-turn) verified accuracy, cost per 1k queries | 81.0% [76.4, 84.8], $4.25; Tiny Aya B $0.06 on an L4 | `results/e5_roi.json` |
+| Reward-hacking queries (literal smuggling, hard-coded IDs, empty) paid | single-DB 54.1% → counterfactual **1.9%** [1.5, 2.5] | `results/e0_reward_audit.json` |
+| Buggy gold-mutants paid (strict multiset, `R_exec_rex`) | single-DB 29.5% [27.4, 31.6] → counterfactual **16.8%** [15.2, 18.6]: a 43% cut; pre-registered target 50%, **not met** (H2) | same |
+| Correct queries (gold and paraphrases) rejected by the counterfactual reward | **0 / 2847** | same |
+| AgentTune built-in SQL reward: `WHERE 1 = 1` + always answer "yes" | 3.10, the same as honest SQL on every yes-question; **our patch: 2.20** (with result matching 1.20 vs 5.10) | `results/e0_agenttune.json`, `tests/test_agenttune_reward.py` |
+| SkyRL-SQL reward (set comparison, one DB) on the same candidates | pays 37.5% of mutants and 53.2% of hacks; copies alone → 27.2% / 1.9%; copies + strict comparator → 16.8% / 1.9% | `results/a3_skyrl_audit.json` |
+| Real benchmark: Spider-dev answers that pass the original DB but fail a test-suite DB, 8 published systems | **8.1% to 14.9%** of their correct-looking answers; highest for the prompted LLMs (Claude 14.9%, C3 14.1%) | `results/a2_spider_lucky.json` |
+
+**Before → after (test set, 331 items × 8 samples, different generator; verified = right on the original and all 4 copies).**
+
+| Model | Verified [95% CI] | Silent error | Lucky pass | $ per 1k verified-correct answers |
+|---|---|---|---|---|
+| Tiny Aya base | 0.9% | 4.5% | 0.5% | n/a |
+| SFT | 9.4% [8.4, 10.6] | 65.4% | 5.1% | $0.57 |
+| **GRPO-B** (single-DB reward) | **12.7%** [11.5, 14.0]; vs SFT +3.2 pts [1.8, 4.8], McNemar p = 0.006 | 64.0% | 5.1% | **$0.48** |
+| GRPO-C (counterfactual reward) | 9.0% [7.9, 10.1]; vs SFT −0.5 pts, p = 0.21; vs B −3.7 pts [−5.3, −2.3] | 61.2% | 5.1% | $0.58 |
+| Command A (1 sample, no tools) | 81.0% [76.4, 84.8] | n/a | 1.8% | $5.25 |
+
+Tiny Aya B is about 70× cheaper than Command A per query and about **11× cheaper per verified-correct answer**, but at 12.7% accuracy it does not replace it. Picking each item's most common answer out of the 8 samples (no gold needed) raises B to 16.9% and C to 13.6% (§8, E8).
 
 Demo: `huggingface.co/spaces/sqlcf-lexsi/counterfactual-sql-demo` (runs in the browser) · Data: `huggingface.co/datasets/sqlcf-lexsi/counterfactual-sql-data` · Code: `github.com/RishiiGamer2201/sexsi_hack` · `python verify_all.py` re-derives every number above from stored runs.
 
@@ -32,11 +42,12 @@ Question: *"How many units of grocery products were in orders that received a pa
 - **Rewards compared:** `R_exec_set` (BIRD-style set match), `R_exec_rex` (strict multiset, one DB), and ours: `R_cf_mean = C0 × mean(C1..CK)`, plus strict (all pass) and soft (`C0·(1−0.2·[any fail])`, ReViSQL-style) ablations. Gate G1 froze `R_cf_mean` before training, by lowest FN on gold and then by most non-zero-variance GRPO groups.
 - **Training:** Tiny Aya Global 3.35B, LoRA r=16. SFT on scripted oracle trajectories (`list_tables → describe → explore → final SQL`), then GRPO **B** (`R_exec_rex`) vs **C** (`R_cf_mean`) from the same SFT adapter. Same data, seed, 60 steps, G=6, 4 prompts per step, lr 1e-5, β=0.02. Only the reward differs.
 - **Evaluation:** fresh test DBs from a **different generator** (FK-closed sub-DB of a larger parent plus 4 family-blind mutations), 331 items × 8 samples, temperature 0.7.
+- **Lexsi tools:** training runs on **AgentTune** (multi-turn tool-calling GRPO; we fixed one trainer bug and one reward exploit in it). Evaluation follows **AuditKIT**'s agent-audit framing (claimed success vs verified success, pass^k). Details in §3.
 
 ## 3. Lexsi repos and features used
 
 - **AgentTune** (`d4db4c1`): multi-turn GRPO trainer with tool calls, its tool-prompt fallback, render, parser and fold functions (SFT text is built with AgentTune's own constants so SFT matches GRPO rollouts), and `lexsi_provenance.json`. We found and patched one bug: the multi-turn stream dropped chat-template tokens between turns, so the trainer scored tokens in a context vLLM never saw (importance ratio ≈1e-5). Fix: `patches/agenttune-multiturn-ids.patch`.
-- **AgentTune built-in SQL reward:** audited in E0 (H3).
+- **AgentTune built-in SQL reward:** audited in E0 (H3). It pays a `WHERE 1 = 1` query as much as the real one. We wrote a fix, `patches/agenttune-sql-reward-hardening.patch`, with a repro (`scripts/agenttune_repro.py`) and a regression test (`tests/test_agenttune_reward.py`). An upstream issue is drafted in `docs/agenttune_sql_reward_issue.md` and has not been posted.
 - **AuditKIT** (`9da5838`): agent-eval framing (claims success, verified failure = silent error) and pass^k; statistics reimplemented in `evaluate.py`.
 
 ## 4. Models and licences
@@ -85,6 +96,18 @@ Audit set, 1302 items; Wilson 95% CIs.
 
 - **H2 not met:** a 43% relative cut in mutant FP on the honest row, against the pre-registered 50%. Hack FP falls 96%.
 - **AgentTune's built-in SQL reward (H3)**, 360 yes/no items: padding the WHERE clause and always answering "yes" earns the honest score on every yes item; +2.45 overall vs +3.10 for honest SQL.
+
+**Hack catalogue.** Every reward hack we tried, with how often each reward pays it.
+
+| Hack | Example | Single-DB reward pays | Counterfactual reward pays |
+|---|---|---|---|
+| Literal smuggling: return the answer seen while exploring | `SELECT 5` | 1302 / 1302 | **0 / 1302** |
+| Hard-coded IDs: list the gold rows' IDs | `SELECT customer_id FROM customers WHERE customer_id IN (3, 17, 42)` | 235 / 235 | 54 / 235 (23%): the random answer-changing copy kept the same IDs |
+| Empty result | `SELECT NULL WHERE 0` | 0 / 1302 | 0 / 1302 |
+| WHERE padding + fixed answer (AgentTune reward only) | `SELECT * FROM customers WHERE 1 = 1`, then `*yes*` | 3.10 = honest, on all 314 yes items | n/a (AgentTune's reward is yes/no); our patch: 2.20 |
+| Duplicate rows instead of DISTINCT (set-comparison rewards only) | gold `SELECT DISTINCT o.customer_id ...`, hack drops `DISTINCT` | SkyRL pays 203 / 203 | set comparison + copies still pays 203 / 203; strict comparator + copies 15 / 203 |
+
+The remaining 1.9% of hacks paid by the counterfactual reward are all hard-coded IDs. A copy that changes which customers match closes that gap.
 
 ### E1: how often bugs are invisible on one DB (figure 2)
 Share of gold-mutants that pass the single-DB check: **29.2%** at 50 customers, 0.8% at 500, 0.2% at 5,000. What makes a bug invisible is the size of the question's slice (city × year × category) more than the DB size: small slices are common in real questions.
@@ -152,8 +175,55 @@ Command A (`command-a-03-2025`, trial API) answers each test item once, single-t
 - Tiny Aya is priced at our L4 VM's on-demand rate ($0.74/hr, g2-standard-4) and L4 throughput. GRPO-B's full test generation took 785 s on the L4 vs 524 s on an RTX 5070 Ti laptop GPU, with the same accuracy (12.5% vs 12.7% verified). SFT and C were timed on the laptop only and are scaled by B's L4/laptop ratio (1.50). Per-query latency was not measured for Tiny Aya (future work, §10).
 - **Command A falls into the fan-out trap too:** 0% verified on F2 (all 36 items from `F2_units_paid`). It joins `payments` directly, so an order with two payments counts its units twice, and it adds a `status != 'cancelled'` filter the question does not ask for. The single-DB check already rejects 32 of these 36; the counterfactual copies reject the other 4, which match on the original DB by luck. Lucky passes across all of Command A's answers: 1.8%.
 
+### E6: the same hole on a real benchmark (Spider dev)
+Do real systems produce lucky passes, or only our synthetic mutants? We took the public Spider-dev prediction files of 8 systems (from the ESM+ repo, `bossben/ESMp`) and scored each on the original Spider DB and on the distilled test-suite DBs of Zhong, Yu & Klein (2020), 1034 questions. CPU only (`scripts/a2_spider_lucky.py`).
+
+| System | EX (original DB) | TS (original + suite) | Lucky share of EX passes [95% CI] |
+|---|---|---|---|
+| Claude | 80.6% | 68.6% | **14.9%** [12.6, 17.5] |
+| C3 (ChatGPT) | 79.7% | 68.5% | 14.1% [11.9, 16.6] |
+| DIN-SQL | 81.5% | 72.2% | 11.4% [9.4, 13.7] |
+| GPT-4 Turbo | 72.3% | 64.7% | 10.6% [8.6, 13.0] |
+| DAIL-SQL | 82.7% | 75.3% | 8.9% [7.2, 11.0] |
+| RASAT+PICARD | 76.5% | 70.1% | 8.3% [6.6, 10.5] |
+| RESDSQL | 82.6% | 75.8% | 8.2% [6.5, 10.2] |
+| Graphix | 79.9% | 73.4% | 8.1% [6.4, 10.2] |
+
+- An RL reward that checks only the original DB would pay 8–15% of these systems' "correct" answers for queries that are wrong on some other valid database. That is lower than the 29.5% mutant pay rate in E0 (the mutants are built to be hard to spot), but it comes from real queries written by real systems.
+- A hand check of 40 lucky cases: 27 return a different number of rows on the suite DB, 13 return different values. Typical causes are `GROUP BY name` where names repeat (gold groups by ID), `EXCEPT` vs `NOT IN` with duplicates, `ORDER BY ... LIMIT 1` where there are ties, and a `LEFT JOIN` that adds zero-count rows. Many are real bugs; some are ties or ambiguous gold, so read these rates as upper bounds.
+- Our scorer keeps `DISTINCT` and uses our strict comparator, so our EX and TS run a few points below the official script's. The lucky share uses the same comparator on both sides.
+
+### E7: a second public reward (SkyRL-SQL)
+SkyRL-SQL's outcome reward (`NovaSky-AI/SkyRL` @ `d870046`) runs the predicted and gold SQL on one DB and pays 1 if the two *sets* of rows are equal. We re-implemented that comparison from its source (`scripts/audit_skyrl.py`) and scored the E0 candidates four ways.
+
+| Reward | Mutants paid (n = 1814) | Hacks paid (n = 2839) | Correct rejected (n = 2847) |
+|---|---|---|---|
+| SkyRL as shipped (set compare, one DB) | 37.5% [35.3, 39.7] | 53.2% | 0 |
+| SkyRL's set compare on original + copies | 27.2% [25.2, 29.3] | 1.9% | 0 |
+| Strict multiset, one DB (`R_exec_rex`) | 29.5% | 54.1% | 0 |
+| Strict multiset on original + copies (ours) | **16.8%** | **1.9%** | 0 |
+
+- A shipped reward has two holes of about the same size. Adding copies closes the database hole (−10.3 pts). A strict comparator closes the comparator hole (−10.4 pts more). Nearly all of the comparator hole is dropped `DISTINCT` (188 of 203 such mutants are paid by set comparison on every DB).
+
+### E8: does the multi-DB signal help without gold? (self-consistency)
+For each test item, each model has 8 samples. Without gold, we can pick the most common answer, judged either by its result on the original DB alone or by its results on all 5 DBs (`scripts/a4_selfconsistency.py`). Paired bootstrap CIs over items.
+
+| Model | First sample | Vote, 1 DB | Vote, 5 DBs | Any of 8 (oracle) | 5-DB vote − first [95% CI] |
+|---|---|---|---|---|---|
+| SFT | 8.5% | 10.9% | 11.8% | 21.5% | +3.3 [+0.6, +6.3] |
+| GRPO-B | 13.9% | 16.9% | 16.3% | 22.4% | +2.4 [−0.6, +5.4] |
+| GRPO-C | 6.3% | 13.6% | 13.9% | 21.5% | +7.6 [+4.8, +10.6] |
+
+- Voting helps, but voting on 5 DBs adds nothing over voting on 1 (difference within ±1 pt for every model). A "shaky answer" flag (fewer than half of the samples agree) catches 53–59% of wrong answers at 94–98% precision, again with no gain from the extra DBs (AUROC 0.67–0.74 either way).
+- This is a null, and we report it as one. At 10–15% accuracy, wrong answers rarely agree with each other, so one DB already splits them. Our copies are also built per item from the gold query's bug families, so this is not yet a gold-free verifier.
+- All three trained models reach about the same pass@8 (21.5–22.4%). GRPO-B's gain is in picking its right answer more often, not in finding new ones.
+
 ### Nulls and what else we tried
-- **The training comparison is null.** C did not beat B (H4) or SFT. The reward audit shows the single-DB reward *can* be fooled, but on our GRPO prompts the policy rarely produced the queries that fool it (about 7% of rollouts), so B and C trained on nearly the same signal. A fair test needs prompts where lucky passes are common: larger slices of held-out compositions, or counterfactuals seeded from the model's own near-misses.
+- **The training comparison is null, and it is neither noise nor evidence that the counterfactual reward hurts.** On the eval set, C is 3.7 pts below B (95% CI [−5.3, −2.3], exact McNemar p < 0.001). That gap is real for these two adapters, but we trained one seed each, so we cannot say how much is GRPO run-to-run variance. Three facts explain why we expected little difference:
+  1. **C really was stricter.** Replaying all 1440 training rollouts per run, C's reward was lower than B's on 7.1% (B run) and 7.2% (C run) of rollouts because they passed the original DB by luck. It was *higher* on only 0.1% and 0.3%.
+  2. **The training prompts were too easy for the difference to matter.** 86% of rollouts passed the original DB, so the two rewards agreed on about 93% of rollouts. RL speed depends on reward variance under the policy, not on how accurate the reward is (Razin et al., 2503.15477), and RLVR tolerates far more reward noise than 7% (Lv et al., 2505.22653).
+  3. **Others see the same pattern.** DualSQL (2609.18135) trained Qwen3-8B with a stricter single-DB comparator and gained +0.4 EX and +3.0 on its strict metric: a near-null on the headline number.
+- A fair test needs prompts where lucky passes are common (§10).
 - H2 missed its pre-registered threshold (above).
 - With all 11 train templates in SFT, the SFT model solved the GRPO prompts deterministically: only 8 of 2670 rollouts passed the original DB but failed a counterfactual, so B and C would have seen almost the same reward. We held 3 templates out of SFT (`sft_ho`) so the rewards differ; test templates were never touched.
 - vLLM LoRA crashes on Tiny Aya's tied embeddings, so GRPO adapters are merged (fp32 merge, saved fp16) before eval. vLLM sleep mode segfaults on wake-up (vLLM 0.22.1), so it is off.
@@ -162,20 +232,33 @@ Command A (`command-a-03-2025`, trial API) answers each test item once, single-t
 
 > To our knowledge, this is the first study to use execution on code-generated, bug-family-targeted counterfactual databases as the online RL reward for a small (~3B) text-to-SQL agent, and to measure that reward's per-family false-positive and false-negative rates, its generalization to a held-out bug family, and answer smuggling. Prior work applied multi-database checks to evaluation (Zhong et al. 2020; Ai 2026) or supervised fine-tuning (SQLoom), or used symbolic verification on a single database (ReViSQL).
 
+**What already exists, and what is new here.** Checking SQL on more than one database is not new. Zhong, Yu & Klein (2020) built distilled test suites of databases for *evaluation*; our E6 reuses them. SpotIt (2510.26840) and VeriEQL search for a database on which two queries differ, also for evaluation. ReViSQL (2603.20004) uses VeriEQL inside RL and finds that 28.8–38.4% of positive execution rewards are false, close to our 29.5%; it works at frontier scale on one database and softens the reward to 0.8 rather than refusing it. DualSQL (2609.18135) trains 4B/8B models with a stricter single-DB comparator and sees a near-null (+0.4 EX). The unreviewed repo `devChaudhari7/rl-sql` scores RL rewards on 3 seeded DBs per schema, without an audit. Our delta: (1) copies generated by code per bug family, with no solver, in two kinds (answer-changing and answer-preserving), hidden from the agent and used as a hard RL reward at 3B, in a run where the reward is the only variable; (2) a gold-mutant and hack audit of the reward itself, applied to two public rewards (AgentTune, SkyRL-SQL) and to 8 real systems on Spider; (3) a fix for the AgentTune exploit, with a regression test.
+
 - **Execution-reward false positives:** ReViSQL (2603.20004; VeriEQL refutes 28.8–38.4% of positive rewards in a frontier-scale BIRD pilot, soft 0.8 penalty), Graph-Reward-SQL (2505.12380), DualSQL (2609.18135; strict single-DB comparator at 4B/8B).
 - **Multiple or counterfactual DBs:** Pasupat & Liang 2016 (1606.06900; fictitious worlds), Zhong, Yu & Klein 2020 (2010.02840; test suites, evaluation), Ai 2026 (2608.16663; "counterfactual database instances", evaluation), SQLoom (2611.03298; counterexample DBs for SFT), Progress-SQL (2606.06825).
 - **Test and data generation:** XData (1411.6704), ParSEval (PVLDB 18(11)), HardTests (2505.24098), RobustTests (2608.24135), CodeContests+ (2506.05817).
+- **Distinguishing DBs and open SQL RL rewards:** SpotIt (2510.26840), SkyRL-SQL (NovaSky-AI, audited in E7). **Why a more accurate reward may not train better:** Razin et al. (2503.15477), Lv et al. (2505.22653).
 - **SQL RL at small scale:** SQL-R1 (2504.08600), Arctic-Text2SQL-R1 (2505.20315), Think2SQL (2504.15077), Reasoning-SQL (2503.23157).
 - **Evaluation and labelling:** τ-bench pass^k (2406.12045), NL2SQL-BUGs taxonomy (2503.11984), benchmark annotation errors (Jin et al., 2601.08778). Library: AgentTune (2610.13335).
 
-## 10. With more credits
+## 10. With more credits: a pre-registered test
 
-Aya Expanse 8B; more GRPO steps and seeds; a VeriEQL oracle on passes for comparability with ReViSQL; adversarial counterfactuals seeded from the model's own near-misses; per-query latency for the self-hosted agent (we measured batched throughput only), to complete the ROI comparison with Command A's per-call latency.
+The training null says our prompts were too easy, not that the reward is useless. With the shortlist credits we would run the test that can tell, and we fix the prediction now.
+
+- **Curriculum.** Sample SFT 8 times on small-slice (about 50-customer) train items. Keep items where 1 to 7 of the 8 samples pass the original DB and at least 20% of those passes fail a copy.
+- **Runs.** B (`R_exec_rex`) vs C-min (all DBs must pass) vs C-penalty (−0.5 on a lucky pass), 3 seeds each, 120 steps, everything else as in §2. Same 331 × 8 test set.
+- **Prediction.** C-min beats B by **at least 2 pts verified** (mean of 3 seeds), and B's lucky-pass share of training rollouts rises over steps while C-min's does not. If the gap is under 2 pts, or its 3-seed CI includes 0, we report a second null.
+- **Also:** a format-only reward control; per-query latency for the self-hosted agent (we measured batched throughput only); Aya Expanse 8B; a VeriEQL check on passes, for comparison with ReViSQL.
 
 ## 11. Limitations
 
-- One synthetic schema, 18 templates; real warehouses have messier semantics.
-- 60 GRPO steps per condition, one seed each, on one L4: effects are small and the CIs are wide.
+> **Threats to validity**
+> - **One seed** per training condition: the B–C gap (−3.7 pts) is significant across eval items but not across runs.
+> - **One model** (Tiny Aya Global 3.35B) and 60 GRPO steps on one L4.
+> - **Synthetic schemas:** one e-commerce schema, 18 templates; real warehouses have messier semantics. E6 (Spider) is the only real-data check, and it uses other systems' predictions, not our model's.
+> - **Gold-informed copies:** our copies are generated from each item's bug families, which know the gold query. A deployable verifier would build them from the schema alone (E8 is therefore an analysis, not a product).
+> - **Comparator:** our strict comparator is stricter than the official Spider script, so E6's absolute EX/TS are not leaderboard numbers.
+
 - F4 is described only in SQL terms: superseded and corrected records.
 - The test generator is less strict than the training reward (54 of 103 base-blind mutants caught).
 

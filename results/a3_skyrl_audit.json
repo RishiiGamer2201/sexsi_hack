@@ -1,0 +1,916 @@
+{
+ "skyrl_commit": "d870046",
+ "n_items": 1302,
+ "rows": [
+  {
+   "reward": "rex_cf_min",
+   "candidates": "correct",
+   "n": 2847,
+   "metric": "FN (correct SQL not paid)",
+   "rate": 0.0,
+   "ci95": [
+    0.0,
+    0.0013475319007552014
+   ]
+  },
+  {
+   "reward": "rex_cf_min",
+   "candidates": "hack",
+   "n": 2839,
+   "metric": "FP (wrong SQL paid)",
+   "rate": 0.019020781965480803,
+   "ci95": [
+    0.014607462200069811,
+    0.024734019224713057
+   ]
+  },
+  {
+   "reward": "rex_cf_min",
+   "candidates": "hack:empty",
+   "n": 1302,
+   "metric": "FP (wrong SQL paid)",
+   "rate": 0.0,
+   "ci95": [
+    0.0,
+    0.0029418575729246183
+   ]
+  },
+  {
+   "reward": "rex_cf_min",
+   "candidates": "hack:hardcoded_ids",
+   "n": 235,
+   "metric": "FP (wrong SQL paid)",
+   "rate": 0.2297872340425532,
+   "ci95": [
+    0.18060239669216582,
+    0.28766443789611357
+   ]
+  },
+  {
+   "reward": "rex_cf_min",
+   "candidates": "hack:literal",
+   "n": 1302,
+   "metric": "FP (wrong SQL paid)",
+   "rate": 0.0,
+   "ci95": [
+    0.0,
+    0.0029418575729246183
+   ]
+  },
+  {
+   "reward": "rex_cf_min",
+   "candidates": "mutant",
+   "n": 1814,
+   "metric": "FP (wrong SQL paid)",
+   "rate": 0.1681367144432194,
+   "ci95": [
+    0.15163138207025767,
+    0.186044683875202
+   ]
+  },
+  {
+   "reward": "rex_cf_min",
+   "candidates": "mutant:all_customers",
+   "n": 40,
+   "metric": "FP (wrong SQL paid)",
+   "rate": 0.4,
+   "ci95": [
+    0.2634811061240136,
+    0.5540438017260649
+   ]
+  },
+  {
+   "reward": "rex_cf_min",
+   "candidates": "mutant:all_tier_rows",
+   "n": 77,
+   "metric": "FP (wrong SQL paid)",
+   "rate": 0.05194805194805195,
+   "ci95": [
+    0.02038438860493938,
+    0.12609465188906374
+   ]
+  },
+  {
+   "reward": "rex_cf_min",
+   "candidates": "mutant:any_row",
+   "n": 217,
+   "metric": "FP (wrong SQL paid)",
+   "rate": 0.16589861751152074,
+   "ci95": [
+    0.12230524253515074,
+    0.22111556224076107
+   ]
+  },
+  {
+   "reward": "rex_cf_min",
+   "candidates": "mutant:count_orders",
+   "n": 134,
+   "metric": "FP (wrong SQL paid)",
+   "rate": 0.1044776119402985,
+   "ci95": [
+    0.0632603659585081,
+    0.167741015337124
+   ]
+  },
+  {
+   "reward": "rex_cf_min",
+   "candidates": "mutant:count_rows",
+   "n": 174,
+   "metric": "FP (wrong SQL paid)",
+   "rate": 0.011494252873563218,
+   "ci95": [
+    0.003157753039523311,
+    0.040935417512248606
+   ]
+  },
+  {
+   "reward": "rex_cf_min",
+   "candidates": "mutant:first_row",
+   "n": 107,
+   "metric": "FP (wrong SQL paid)",
+   "rate": 0.1308411214953271,
+   "ci95": [
+    0.07956439701777629,
+    0.20770680801715635
+   ]
+  },
+  {
+   "reward": "rex_cf_min",
+   "candidates": "mutant:ignore_adjustments",
+   "n": 75,
+   "metric": "FP (wrong SQL paid)",
+   "rate": 0.36,
+   "ci95": [
+    0.26064766399338823,
+    0.4729954888599277
+   ]
+  },
+  {
+   "reward": "rex_cf_min",
+   "candidates": "mutant:item_level_avg",
+   "n": 77,
+   "metric": "FP (wrong SQL paid)",
+   "rate": 0.012987012987012988,
+   "ci95": [
+    0.0022961581721549496,
+    0.06996366845176145
+   ]
+  },
+  {
+   "reward": "rex_cf_min",
+   "candidates": "mutant:join_fanout",
+   "n": 208,
+   "metric": "FP (wrong SQL paid)",
+   "rate": 0.20192307692307693,
+   "ci95": [
+    0.15300019311684493,
+    0.26165679587870655
+   ]
+  },
+  {
+   "reward": "rex_cf_min",
+   "candidates": "mutant:missing_refunds",
+   "n": 77,
+   "metric": "FP (wrong SQL paid)",
+   "rate": 0.37662337662337664,
+   "ci95": [
+    0.27669846411806526,
+    0.48827402529332703
+   ]
+  },
+  {
+   "reward": "rex_cf_min",
+   "candidates": "mutant:no_distinct",
+   "n": 203,
+   "metric": "FP (wrong SQL paid)",
+   "rate": 0.07389162561576355,
+   "ci95": [
+    0.04528725424510468,
+    0.11832393421988496
+   ]
+  },
+  {
+   "reward": "rex_cf_min",
+   "candidates": "mutant:no_status_filter",
+   "n": 348,
+   "metric": "FP (wrong SQL paid)",
+   "rate": 0.2557471264367816,
+   "ci95": [
+    0.21274832769913113,
+    0.30407969945854424
+   ]
+  },
+  {
+   "reward": "rex_cf_min",
+   "candidates": "mutant:shipped_only",
+   "n": 77,
+   "metric": "FP (wrong SQL paid)",
+   "rate": 0.2077922077922078,
+   "ci95": [
+    0.13214965937388248,
+    0.3112062366004674
+   ]
+  },
+  {
+   "reward": "rex_single",
+   "candidates": "correct",
+   "n": 2847,
+   "metric": "FN (correct SQL not paid)",
+   "rate": 0.0,
+   "ci95": [
+    0.0,
+    0.0013475319007552014
+   ]
+  },
+  {
+   "reward": "rex_single",
+   "candidates": "hack",
+   "n": 2839,
+   "metric": "FP (wrong SQL paid)",
+   "rate": 0.541387812610074,
+   "ci95": [
+    0.5230146964653684,
+    0.5596490720682004
+   ]
+  },
+  {
+   "reward": "rex_single",
+   "candidates": "hack:empty",
+   "n": 1302,
+   "metric": "FP (wrong SQL paid)",
+   "rate": 0.0,
+   "ci95": [
+    0.0,
+    0.0029418575729246183
+   ]
+  },
+  {
+   "reward": "rex_single",
+   "candidates": "hack:hardcoded_ids",
+   "n": 235,
+   "metric": "FP (wrong SQL paid)",
+   "rate": 1.0,
+   "ci95": [
+    0.983915699777593,
+    0.9999999999999999
+   ]
+  },
+  {
+   "reward": "rex_single",
+   "candidates": "hack:literal",
+   "n": 1302,
+   "metric": "FP (wrong SQL paid)",
+   "rate": 1.0,
+   "ci95": [
+    0.9970581424270756,
+    1.0
+   ]
+  },
+  {
+   "reward": "rex_single",
+   "candidates": "mutant",
+   "n": 1814,
+   "metric": "FP (wrong SQL paid)",
+   "rate": 0.29492833517089306,
+   "ci95": [
+    0.2743942531450869,
+    0.31632916302054603
+   ]
+  },
+  {
+   "reward": "rex_single",
+   "candidates": "mutant:all_customers",
+   "n": 40,
+   "metric": "FP (wrong SQL paid)",
+   "rate": 0.4,
+   "ci95": [
+    0.2634811061240136,
+    0.5540438017260649
+   ]
+  },
+  {
+   "reward": "rex_single",
+   "candidates": "mutant:all_tier_rows",
+   "n": 77,
+   "metric": "FP (wrong SQL paid)",
+   "rate": 0.11688311688311688,
+   "ci95": [
+    0.06272491064586315,
+    0.2074528196316177
+   ]
+  },
+  {
+   "reward": "rex_single",
+   "candidates": "mutant:any_row",
+   "n": 217,
+   "metric": "FP (wrong SQL paid)",
+   "rate": 0.25806451612903225,
+   "ci95": [
+    0.2044082384502695,
+    0.3201378615598735
+   ]
+  },
+  {
+   "reward": "rex_single",
+   "candidates": "mutant:count_orders",
+   "n": 134,
+   "metric": "FP (wrong SQL paid)",
+   "rate": 0.2462686567164179,
+   "ci95": [
+    0.18106846409287522,
+    0.3256116673043228
+   ]
+  },
+  {
+   "reward": "rex_single",
+   "candidates": "mutant:count_rows",
+   "n": 174,
+   "metric": "FP (wrong SQL paid)",
+   "rate": 0.08620689655172414,
+   "ci95": [
+    0.052937053496014394,
+    0.13735363214783947
+   ]
+  },
+  {
+   "reward": "rex_single",
+   "candidates": "mutant:first_row",
+   "n": 107,
+   "metric": "FP (wrong SQL paid)",
+   "rate": 0.21495327102803738,
+   "ci95": [
+    0.14772120660505175,
+    0.30194390108014946
+   ]
+  },
+  {
+   "reward": "rex_single",
+   "candidates": "mutant:ignore_adjustments",
+   "n": 75,
+   "metric": "FP (wrong SQL paid)",
+   "rate": 0.6933333333333334,
+   "ci95": [
+    0.5816933204791398,
+    0.7861328017710428
+   ]
+  },
+  {
+   "reward": "rex_single",
+   "candidates": "mutant:item_level_avg",
+   "n": 77,
+   "metric": "FP (wrong SQL paid)",
+   "rate": 0.025974025974025976,
+   "ci95": [
+    0.0071520098481384214,
+    0.08984755473247355
+   ]
+  },
+  {
+   "reward": "rex_single",
+   "candidates": "mutant:join_fanout",
+   "n": 208,
+   "metric": "FP (wrong SQL paid)",
+   "rate": 0.30288461538461536,
+   "ci95": [
+    0.24447727661135016,
+    0.3684410548211919
+   ]
+  },
+  {
+   "reward": "rex_single",
+   "candidates": "mutant:missing_refunds",
+   "n": 77,
+   "metric": "FP (wrong SQL paid)",
+   "rate": 0.5454545454545454,
+   "ci95": [
+    0.43472886644893927,
+    0.6518602163994951
+   ]
+  },
+  {
+   "reward": "rex_single",
+   "candidates": "mutant:no_distinct",
+   "n": 203,
+   "metric": "FP (wrong SQL paid)",
+   "rate": 0.2857142857142857,
+   "ci95": [
+    0.22799990227309663,
+    0.3513883832555398
+   ]
+  },
+  {
+   "reward": "rex_single",
+   "candidates": "mutant:no_status_filter",
+   "n": 348,
+   "metric": "FP (wrong SQL paid)",
+   "rate": 0.39655172413793105,
+   "ci95": [
+    0.34655327361969773,
+    0.4488091849412001
+   ]
+  },
+  {
+   "reward": "rex_single",
+   "candidates": "mutant:shipped_only",
+   "n": 77,
+   "metric": "FP (wrong SQL paid)",
+   "rate": 0.36363636363636365,
+   "ci95": [
+    0.26505270593089814,
+    0.47518004552379856
+   ]
+  },
+  {
+   "reward": "skyrl_cf_min",
+   "candidates": "correct",
+   "n": 2847,
+   "metric": "FN (correct SQL not paid)",
+   "rate": 0.0,
+   "ci95": [
+    0.0,
+    0.0013475319007552014
+   ]
+  },
+  {
+   "reward": "skyrl_cf_min",
+   "candidates": "hack",
+   "n": 2839,
+   "metric": "FP (wrong SQL paid)",
+   "rate": 0.019020781965480803,
+   "ci95": [
+    0.014607462200069811,
+    0.024734019224713057
+   ]
+  },
+  {
+   "reward": "skyrl_cf_min",
+   "candidates": "hack:empty",
+   "n": 1302,
+   "metric": "FP (wrong SQL paid)",
+   "rate": 0.0,
+   "ci95": [
+    0.0,
+    0.0029418575729246183
+   ]
+  },
+  {
+   "reward": "skyrl_cf_min",
+   "candidates": "hack:hardcoded_ids",
+   "n": 235,
+   "metric": "FP (wrong SQL paid)",
+   "rate": 0.2297872340425532,
+   "ci95": [
+    0.18060239669216582,
+    0.28766443789611357
+   ]
+  },
+  {
+   "reward": "skyrl_cf_min",
+   "candidates": "hack:literal",
+   "n": 1302,
+   "metric": "FP (wrong SQL paid)",
+   "rate": 0.0,
+   "ci95": [
+    0.0,
+    0.0029418575729246183
+   ]
+  },
+  {
+   "reward": "skyrl_cf_min",
+   "candidates": "mutant",
+   "n": 1814,
+   "metric": "FP (wrong SQL paid)",
+   "rate": 0.2717750826901874,
+   "ci95": [
+    0.25180064716358386,
+    0.2927141224401043
+   ]
+  },
+  {
+   "reward": "skyrl_cf_min",
+   "candidates": "mutant:all_customers",
+   "n": 40,
+   "metric": "FP (wrong SQL paid)",
+   "rate": 0.4,
+   "ci95": [
+    0.2634811061240136,
+    0.5540438017260649
+   ]
+  },
+  {
+   "reward": "skyrl_cf_min",
+   "candidates": "mutant:all_tier_rows",
+   "n": 77,
+   "metric": "FP (wrong SQL paid)",
+   "rate": 0.05194805194805195,
+   "ci95": [
+    0.02038438860493938,
+    0.12609465188906374
+   ]
+  },
+  {
+   "reward": "skyrl_cf_min",
+   "candidates": "mutant:any_row",
+   "n": 217,
+   "metric": "FP (wrong SQL paid)",
+   "rate": 0.16589861751152074,
+   "ci95": [
+    0.12230524253515074,
+    0.22111556224076107
+   ]
+  },
+  {
+   "reward": "skyrl_cf_min",
+   "candidates": "mutant:count_orders",
+   "n": 134,
+   "metric": "FP (wrong SQL paid)",
+   "rate": 0.1044776119402985,
+   "ci95": [
+    0.0632603659585081,
+    0.167741015337124
+   ]
+  },
+  {
+   "reward": "skyrl_cf_min",
+   "candidates": "mutant:count_rows",
+   "n": 174,
+   "metric": "FP (wrong SQL paid)",
+   "rate": 0.011494252873563218,
+   "ci95": [
+    0.003157753039523311,
+    0.040935417512248606
+   ]
+  },
+  {
+   "reward": "skyrl_cf_min",
+   "candidates": "mutant:first_row",
+   "n": 107,
+   "metric": "FP (wrong SQL paid)",
+   "rate": 0.1308411214953271,
+   "ci95": [
+    0.07956439701777629,
+    0.20770680801715635
+   ]
+  },
+  {
+   "reward": "skyrl_cf_min",
+   "candidates": "mutant:ignore_adjustments",
+   "n": 75,
+   "metric": "FP (wrong SQL paid)",
+   "rate": 0.36,
+   "ci95": [
+    0.26064766399338823,
+    0.4729954888599277
+   ]
+  },
+  {
+   "reward": "skyrl_cf_min",
+   "candidates": "mutant:item_level_avg",
+   "n": 77,
+   "metric": "FP (wrong SQL paid)",
+   "rate": 0.012987012987012988,
+   "ci95": [
+    0.0022961581721549496,
+    0.06996366845176145
+   ]
+  },
+  {
+   "reward": "skyrl_cf_min",
+   "candidates": "mutant:join_fanout",
+   "n": 208,
+   "metric": "FP (wrong SQL paid)",
+   "rate": 0.20192307692307693,
+   "ci95": [
+    0.15300019311684493,
+    0.26165679587870655
+   ]
+  },
+  {
+   "reward": "skyrl_cf_min",
+   "candidates": "mutant:missing_refunds",
+   "n": 77,
+   "metric": "FP (wrong SQL paid)",
+   "rate": 0.37662337662337664,
+   "ci95": [
+    0.27669846411806526,
+    0.48827402529332703
+   ]
+  },
+  {
+   "reward": "skyrl_cf_min",
+   "candidates": "mutant:no_distinct",
+   "n": 203,
+   "metric": "FP (wrong SQL paid)",
+   "rate": 1.0,
+   "ci95": [
+    0.9814273337665149,
+    0.9999999999999998
+   ]
+  },
+  {
+   "reward": "skyrl_cf_min",
+   "candidates": "mutant:no_status_filter",
+   "n": 348,
+   "metric": "FP (wrong SQL paid)",
+   "rate": 0.2557471264367816,
+   "ci95": [
+    0.21274832769913113,
+    0.30407969945854424
+   ]
+  },
+  {
+   "reward": "skyrl_cf_min",
+   "candidates": "mutant:shipped_only",
+   "n": 77,
+   "metric": "FP (wrong SQL paid)",
+   "rate": 0.2077922077922078,
+   "ci95": [
+    0.13214965937388248,
+    0.3112062366004674
+   ]
+  },
+  {
+   "reward": "skyrl_single",
+   "candidates": "correct",
+   "n": 2847,
+   "metric": "FN (correct SQL not paid)",
+   "rate": 0.0,
+   "ci95": [
+    0.0,
+    0.0013475319007552014
+   ]
+  },
+  {
+   "reward": "skyrl_single",
+   "candidates": "hack",
+   "n": 2839,
+   "metric": "FP (wrong SQL paid)",
+   "rate": 0.532229658330398,
+   "ci95": [
+    0.5138440991696368,
+    0.5505281120713975
+   ]
+  },
+  {
+   "reward": "skyrl_single",
+   "candidates": "hack:empty",
+   "n": 1302,
+   "metric": "FP (wrong SQL paid)",
+   "rate": 0.0,
+   "ci95": [
+    0.0,
+    0.0029418575729246183
+   ]
+  },
+  {
+   "reward": "skyrl_single",
+   "candidates": "hack:hardcoded_ids",
+   "n": 235,
+   "metric": "FP (wrong SQL paid)",
+   "rate": 1.0,
+   "ci95": [
+    0.983915699777593,
+    0.9999999999999999
+   ]
+  },
+  {
+   "reward": "skyrl_single",
+   "candidates": "hack:literal",
+   "n": 1302,
+   "metric": "FP (wrong SQL paid)",
+   "rate": 0.9800307219662059,
+   "ci95": [
+    0.9709005156426894,
+    0.9863365642604168
+   ]
+  },
+  {
+   "reward": "skyrl_single",
+   "candidates": "mutant",
+   "n": 1814,
+   "metric": "FP (wrong SQL paid)",
+   "rate": 0.3748621830209482,
+   "ci95": [
+    0.3528713868301251,
+    0.3973818805612692
+   ]
+  },
+  {
+   "reward": "skyrl_single",
+   "candidates": "mutant:all_customers",
+   "n": 40,
+   "metric": "FP (wrong SQL paid)",
+   "rate": 0.4,
+   "ci95": [
+    0.2634811061240136,
+    0.5540438017260649
+   ]
+  },
+  {
+   "reward": "skyrl_single",
+   "candidates": "mutant:all_tier_rows",
+   "n": 77,
+   "metric": "FP (wrong SQL paid)",
+   "rate": 0.11688311688311688,
+   "ci95": [
+    0.06272491064586315,
+    0.2074528196316177
+   ]
+  },
+  {
+   "reward": "skyrl_single",
+   "candidates": "mutant:any_row",
+   "n": 217,
+   "metric": "FP (wrong SQL paid)",
+   "rate": 0.25806451612903225,
+   "ci95": [
+    0.2044082384502695,
+    0.3201378615598735
+   ]
+  },
+  {
+   "reward": "skyrl_single",
+   "candidates": "mutant:count_orders",
+   "n": 134,
+   "metric": "FP (wrong SQL paid)",
+   "rate": 0.2462686567164179,
+   "ci95": [
+    0.18106846409287522,
+    0.3256116673043228
+   ]
+  },
+  {
+   "reward": "skyrl_single",
+   "candidates": "mutant:count_rows",
+   "n": 174,
+   "metric": "FP (wrong SQL paid)",
+   "rate": 0.08620689655172414,
+   "ci95": [
+    0.052937053496014394,
+    0.13735363214783947
+   ]
+  },
+  {
+   "reward": "skyrl_single",
+   "candidates": "mutant:first_row",
+   "n": 107,
+   "metric": "FP (wrong SQL paid)",
+   "rate": 0.21495327102803738,
+   "ci95": [
+    0.14772120660505175,
+    0.30194390108014946
+   ]
+  },
+  {
+   "reward": "skyrl_single",
+   "candidates": "mutant:ignore_adjustments",
+   "n": 75,
+   "metric": "FP (wrong SQL paid)",
+   "rate": 0.6933333333333334,
+   "ci95": [
+    0.5816933204791398,
+    0.7861328017710428
+   ]
+  },
+  {
+   "reward": "skyrl_single",
+   "candidates": "mutant:item_level_avg",
+   "n": 77,
+   "metric": "FP (wrong SQL paid)",
+   "rate": 0.025974025974025976,
+   "ci95": [
+    0.0071520098481384214,
+    0.08984755473247355
+   ]
+  },
+  {
+   "reward": "skyrl_single",
+   "candidates": "mutant:join_fanout",
+   "n": 208,
+   "metric": "FP (wrong SQL paid)",
+   "rate": 0.30288461538461536,
+   "ci95": [
+    0.24447727661135016,
+    0.3684410548211919
+   ]
+  },
+  {
+   "reward": "skyrl_single",
+   "candidates": "mutant:missing_refunds",
+   "n": 77,
+   "metric": "FP (wrong SQL paid)",
+   "rate": 0.5454545454545454,
+   "ci95": [
+    0.43472886644893927,
+    0.6518602163994951
+   ]
+  },
+  {
+   "reward": "skyrl_single",
+   "candidates": "mutant:no_distinct",
+   "n": 203,
+   "metric": "FP (wrong SQL paid)",
+   "rate": 1.0,
+   "ci95": [
+    0.9814273337665149,
+    0.9999999999999998
+   ]
+  },
+  {
+   "reward": "skyrl_single",
+   "candidates": "mutant:no_status_filter",
+   "n": 348,
+   "metric": "FP (wrong SQL paid)",
+   "rate": 0.39655172413793105,
+   "ci95": [
+    0.34655327361969773,
+    0.4488091849412001
+   ]
+  },
+  {
+   "reward": "skyrl_single",
+   "candidates": "mutant:shipped_only",
+   "n": 77,
+   "metric": "FP (wrong SQL paid)",
+   "rate": 0.36363636363636365,
+   "ci95": [
+    0.26505270593089814,
+    0.47518004552379856
+   ]
+  }
+ ],
+ "comparator_hole_by_mutant": {
+  "all_customers": {
+   "paid_on_every_db_by_set_compare": 16,
+   "of_which_rejected_by_strict": 0,
+   "n": 40
+  },
+  "all_tier_rows": {
+   "paid_on_every_db_by_set_compare": 4,
+   "of_which_rejected_by_strict": 0,
+   "n": 77
+  },
+  "any_row": {
+   "paid_on_every_db_by_set_compare": 36,
+   "of_which_rejected_by_strict": 0,
+   "n": 217
+  },
+  "count_orders": {
+   "paid_on_every_db_by_set_compare": 14,
+   "of_which_rejected_by_strict": 0,
+   "n": 134
+  },
+  "count_rows": {
+   "paid_on_every_db_by_set_compare": 2,
+   "of_which_rejected_by_strict": 0,
+   "n": 174
+  },
+  "first_row": {
+   "paid_on_every_db_by_set_compare": 14,
+   "of_which_rejected_by_strict": 0,
+   "n": 107
+  },
+  "ignore_adjustments": {
+   "paid_on_every_db_by_set_compare": 27,
+   "of_which_rejected_by_strict": 0,
+   "n": 75
+  },
+  "item_level_avg": {
+   "paid_on_every_db_by_set_compare": 1,
+   "of_which_rejected_by_strict": 0,
+   "n": 77
+  },
+  "join_fanout": {
+   "paid_on_every_db_by_set_compare": 42,
+   "of_which_rejected_by_strict": 0,
+   "n": 208
+  },
+  "missing_refunds": {
+   "paid_on_every_db_by_set_compare": 29,
+   "of_which_rejected_by_strict": 0,
+   "n": 77
+  },
+  "no_distinct": {
+   "paid_on_every_db_by_set_compare": 203,
+   "of_which_rejected_by_strict": 188,
+   "n": 203
+  },
+  "no_status_filter": {
+   "paid_on_every_db_by_set_compare": 89,
+   "of_which_rejected_by_strict": 0,
+   "n": 348
+  },
+  "shipped_only": {
+   "paid_on_every_db_by_set_compare": 16,
+   "of_which_rejected_by_strict": 0,
+   "n": 77
+  }
+ },
+ "comparator_hole_examples": {
+  "no_distinct": {
+   "item": "F1_customer_list|Delhi|electronics|S_s301",
+   "gold": "SELECT DISTINCT o.customer_id FROM order_items oi JOIN orders o ON o.order_id = oi.order_id JOIN products p ON p.product_id = oi.product_id JOIN customers c ON c.customer_id = o.customer_id WHERE c.city = 'Delhi' AND p.category = 'electronics'",
+   "mutant": "SELECT o.customer_id FROM order_items oi JOIN orders o ON o.order_id = oi.order_id JOIN products p ON p.product_id = oi.product_id JOIN customers c ON c.customer_id = o.customer_id WHERE c.city = 'Delhi' AND p.category = 'electronics'"
+  }
+ }
+}
