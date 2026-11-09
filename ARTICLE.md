@@ -57,7 +57,15 @@ All data is synthetic: an e-commerce schema from a seeded generator, with no per
 
 ## 6. Model collection
 
-SFT (`sft_ho`), GRPO-B (improved: beats SFT, p = 0.006) and GRPO-C (null: no gain over SFT), as LoRA adapters on Tiny Aya Global. ⟨Publishing is pending the organisers' answer on releasing adapters of a gated model.⟩
+LoRA adapters (r = 16) on Tiny Aya Global, each with a card giving its test metrics and G3 label:
+
+| Repo | Model | G3 |
+|---|---|---|
+| `sqlcf-lexsi/tiny-aya-global-sqlcf-sft` | SFT (`sft_ho`), the init of both GRPO runs | baseline, 9.4% verified |
+| `sqlcf-lexsi/tiny-aya-global-sqlcf-grpo-b` | GRPO-B, single-DB reward | improved: 12.7%, beats SFT (p = 0.006) |
+| `sqlcf-lexsi/tiny-aya-global-sqlcf-grpo-c` | GRPO-C, counterfactual reward | null: 9.0%, no gain over SFT (p = 0.21) |
+
+The adapters are derivatives of a gated, non-commercial model. Each repo ships the base model's CC-BY-NC-4.0 licence and a notice pointing to Cohere's licence addendum and Acceptable Use Policy, and is gated with automatic approval. To use them you need access to `CohereLabs/tiny-aya-global`. vLLM's LoRA path crashes on Tiny Aya's tied embeddings, so merge first (`train.py merge`, fp32 merge saved as fp16).
 
 ## 7. Data collection
 

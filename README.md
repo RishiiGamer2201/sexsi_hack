@@ -18,7 +18,7 @@ A text-to-SQL agent is usually rewarded for matching the gold answer on **one** 
 | Why: rollouts on which B's and C's rewards differed during training | about 7% |
 | Command A (single-turn) | 81.0% verified, $4.25 per 1k queries vs $0.06 for Tiny Aya B on an L4 |
 
-Every number is re-derived from stored runs by `python verify_all.py`. Demo, data and models: `sqlcf-lexsi` on Hugging Face (private until submission).
+Every number is re-derived from stored runs by `python verify_all.py`. Demo, data and models: one `sqlcf-lexsi` collection on Hugging Face (private until submission). The adapters carry the base model's CC-BY-NC-4.0 licence and are gated with automatic approval.
 
 ## Setup (Linux / WSL)
 
@@ -64,6 +64,7 @@ source .secrets.env && .venv/bin/python scripts/e5_command_a.py            # E5:
 .venv/bin/python scripts/e5_roi.py                                         # E5 ROI table
 .venv/bin/python scripts/audit_sample.py && .venv/bin/python scripts/audit_labels.py  # manual audit
 .venv/bin/python verify_all.py                                             # re-derive every results/*.json
+source .secrets.env && .venv/bin/python scripts/push_models.py             # adapters + licence + collection (private; --public --gated later)
 ```
 
 ## Layout

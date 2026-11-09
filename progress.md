@@ -4,34 +4,27 @@
 
 ## Current state (Nov 9)
 
-- **Precision fix verified.** SFT retrained on the local GPU, then merged in fp32 and saved as fp16.
-  - On 58 of its own training items (greedy), 1.00 verify [0.94, 1.0]; the bf16 merge got 0.26.
-  - Adapter: `runs/sft/adapter` (local); merged model: `runs/sft/merged` (fp16, 6.3 GB, local).
-- **VM: RUNNING GRPO-B** (started 23:06 UTC Nov 8; about 3.2 h for 60 steps, then autostop). Smoke test passed. GRPO-C (R_cf_mean) is chained to start when B ends; autostop after C.
-- **Held-out SFT** (3 GRPO-only templates): trained; 170 rollouts where B and C rewards differ (was 8). See log.
-- **GRPO signal: OK** (125 of 445 groups mixed). E4 for base and SFT is done with the fixed model and real samples.
-- **Pipeline:** the smoke test passed before the fix. The fix changes TRL's weight sync (`sqlcf/precision.py`), so GRPO-B's step-1 reward serves as the smoke test (see Next 1).
-- **VM `sqlcf-l4`** (asia-south1-a, 1x L4): start it with `bash scripts/vm_start.sh`, which retries through stockouts. Stop it whenever no job is running. SSH from WSL's gcloud (user `admin_wsl`).
-- **Gates:**
-  - G1 (freeze the reward form): passes. R_cf_mean.
-  - G2 (GRPO step time): passes. 190 s per step, so 60 steps take about 3.2 h.
-- **Access:**
-  - Aksh: sudo account on the VM, plus IAM rights to start and stop it.
-  - Shreshth: no SSH key on the VM yet.
+- **All experiments done** (E0, E1, E2, E3 B + C, E4, E5, manual audit). Training comparison is a null: B 12.7% verified, C 9.0%, SFT 9.4%. `verify_all.py` passes.
+- **VM `sqlcf-l4`: TERMINATED**, no job queued. Start with `bash scripts/vm_start.sh` only if a new run is approved.
+- **Write-up:** ARTICLE.md (12 sections, all numbers), ABSTRACT.md, README judge's view.
+- **Hugging Face, org `sqlcf-lexsi`, ALL PRIVATE** (user: nothing public until approved):
+  - Space `counterfactual-sql-demo`, dataset `counterfactual-sql-data`.
+  - Models `tiny-aya-global-sqlcf-sft`, `-grpo-b`, `-grpo-c` (LoRA adapters + LICENSE + NOTICE + card).
+  - Collection `counterfactual-db-rewards-for-a-small-sql-agent-6af174f77dbae0bf0a54c3c4` with all five.
+- **Licence ruling (organisers, Discord, Nov 9):** adapters of the gated base may be published with its licence included. During judging every artifact must be public, or gated with automatic approval; private or manual-approval repos count as missing.
 
 ## Next
 
-1. **GRPO-B as soon as the VM starts** (`scripts/laptop_kick_grpo.sh` retries through stockouts).
-   - It copies the local verified SFT adapter up, then launches `vm_grpo.sh R_exec_rex grpo_B`.
-   - Step 1 doubles as the smoke test for the TRL sync patch: train-prompt reward should be about 0.9. About 0.01 would mean vLLM is serving base weights.
-2. Gate G1 from GRPO-B's first steps (`scripts/gate_g1.py`). Then GRPO-C with the same arguments, then E4 for B and C on the local GPU.
-3. Done: held-out SFT, its signal check and its E4 (`sft_ho`, verified 0.094).
-4. The user chose no zone move: keep retrying in asia-south1-a.
+1. **User approval to go public** before submission (deadline Nov 14 AoE). Then: `scripts/push_models.py --public --gated` (models gated, auto-approve), and make the Space, dataset and collection public.
+2. User: confirm Command A price at docs.cohere.com; invite AkshAgg and hi-phi-r25i to `sqlcf-lexsi` (write).
+3. User decision on the null: accept and polish (recommended) / second seed (about 7 h VM) / redesigned C.
+4. Publish the HF Article from ARTICLE.md; final submission form.
 
 ## Log
 
 ### Nov 9
 
+- **Model repos pushed, private:** `scripts/push_models.py` uploads the three LoRA adapters (sft_ho, B, C; no `ref/`, no `training_args.bin`) with the base model's CC-BY-NC-4.0 text as `LICENSE` (`docs/LICENSE-CC-BY-NC-4.0.txt`), a `NOTICE` naming Cohere's licence addendum and Acceptable Use Policy, and a card (base_model, G3 label, verified / single / silent error / F4 with 95% CIs), plus B and C's provenance, config and training stats. It also builds one private collection with Space, dataset and the 3 models. Verified via the API: all 6 private, models not gated. `--public --gated` will make the models public with automatic-approval gating, per the organisers' ruling.
 - **L4 re-timing done (ROI item 1):** GRPO-B's 331 x 8 test generation took 785 s on the L4 vs 524 s on the laptop (ratio 1.50), same accuracy (12.5% vs 12.7% verified; `results/e5_l4_check.json`). VM TERMINATED after copy. ROI now priced at L4 speed: Tiny Aya B $0.061 per 1k (SFT $0.054, C $0.052, scaled by the ratio) vs Command A $4.25: about 70x cheaper per query, 11x per verified answer. Article, README and abstract updated.
 - **README "judge's 60-second view" and ABSTRACT.md (about 430 words) written.** Correction: Command A's F2 failure is mostly caught by the single-DB check too (32/36); the counterfactual copies catch the other 4 lucky passes. Article and abstract say so.
 - **Manual audit done:** 48 wrong test trajectories (16 each from sft_ho, B, C; 6 lucky passes + 10 other per model; seed 0, stratified by family), labelled with NL2SQL-BUGs categories (`results/manual_audit.jsonl`). Top errors: `order_date` for payment date 11, value linking 7, extra status filter 6. All 18 lucky passes are real semantic bugs; none is smuggling or hacking.
