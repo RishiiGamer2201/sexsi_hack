@@ -1,0 +1,16 @@
+{
+ "what": "GRPO-B test generation re-run on the L4 VM (scripts/vm_time_l4.sh), for E5 throughput; same settings as results/traj_B.jsonl",
+ "gpu": "NVIDIA L4",
+ "gen_s": 785.27,
+ "trajectories": 2648,
+ "verified": [
+  0.12462235649546828,
+  0.11258315660249904,
+  0.1377491407715221
+ ],
+ "single": [
+  0.17069486404833836,
+  0.15684374949962526,
+  0.18550007676812763
+ ]
+}

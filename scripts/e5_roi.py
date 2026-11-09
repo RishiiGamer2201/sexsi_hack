@@ -4,8 +4,8 @@ measured generation time (runs/local_<model>.log, "gen <model> <s> s") / traject
 
   python3 scripts/e5_roi.py [--gpu-usd-hr 0.74] [--models sft_ho B C]
 Prices: Command A $2.50 / 1M input, $10.00 / 1M output (Cohere list price for command-a-03-2025, checked Nov 9 2026).
-GPU default: our g2-standard-4 + L4 VM on-demand rate. Throughput was measured on an RTX 5070 Ti laptop GPU
-(vLLM, 331 items x 8 samples batched), so the Tiny Aya figure assumes L4 throughput is similar: label it as such.
+GPU default: our g2-standard-4 + L4 VM on-demand rate. Tiny Aya is priced at L4 throughput: B was timed on the L4
+(runs/time_l4.log); the other models' laptop times are scaled by B's L4 / laptop ratio.
 """
 import argparse
 import json
@@ -31,18 +31,26 @@ out = {"command_a": {"n": len(rows), "verified": e4.get("command_a", {}).get("ve
                      "usd_per_1k": 1000 * (tin * IN_USD + tout * OUT_USD) / len(rows),
                      "tokens_per_query": [tin / len(rows), tout / len(rows)],
                      "latency_s_median": statistics.median(lat), "latency_s_p90": lat[int(0.9 * len(lat)) - 1]}}
+def gen_s(log, name):
+    hit = re.findall(rf"^gen {re.escape(name)} ([0-9.]+) s", log.read_text(), re.M) if log.exists() else []
+    return float(hit[-1]) if hit else None
+
+
+# L4 timing (scripts/vm_time_l4.sh) exists for B only; other models are scaled by B's L4 / laptop time ratio.
+l4_b, lap_b = gen_s(ROOT / "runs/time_l4.log", "B_l4"), gen_s(ROOT / "runs/local_B.log", "B")
+ratio = l4_b / lap_b if l4_b and lap_b else None
 for m in a.models:
-    log = ROOT / f"runs/local_{m}.log"
-    hit = re.findall(rf"^gen {re.escape(m)} ([0-9.]+) s", log.read_text(), re.M) if log.exists() else []
+    lap = gen_s(ROOT / f"runs/local_{m}.log", m)
     n = sum(1 for _ in open(ROOT / f"results/traj_{m}.jsonl"))
-    if not hit or m not in e4:
+    if not lap or m not in e4:
         print(f"skip {m}: no timing or no score")
         continue
-    sec = float(hit[-1])
-    out[m] = {"n": n, "verified": e4[m]["verified"], "single": e4[m]["single"], "gen_s": sec,
-              "trajectories_per_s": n / sec, "usd_per_1k": 1000 * a.gpu_usd_hr * sec / 3600 / n}
-out["assumptions"] = {"command_a_usd_per_1M": [2.50, 10.00], "gpu_usd_hr": a.gpu_usd_hr,
-                      "throughput_gpu": "RTX 5070 Ti laptop, vLLM batched; latency per query not measured for Tiny Aya"}
+    l4, how = (l4_b, "measured on L4") if m == "B" and l4_b else ((lap * ratio, "laptop time x B's L4/laptop ratio") if ratio else (lap, "laptop time"))
+    out[m] = {"n": n, "verified": e4[m]["verified"], "single": e4[m]["single"], "gen_s_laptop": lap, "gen_s_l4": l4, "l4_time": how,
+              "trajectories_per_s": n / l4, "usd_per_1k": 1000 * a.gpu_usd_hr * l4 / 3600 / n}
+out["assumptions"] = {"command_a_usd_per_1M": [2.50, 10.00], "gpu_usd_hr": a.gpu_usd_hr, "l4_over_laptop_ratio": ratio,
+                      "throughput": "vLLM batched, 331 items x 8 samples, T=0.7; B timed on the L4 (785 s) and on an RTX 5070 Ti "
+                                    "laptop; per-query latency not measured for Tiny Aya"}
 (ROOT / "results/e5_roi.json").write_text(json.dumps(out, indent=1))
 print("| Model | Verified | Single-DB | $ / 1k queries | Latency / throughput |\n|---|---|---|---|---|")
 for m, v in out.items():
@@ -50,6 +58,6 @@ for m, v in out.items():
         continue
     pct = lambda x: f"{100 * x[0]:.1f}% [{100 * x[1]:.1f}, {100 * x[2]:.1f}]" if x else "n/a"
     speed = (f"median {v['latency_s_median']:.1f} s, p90 {v['latency_s_p90']:.1f} s" if m == "command_a"
-             else f"{v['trajectories_per_s']:.1f} trajectories/s batched")
+             else f"{v['trajectories_per_s']:.1f} trajectories/s batched on L4 ({v['l4_time']})")
     print(f"| {m} | {pct(v['verified'])} | {pct(v['single'])} | ${v['usd_per_1k']:.3f} | {speed} |")
 assert out["command_a"]["usd_per_1k"] > 0

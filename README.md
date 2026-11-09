@@ -16,7 +16,7 @@ A text-to-SQL agent is usually rewarded for matching the gold answer on **one** 
 | Test verified accuracy (Tiny Aya 3.35B): base / SFT / GRPO-B single-DB reward / GRPO-C counterfactual reward | 0.9% / 9.4% / **12.7%** / 9.0% |
 | GRPO-C vs GRPO-B (pre-registered H4) | **null**: C is not better (−3.7 pts verified, p < 0.001; silent error p = 0.61) |
 | Why: rollouts on which B's and C's rewards differed during training | about 7% |
-| Command A (single-turn) | 81.0% verified, $4.25 per 1k queries vs about $0.04 for Tiny Aya |
+| Command A (single-turn) | 81.0% verified, $4.25 per 1k queries vs $0.06 for Tiny Aya B on an L4 |
 
 Every number is re-derived from stored runs by `python verify_all.py`. Demo, data and models: `sqlcf-lexsi` on Hugging Face (private until submission).
 

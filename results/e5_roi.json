@@ -31,9 +31,11 @@
    0.13248019213082912,
    0.15933271253134978
   ],
-  "gen_s": 465.57,
-  "trajectories_per_s": 5.687651695770776,
-  "usd_per_1k": 0.03614067220543806
+  "gen_s_laptop": 465.57,
+  "gen_s_l4": 698.1727373245488,
+  "l4_time": "laptop time x B's L4/laptop ratio",
+  "trajectories_per_s": 3.7927576635938807,
+  "usd_per_1k": 0.05419685985441488
  },
  "B": {
   "n": 2648,
@@ -47,9 +49,11 @@
    0.16413956667413937,
    0.19328811678930724
   ],
-  "gen_s": 523.65,
-  "trajectories_per_s": 5.056812756612241,
-  "usd_per_1k": 0.04064923212487412
+  "gen_s_laptop": 523.65,
+  "gen_s_l4": 785.27,
+  "l4_time": "measured on L4",
+  "trajectories_per_s": 3.3720885809976187,
+  "usd_per_1k": 0.06095793470963409
  },
  "C": {
   "n": 2648,
@@ -63,9 +67,11 @@
    0.12776814975928472,
    0.15424024772569325
   ],
-  "gen_s": 443.21,
-  "trajectories_per_s": 5.974594436046118,
-  "usd_per_1k": 0.034404938737831486
+  "gen_s_laptop": 443.21,
+  "gen_s_l4": 664.6414908813138,
+  "l4_time": "laptop time x B's L4/laptop ratio",
+  "trajectories_per_s": 3.984102762661951,
+  "usd_per_1k": 0.05159393916290829
  },
  "assumptions": {
   "command_a_usd_per_1M": [
@@ -73,6 +79,7 @@
    10.0
   ],
   "gpu_usd_hr": 0.74,
-  "throughput_gpu": "RTX 5070 Ti laptop, vLLM batched; latency per query not measured for Tiny Aya"
+  "l4_over_laptop_ratio": 1.4996085171393105,
+  "throughput": "vLLM batched, 331 items x 8 samples, T=0.7; B timed on the L4 (785 s) and on an RTX 5070 Ti laptop; per-query latency not measured for Tiny Aya"
  }
 }

@@ -32,6 +32,7 @@
 
 ### Nov 9
 
+- **L4 re-timing done (ROI item 1):** GRPO-B's 331 x 8 test generation took 785 s on the L4 vs 524 s on the laptop (ratio 1.50), same accuracy (12.5% vs 12.7% verified; `results/e5_l4_check.json`). VM TERMINATED after copy. ROI now priced at L4 speed: Tiny Aya B $0.061 per 1k (SFT $0.054, C $0.052, scaled by the ratio) vs Command A $4.25: about 70x cheaper per query, 11x per verified answer. Article, README and abstract updated.
 - **README "judge's 60-second view" and ABSTRACT.md (about 430 words) written.** Correction: Command A's F2 failure is mostly caught by the single-DB check too (32/36); the counterfactual copies catch the other 4 lucky passes. Article and abstract say so.
 - **Manual audit done:** 48 wrong test trajectories (16 each from sft_ho, B, C; 6 lucky passes + 10 other per model; seed 0, stratified by family), labelled with NL2SQL-BUGs categories (`results/manual_audit.jsonl`). Top errors: `order_date` for payment date 11, value linking 7, extra status filter 6. All 18 lucky passes are real semantic bugs; none is smuggling or hacking.
 - **L4 re-timing started** for the ROI table (`scripts/vm_time_l4.sh`: merge B on the VM, same 331 x 8 eval, autostop with hold). Per-query latency for Tiny Aya is left as future work (ARTICLE §10).
