@@ -1,0 +1,13 @@
+# When Execution Success Lies: counterfactual-database rewards for a small SQL agent
+
+Lexsi hackathon · Track 3 · PS #6 (data and database agents) + PS #9 (reward design and reward-hacking defences)
+
+Text-to-SQL agents trained with reinforcement learning are usually rewarded for matching the gold answer on one database. A wrong query can match by luck, and the reward then reinforces the luck. We test a defence: also execute the agent's final SQL on code-generated, bug-family-targeted counterfactual copies of the database that the agent never sees. Each item gets at least one answer-changing copy, which defeats literal smuggling, and at least one answer-preserving copy, which exposes fan-out and duplicate bugs.
+
+**Reward audit (no GPU, 1302 items).** The strict single-DB reward pays 29.5% [27.4, 31.6] of realistic buggy gold-mutants. The counterfactual reward, with copies chosen blind to the mutants, pays 16.8%: a 43% relative cut, short of our pre-registered 50%. Reward-hacking queries fall from 54.1% paid to 1.9%, and no correct or paraphrased query is rejected (0/2847). How often a bug is invisible on one DB depends on the size of the question's slice: 29% at 50 customers, under 1% at 500. AgentTune's built-in SQL reward can be gamed: padding the WHERE clause and always answering "yes" earns the honest score on every yes item.
+
+**Training (Tiny Aya Global 3.35B, LoRA, AgentTune GRPO).** From one SFT adapter we trained two 60-step GRPO runs that differ only in the reward: B (single DB) and C (counterfactual mean). On fresh test databases from a different generator (331 items × 8 samples), B raises verified accuracy from 9.4% to 12.7% (p = 0.006). C does not improve on SFT (9.0%), and our pre-registered hypothesis that C makes fewer silent errors than B is **not supported** (McNemar p = 0.61). Logging every rollout shows why: the two rewards disagreed on only about 7% of training rollouts. On our prompts, the policy rarely wrote the lucky queries the audit shows the single-DB reward would pay. A hand audit of 48 wrong trajectories finds that every lucky pass is an honest semantic bug (extra or missing filter, wrong column or table, wrong aggregate), not reward hacking.
+
+**ROI.** Cohere Command A, single-turn, reaches 81.0% verified at $4.25 per 1k queries; self-hosted Tiny Aya costs about $0.04. Command A also fails an entire fan-out template (0/36 verified). The single-DB check passes 4 of those 36, and the counterfactual copies reject all 4.
+
+We release the generator, all databases, every rollout with its per-DB reward, an in-browser demo, and `verify_all.py`, which re-derives every number. The audit is the headline result; the training comparison is reported as a null.

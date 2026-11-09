@@ -32,6 +32,7 @@
 
 ### Nov 9
 
+- **README "judge's 60-second view" and ABSTRACT.md (about 430 words) written.** Correction: Command A's F2 failure is mostly caught by the single-DB check too (32/36); the counterfactual copies catch the other 4 lucky passes. Article and abstract say so.
 - **Manual audit done:** 48 wrong test trajectories (16 each from sft_ho, B, C; 6 lucky passes + 10 other per model; seed 0, stratified by family), labelled with NL2SQL-BUGs categories (`results/manual_audit.jsonl`). Top errors: `order_date` for payment date 11, value linking 7, extra status filter 6. All 18 lucky passes are real semantic bugs; none is smuggling or hacking.
 - **L4 re-timing started** for the ROI table (`scripts/vm_time_l4.sh`: merge B on the VM, same 331 x 8 eval, autostop with hold). Per-query latency for Tiny Aya is left as future work (ARTICLE §10).
 - **GRPO-C done and evaluated: the training comparison is null.** VM TERMINATED by autostop after the watcher copied C's adapter, logs and reward log (hold file released).

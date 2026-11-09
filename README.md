@@ -1,6 +1,24 @@
 # When Execution Success Lies — counterfactual-DB rewards for a small SQL agent
 
-Lexsi hackathon, Track 3 (PS #6 + #9), team Teen_khapeetars. Plan and status: [plan.md](plan.md). Background: [research.md](research.md).
+Lexsi hackathon, Track 3 (PS #6 + #9), team Teen_khapeetars. Full write-up: [ARTICLE.md](ARTICLE.md). Plan: [plan.md](plan.md). Log: [progress.md](progress.md). Background: [research.md](research.md).
+
+## Judge's 60-second view
+
+A text-to-SQL agent is usually rewarded for matching the gold answer on **one** database, and a wrong query can match by luck. We also check it on code-generated **counterfactual copies** of the database that the agent never sees.
+
+| Result | Number (95% CI) |
+|---|---|
+| Buggy gold-mutants paid by the single-DB reward | 29.5% [27.4, 31.6] |
+| Same mutants paid by the counterfactual reward (CFs chosen blind to the mutants) | 16.8% [15.2, 18.6]: a 43% cut; pre-registered target 50%, not met |
+| Reward hacks (literal smuggling, hard-coded IDs, ...) paid: single-DB → counterfactual | 54.1% → 1.9% |
+| Correct queries rejected by the counterfactual reward | 0 / 2847 |
+| AgentTune's built-in SQL reward: padded WHERE + always "yes" | +2.45 vs +3.10 for honest SQL |
+| Test verified accuracy (Tiny Aya 3.35B): base / SFT / GRPO-B single-DB reward / GRPO-C counterfactual reward | 0.9% / 9.4% / **12.7%** / 9.0% |
+| GRPO-C vs GRPO-B (pre-registered H4) | **null**: C is not better (−3.7 pts verified, p < 0.001; silent error p = 0.61) |
+| Why: rollouts on which B's and C's rewards differed during training | about 7% |
+| Command A (single-turn) | 81.0% verified, $4.25 per 1k queries vs about $0.04 for Tiny Aya |
+
+Every number is re-derived from stored runs by `python verify_all.py`. Demo, data and models: `sqlcf-lexsi` on Hugging Face (private until submission).
 
 ## Setup (Linux / WSL)
 
@@ -41,6 +59,11 @@ Tiny Aya (`CohereLabs/tiny-aya-global`) is gated: accept the licence and use an 
 .venv-train/bin/python train.py grpo --reward R_cf_mean  --out runs/grpo_C # E3 condition C
 for m in sft grpo_B grpo_C; do .venv-train/bin/python evaluate.py gen --model runs/$m/merged --name ${m#grpo_}; done
 .venv/bin/python evaluate.py score --traj results/traj_*.jsonl             # E4
+.venv/bin/python scripts/figure3.py B C                                    # training-reward audit (needs runs/grpo_*_rewards.jsonl)
+source .secrets.env && .venv/bin/python scripts/e5_command_a.py            # E5: Command A on the test set (CO_API_KEY)
+.venv/bin/python scripts/e5_roi.py                                         # E5 ROI table
+.venv/bin/python scripts/audit_sample.py && .venv/bin/python scripts/audit_labels.py  # manual audit
+.venv/bin/python verify_all.py                                             # re-derive every results/*.json
 ```
 
 ## Layout
