@@ -6,6 +6,7 @@ __pycache__/
 .pytest_cache/
 *.pyc
 .env
+.secrets.env
 
 # generated data (rebuild with the commands in README.md) and third-party repos
 data/
