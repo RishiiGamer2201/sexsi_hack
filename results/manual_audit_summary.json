@@ -1,0 +1,57 @@
+{
+ "n": 48,
+ "by_label": {
+  "extra_filter": 6,
+  "wrong_date_col": 11,
+  "missing_current": 5,
+  "count_for_sum": 3,
+  "missing_table": 4,
+  "value_linking": 7,
+  "wrong_grain": 5,
+  "incoherent": 2,
+  "wrong_table": 1,
+  "invalid_sql": 4
+ },
+ "lucky_by_label": {
+  "extra_filter": 5,
+  "wrong_date_col": 4,
+  "missing_current": 2,
+  "count_for_sum": 3,
+  "missing_table": 3,
+  "wrong_table": 1
+ },
+ "by_model_label": {
+  "sft_ho": {
+   "extra_filter": 2,
+   "wrong_date_col": 4,
+   "missing_current": 1,
+   "count_for_sum": 1,
+   "missing_table": 2,
+   "value_linking": 3,
+   "wrong_grain": 1,
+   "incoherent": 2
+  },
+  "B": {
+   "extra_filter": 1,
+   "wrong_date_col": 4,
+   "missing_table": 1,
+   "wrong_table": 1,
+   "count_for_sum": 1,
+   "value_linking": 3,
+   "wrong_grain": 2,
+   "missing_current": 1,
+   "invalid_sql": 2
+  },
+  "C": {
+   "extra_filter": 3,
+   "wrong_date_col": 3,
+   "missing_current": 3,
+   "count_for_sum": 1,
+   "missing_table": 1,
+   "value_linking": 1,
+   "wrong_grain": 2,
+   "invalid_sql": 2
+  }
+ },
+ "smuggling_or_hacking": 0
+}

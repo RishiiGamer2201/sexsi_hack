@@ -109,6 +109,25 @@ Only about 7% of rollouts (86% × 8%) got a different reward under C than under 
 - **H6 (literal smuggling):** none at test for any trained model (0 of 2648 trajectories each), so there was nothing for C to remove.
 - **Gate G3:** B beats SFT on verified accuracy and is released as improved; C is released labelled as a null.
 - One training seed per condition: we cannot separate the B–C gap from run-to-run GRPO variance. B's gain over SFT may also be partly seed luck.
+
+**Manual audit** (`results/manual_audit.jsonl`, `scripts/audit_sample.py`). 48 wrong test trajectories, 16 per model (sft_ho, B, C), sampled with seed 0 and stratified by family. Each model contributes 6 lucky passes (right on the original DB, wrong on a counterfactual) and 10 other wrong answers. Every one was labelled by hand with NL2SQL-BUGs top-level categories.
+
+| Error | NL2SQL-BUGs category | All (48) | Lucky passes (18) |
+|---|---|---|---|
+| `order_date` used where the question says payment date | Attribute | 11 | 4 |
+| Product category matched against customer columns, or a hallucinated value | Value | 7 | 0 |
+| Extra status filter the question does not ask for | Condition | 6 | 5 |
+| No latest-row filter for "current tier" | Condition | 5 | 2 |
+| AVG over order items instead of per-order totals | Clause | 5 | 0 |
+| `invoice_adjustments` left out of net invoice | Table | 4 | 3 |
+| Does not run (undefined alias, unknown column or function) | Others | 4 | 0 |
+| `COUNT(*)` instead of `SUM(quantity)` | Function | 3 | 3 |
+| Incoherent, or an exploratory query given as the answer | Others | 2 | 0 |
+| Wrong table | Table | 1 | 1 |
+
+- **Every lucky pass is a real semantic bug** (an extra or missing filter, a wrong column, a missing table or the wrong aggregate) that happens to give the right number on one DB. None of the 48 is literal smuggling or reward hacking. So the single-DB reward's false positives on this agent are honest mistakes, which is exactly what counterfactual DBs are built to catch.
+- The most common error, ignoring "by payment date", is the same F2 trap Command A falls into.
+- The three models' error mixes are similar. With 16 per model, the audit cannot show a difference between B and C.
 - Caveat: the test generator catches 54 of 103 base-blind mutants, so test "verified" is *less* strict than the training reward.
 
 ### E5: ROI vs Command A
@@ -122,7 +141,7 @@ Command A (`command-a-03-2025`, trial API) answers each test item once, single-t
 | Tiny Aya GRPO-C | 9.0% [7.9, 10.1] | 14.0% | $0.034 | 6.0 trajectories/s batched |
 
 - The small model is about 100× cheaper per query, and about 16× cheaper per *verified-correct* answer, but at 13% accuracy it is not a usable replacement. The honest ROI reading: counterfactual rewards are a cheap way to make a small model's training signal trustworthy, not a way to match a frontier model in 60 GRPO steps.
-- Throughput was measured on an RTX 5070 Ti laptop GPU (vLLM) and priced at our L4 VM's on-demand rate ($0.74/hr). Per-query latency was not measured for Tiny Aya.
+- Throughput was measured on an RTX 5070 Ti laptop GPU (vLLM) and priced at our L4 VM's on-demand rate ($0.74/hr). ⟨L4 re-timing running⟩ Per-query latency was not measured for Tiny Aya (future work, §10).
 - **Command A falls into the fan-out trap too:** 0% verified on F2 (all 36 items from `F2_units_paid`). It joins `payments` directly, so an order with two payments counts its units twice, and it adds a `status != 'cancelled'` filter the question does not ask for. Lucky passes on the original DB: 1.8%.
 
 ### Nulls and what else we tried
@@ -143,7 +162,7 @@ Command A (`command-a-03-2025`, trial API) answers each test item once, single-t
 
 ## 10. With more credits
 
-Aya Expanse 8B; more GRPO steps and seeds; a VeriEQL oracle on passes for comparability with ReViSQL; adversarial counterfactuals seeded from the model's own near-misses.
+Aya Expanse 8B; more GRPO steps and seeds; a VeriEQL oracle on passes for comparability with ReViSQL; adversarial counterfactuals seeded from the model's own near-misses; per-query latency for the self-hosted agent (we measured batched throughput only), to complete the ROI comparison with Command A's per-call latency.
 
 ## 11. Limitations
 
