@@ -336,3 +336,43 @@ Three workstreams. Owners are suggestions; swap them freely.
 3. **Someone:** open the Discord ticket on publishing un-gated LoRA adapters of a gated CC-BY-NC base.
 4. **W1:** start `db.py` + F1 templates. The E0/E1 audit needs no GPU and should be running by tomorrow night.
 5. **W2:** start the AgentTune install and run the README Tiny Aya example.
+
+---
+
+## 9. Plan update after deep research (Nov 9)
+
+Source: [reports/Stronger counterfactual SQL entry.md](reports/Stronger%20counterfactual%20SQL%20entry.md), summarised in research.md §9. Anything that uses the VM or makes repos public needs the user's go.
+
+**Thesis for the rest of the hackathon:** the reward audit is the contribution, and a stricter verifier only matters when the single DB is often fooled on-policy. Our run never reached that point: training prompts passed the original DB 86% of the time, and only 7% of rollouts were lucky.
+
+### A. Zero GPU, before Nov 14
+| # | Task | Cost | Status |
+|---|---|---|---|
+| A1 | Replay training rewards: split the disagreement into lucky vs lenient | 10 min | **Done.** Lucky 7.1/7.2%, lenient 0.1/0.3%; C was truly stricter. Still to do: advantage sign flips under mean / min / penalty, with and without std scaling. |
+| A2 | Real-benchmark lucky-pass rates: Spider-dev predictions (ESM+, 9 systems; OmniSQL 7B/14B/32B) scored on the original DB vs Zhong test-suite DBs | 2–3 h CPU | todo |
+| A3 | Audit SkyRL-SQL's reward with our mutants and hacks: single DB, min over copies, and a multiset/ordered comparator ablation | 2 h CPU | todo |
+| A4 | Gold-free multi-DB voting on `results/traj_*.jsonl`. Compare first sample, single-DB majority, result-vector majority, and oracle pass@8. Add a "split cluster" flag for silent errors and report its precision/recall. | 3 h CPU | todo |
+| A5 | AgentTune reward exploit as a minimal repro, patch and regression test, with the AuditKIT tie-in. Offer it upstream; post nothing without the user's OK. | 2 h | todo |
+| A6 | Novelty sweep: arXiv check for multi-DB RL rewards after Sep 2026 | 30 min | todo |
+
+### B. Small GPU, before Nov 14 (under $10 total; needs user go; stop the VM between jobs)
+| # | Task | Cost | When |
+|---|---|---|---|
+| B1 | Second seed of B and of C-mean, same config, same 331×8 eval | ~$5, ~7 h | Only if the user picks the second-seed option |
+| B2 | Calibration: sample SFT 8× on small-slice (~50-customer) train items. Measure the lucky share of passes and the mixed-group fraction, and build a prefiltered (1–7 of 8 pass) item list. | ~$0.75, ~1 h | Feeds D1 |
+| B3 | One C-min or C-penalty run on the B2 curriculum | ~$2.5 | Optional |
+
+### C. Write-up changes (before Nov 14)
+1. TL;DR leads with the audit: 54.1%→1.9% hacks, 29.5%→16.8% mutants, 0/2847 false rejects, the AgentTune exploit, and A2/A3 numbers when done. Say "H4/H5 not supported" in the TL;DR.
+2. Before→after table: base 0.9 → SFT 9.4 → B 12.7 (C 9.0) with CIs, silent error, lucky-pass rate. ROI per *verified-correct* answer: about $5.25 vs $0.47 per 1k, ~11× (not 70× per query).
+3. Null paragraph: C was strictly stricter (the A1 replay); the training prompts were too easy (86% pass on the original DB). Give the exact CI with the seed caveat. Cite DualSQL's +0.4 / +3.0 as the parallel. Call the result neither noise nor "C hurts".
+4. Prior-art paragraph: Zhong 2020, SpotIt/VeriEQL, ReViSQL, DualSQL, rl-sql, then the novelty delta.
+5. A hack catalogue in the style of METR's report (name, 3-line SQL, x/N paid). A threats-to-validity box: one seed, one model, synthetic schemas, gold-informed copies. Name AgentTune and AuditKIT in section 2.
+6. Section 8 ("with more credits") as a pre-registration of D1 with a numeric prediction, e.g. "on lucky-prone items C-min beats B by ≥2 pts verified, mean of 3 seeds".
+
+### D. Nov 16–21 if shortlisted ($200 HF credits; check what hardware they buy and whether AgentTune runs there; sqlcf-l4 is the fallback)
+- D1: on the B2 curriculum, train B vs C-min vs C-penalty (−0.5), 3 seeds each, 120+ steps. Watch for empty or refusal SQL under the penalty.
+- D2: lucky-pass share per step. Does B learn to exploit while C-min does not?
+- D3: a format-only reward control.
+- D4: rejection-sampling fine-tune on CF-verified vs single-DB-verified samples.
+- D5: demo adds a gold-free "shaky answer" flag.

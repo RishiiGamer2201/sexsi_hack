@@ -19,11 +19,16 @@
 2. User: confirm Command A price at docs.cohere.com. (Done: AkshAgg and hi-phi-r25i are `sqlcf-lexsi` members, checked via the API on Nov 9.)
 3. User decision on the null: accept and polish (recommended) / second seed (about 7 h VM) / redesigned C.
 4. Publish the HF Article from ARTICLE.md; final submission form.
+5. Zero-GPU strengtheners from plan.md §9A (A2 Spider lucky-pass rates, A3 SkyRL reward audit, A4 gold-free multi-DB voting, A5 AgentTune repro and patch), then the write-up changes in §9C. GPU items in §9B need the user's go.
 
 ## Log
 
 ### Nov 9
 
+- **Deep research done** (4 parallel tracks: literature, training techniques, cheap extensions, framing/judging). Report: `reports/Stronger counterfactual SQL entry.md`; notes in `research_notes/`. Summaries added to research.md §9 (prior art, why the null, real-benchmark routes) and plan.md §9 (A–D action plan).
+  - Judging is official: validity check, then double-blind scoring on write-up clarity, practical usefulness, code quality and overall review. Before/after metrics and "meaningfully better for usage" are required. Shortlisted teams get Nov 16–21 and $200 HF credits.
+  - Closest work: ReViSQL (33% of positive SQL rewards are false positives, at 235B) and DualSQL (stricter matcher: +0.4 EX, the same near-null pattern). Must cite Zhong 2020 test suites.
+  - **Replay of the training logs (A1):** lucky rollouts 7.1% (B) / 7.2% (C); rollouts that fail the original but pass a copy 0.1% / 0.3%. So the report's "C was partly lenient" hypothesis is refuted, and C was truly stricter. Training prompts passed the original DB about 86% of the time, so most groups had no gradient and few lucky passes. That is why the stricter reward had little to act on.
 - **HF org members:** AkshAgg and hi-phi-r25i joined `sqlcf-lexsi` (API member list: AkshAgg, LogicPalette, hi-phi-r25i). Space, dataset and models still private.
 - **Model repos pushed, private:** `scripts/push_models.py` uploads the three LoRA adapters (sft_ho, B, C; no `ref/`, no `training_args.bin`) with the base model's CC-BY-NC-4.0 text as `LICENSE` (`docs/LICENSE-CC-BY-NC-4.0.txt`), a `NOTICE` naming Cohere's licence addendum and Acceptable Use Policy, and a card (base_model, G3 label, verified / single / silent error / F4 with 95% CIs), plus B and C's provenance, config and training stats. It also builds one private collection with Space, dataset and the 3 models. Verified via the API: all 6 private, models not gated. `--public --gated` will make the models public with automatic-approval gating, per the organisers' ruling.
 - **L4 re-timing done (ROI item 1):** GRPO-B's 331 x 8 test generation took 785 s on the L4 vs 524 s on the laptop (ratio 1.50), same accuracy (12.5% vs 12.7% verified; `results/e5_l4_check.json`). VM TERMINATED after copy. ROI now priced at L4 speed: Tiny Aya B $0.061 per 1k (SFT $0.054, C $0.052, scaled by the ratio) vs Command A $4.25: about 70x cheaper per query, 11x per verified answer. Article, README and abstract updated.

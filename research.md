@@ -369,3 +369,44 @@ Searches for "text-to-sql aya", "sql agent tiny aya", "counterfactual database r
 | 6 | GRPO effect may be null at 3B | Headline is the reward audit. Pre-register the gate. |
 | 7 | Discord announcements and office-hour times unknown | One teammate joins and reads #hackathon-lexsi. |
 | 8 | Public write-up | Describe the 4th family only as "superseded and corrected records" in SQL terms. No RAG framing. |
+
+---
+
+## 9. Deep research update (Nov 9): prior art, why the null, routes to real benchmarks
+
+Full report: [reports/Stronger counterfactual SQL entry.md](reports/Stronger%20counterfactual%20SQL%20entry.md). Notes with every source: `research_notes/Stronger counterfactual SQL entry/`.
+
+**Judging (official, [kickoff slides](https://hackathon.lexsi.ai/kickoff-slides/), [hackathon.lexsi.ai](https://hackathon.lexsi.ai/)).**
+- Lexsi first checks each entry is valid: artifacts public, write-up and checklist submitted.
+- Judges then score double-blind on four criteria: write-up clarity, practical usefulness, code quality and overall review. No weights are published.
+- Required: before/after metrics (more than one) and "how the model is meaningfully better for usage". An ROI comparison against a closed model is preferred.
+- Shortlist: Nov 16. Shortlisted teams get Nov 16–21 and $200 in HF credits to "prove their thesis", then Demo Day on Nov 22.
+- The site and the slides disagree on whether Track 3 is exempt from the two-repo rule. Name AgentTune and AuditKIT, with the features used, to be safe.
+
+**Closest prior and concurrent work (cite all; do not claim to be first to verify SQL on many DBs).**
+- Zhong, Yu & Klein, EMNLP 2020: distilled test suites (arXiv 2010.02840). Evaluation only. One DB misses ~5% of neighbour queries; the suite catches over 99%.
+- ReViSQL (arXiv 2603.20004, Aug 2026): 28.8–38.4% (mean 32.8%) of positive execution rewards on Kimi-K2.6 were refuted by VeriEQL. They reward 0.8 instead of 1 on a refuted match, and gain +2.8–3.8 at 235B, confounded with process rewards. This is the nearest match to our 29.5% mutant pay rate.
+- DualSQL (arXiv 2609.18135, Sep 2026): Qwen3-8B trained with the strict REX matcher. +0.4 EX and +3.0 on the strict metric, the same near-null pattern as ours.
+- SpotIt (arXiv 2510.26840): an SMT search for a distinguishing DB. It cuts top BIRD-dev systems by 10–14 points, but most disagreements are bad gold. Evaluation only; no window functions.
+- Gold noise: 52.8% of BIRD Mini-Dev has annotation errors (arXiv 2601.08778). This supports our choice of generated DBs with trusted gold.
+- Helff et al. (arXiv 2604.15149): the non-SQL analogue. With a normal verifier, a hacking gap opens around step 250; with a perturbation verifier it stays near zero. We trained 60 steps.
+- Unreviewed repo devChaudhari7/rl-sql scores rewards on 3 seeded DBs per schema.
+- **Our novelty delta:** solver-free, bug-family-targeted copies (answer-changing plus answer-preserving), hidden from the agent, used as a hard RL reward at 3B with a single-variable ablation, plus a gold-mutant audit of an open-source reward.
+
+**Why the training null is expected.**
+- Razin et al. (arXiv 2503.15477): RL speed depends on reward variance under the policy, not on how accurate the reward is.
+- Spurious Rewards (PMLR v306, Shao et al.): random rewards gave most of the gain on Qwen-Math. The effect depends on model family.
+- Lv et al. (arXiv 2505.22653): RLVR tolerates 40% flipped rewards. Our two rewards disagree on 7%.
+- Huang et al. (arXiv 2505.22203): a verifier's accuracy does not measure how hackable it is. Our audit measures hackability directly.
+
+**Replay of our own training logs (done Nov 9, `runs/grpo_{B,C}_rewards.jsonl`, 1440 rollouts each).**
+- The report's "lenient credit" hypothesis is **refuted**. Rollouts that fail the original DB but pass a copy: 2 in B (0.1%) and 5 in C (0.3%).
+- Lucky rollouts (original passes, a copy fails): 102 in B (7.1%) and 104 in C (7.2%). The ~7% disagreement is lucky passes, so C was truly stricter.
+- The original-DB pass rate on training prompts was ~86%. The training prompts were easy for the SFT model, and most groups were all-pass with zero gradient. That is the main reason the stricter reward had little to act on.
+- Under TRL's per-group std scaling, a group whose only pass is lucky gets the same advantages under C-mean as under B. In mixed groups, C-mean still scores a lucky pass above a failure. C-min (lucky = fail) or a penalty (lucky < fail) is what the literature supports: DeepCoder uses all-or-nothing rewards, and Arctic-Text2SQL-R1 found finer-grained rewards made models "lazy".
+
+**Zero-GPU routes to real data.**
+- `taoyds/test-suite-sql-eval` (Apache-2.0) ships Spider test-suite DBs.
+- Public Spider-dev prediction files exist: ESM+ (`bossben/ESMp`, 9 systems) and OmniSQL 7B/14B/32B. Re-scoring them on one DB vs the suite gives real lucky-pass rates.
+- SkyRL-SQL's reward (`skyrl_gym/envs/sql/utils.py`) uses one DB and compares rows as `frozenset`s, so it ignores order and duplicates. It is a second open reward to audit with our mutants. It has two separate holes: the DB hole (closed by copies) and the comparator hole (closed only by a multiset/ordered comparator).
+- Test-time use: single-DB voting does not help SQL (LEVER, Spider dev: 75.3 greedy vs 75.2 MBR-exec). Grouping samples by their result vector across DB copies, with no gold, can give a deployable "shaky answer" flag. Our copies are built with the gold query's bug families, so that version is an analysis; a deployable version needs schema-only copies.
