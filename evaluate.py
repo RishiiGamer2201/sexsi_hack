@@ -159,14 +159,14 @@ def score(traj_paths: list[Path], items_path: Path, out: Path) -> dict:
     for a_, b_ in PAIRS:
         if a_ in per and b_ in per:
             ids = sorted(set(per[a_]) & set(per[b_]))
-            s0a = [per[a_][i][0]["verified"] for i in ids]
-            s0b = [per[b_][i][0]["verified"] for i in ids]
-            ma = [sum(x["verified"] for x in per[a_][i]) / len(per[a_][i]) for i in ids]
-            mb = [sum(x["verified"] for x in per[b_][i]) / len(per[b_][i]) for i in ids]
-            res["comparisons"][f"{a_}_vs_{b_}"] = {
-                "n_items": len(ids),
-                "mcnemar_p_sample0": mcnemar_exact(sum(x and not y for x, y in zip(s0a, s0b)), sum(y and not x for x, y in zip(s0a, s0b))),
-                "verified_diff_bootstrap95": paired_bootstrap(ma, mb)}
+            c = res["comparisons"][f"{a_}_vs_{b_}"] = {"n_items": len(ids)}
+            for k, pre in (("verified", ""), ("silent_error", "silent_")):  # H4 is pre-registered on silent_error
+                s0a = [per[a_][i][0][k] for i in ids]
+                s0b = [per[b_][i][0][k] for i in ids]
+                ma = [sum(x[k] for x in per[a_][i]) / len(per[a_][i]) for i in ids]
+                mb = [sum(x[k] for x in per[b_][i]) / len(per[b_][i]) for i in ids]
+                c[f"{pre}mcnemar_p_sample0"] = mcnemar_exact(sum(x and not y for x, y in zip(s0a, s0b)), sum(y and not x for x, y in zip(s0a, s0b)))
+                c[f"{k}_diff_bootstrap95"] = paired_bootstrap(ma, mb)
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(res, indent=1))
     return res
