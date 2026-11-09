@@ -32,6 +32,10 @@
 
 ### Nov 9
 
+- **E4 for GRPO-B done** (local merge 129 s, generation 524 s; 331 test items x 4 samples):
+  - verified (passes original + all counterfactual DBs): base 0.9%, sft_ho 9.4%, **B 12.7%** (B vs sft_ho +3.2 pts, 95% CI [1.8, 4.8], McNemar p=0.006).
+  - inflation (single-DB pass minus verified): sft_ho 5.1%, B 5.1%, so GRPO with the single-DB reward raised accuracy but not the lucky-pass rate. C (R_cf_mean) is the test of whether that drops.
+  - silent error (tools all ran, SQL given, still wrong): sft_ho 65.4%, B 64.0%.
 - **GRPO-B done:** 60/60 steps in 3.5 h (12,561 s), adapter saved; the VM chain started GRPO-C at 02:36 UTC (step 36/60 at 05:00 UTC). B's adapter was copied to the laptop for a local fp16 merge and E4.
 - **Demo rebuilt without Gradio.** Gradio-Lite failed in the browser (its gradio pins `huggingface-hub<1.0`, the runtime has 2.4.0; Gradio-Lite's last release is Sep 2025).
   - Now `demo/index.html` loads pinned Pyodide 0.27.7 and runs `sqlcf/demo.py` (plain Python: scoring core plus a JSON API). The UI is hand-written HTML. `app.py` was removed.
