@@ -32,6 +32,13 @@
 
 ### Nov 9
 
+- **GRPO-C done and evaluated: the training comparison is null.** VM TERMINATED by autostop after the watcher copied C's adapter, logs and reward log (hold file released).
+  - Test verified: SFT 9.4%, B 12.7%, **C 9.0%**. C vs SFT −0.5 pts (p=0.21); C vs B −3.7 pts [−5.3, −2.3] (p<0.001).
+  - H4 not met: silent error C 61.2% vs B 64.0%, McNemar p=0.61 (bootstrap −2.9 pts [−5.3, −0.5]); C's drop comes with lower accuracy.
+  - H5: no held-out-family gain (F4: SFT 9.2%, B 9.9%, C 8.8%). H6: no literal smuggling by any model (0/2648).
+  - Lucky passes on test 5.1% for SFT, B and C. Figure 3: B and C rewards differed on only about 7% of training rollouts (lucky share 8.2% vs 8.3%; both fell over training), so the two runs saw almost the same signal.
+  - G3: B released as improved, C labelled null. One seed per condition, so the B-C gap may be run variance.
+  - ARTICLE.md updated with all C and E5 numbers; `verify_all.py` passes with every model.
 - **E5 done: Command A on all 331 test items** (single-turn, schema in the prompt, 1 sample per item, T=0.7):
   - verified **81.0%** [76.4, 84.8], single-DB 82.8%, lucky passes 1.8%. By family: F1 100%, F2 0%, F3 64%, F4 95%. Silent error is 0 by definition (no tool calls), so it is not comparable.
   - ROI (`results/e5_roi.json`): Command A $4.25 per 1k queries (median 9.7 s, p90 42 s); Tiny Aya B $0.04 per 1k. Per 1k *verified-correct* answers: Command A about $5.2, B about $0.32, but B's 12.7% accuracy is far from usable.

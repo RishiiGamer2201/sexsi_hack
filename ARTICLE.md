@@ -2,7 +2,7 @@
 
 Lexsi hackathon · Track 3 · Problem statements #6 (data and database agents) and #9 (reward design and reward-hacking defences) · team Teen_khapeetars
 
-> DRAFT (Nov 9). Cells marked ⟨TBD⟩ are filled from `results/` when GRPO-C and the Command A run finish.
+> DRAFT (Nov 9). All numbers are from stored runs in `results/`. The reward audit is the headline; the training comparison came out null and is reported as one.
 
 ## 1. The judge's 60-second view
 
@@ -16,8 +16,9 @@ A text-to-SQL agent is usually rewarded for matching the gold answer on **one** 
 | Correct queries (gold and paraphrases) rejected by the counterfactual reward | 0 / 2847 | same |
 | AgentTune's built-in SQL reward: padded WHERE + always answering "yes" | +2.45 mean vs +3.10 for honest SQL | `results/e0_agenttune.json` |
 | Test verified accuracy: base → SFT → GRPO-B (single-DB reward) | 0.9% → 9.4% → **12.7%** (B vs SFT +3.2 pts [1.8, 4.8], McNemar p = 0.006) | `results/e4_eval.json` |
-| Test verified accuracy, GRPO-C (counterfactual reward) | ⟨TBD⟩ | same |
-| Lucky passes (single-DB pass − verified): SFT 5.1%, B 5.1%, C ⟨TBD⟩ | | same |
+| Test verified accuracy, GRPO-C (counterfactual reward) | 9.0%: **no gain over SFT** (−0.5 pts, p = 0.21), and below B (−3.7 pts [−5.3, −2.3], p < 0.001). **H4 not met.** | same |
+| Lucky passes on test (single-DB pass − verified) | 5.1% for SFT, B and C alike | same |
+| Why the training result is weak: rollouts on which B's and C's rewards differed | about 7% (`figure3`) | `results/figure3_training_rewards.json` |
 | Command A (single-turn) verified accuracy, cost per 1k queries | 81.0% [76.4, 84.8], $4.25; Tiny Aya B $0.04 | `results/e5_roi.json` |
 
 Demo: `huggingface.co/spaces/sqlcf-lexsi/counterfactual-sql-demo` (runs in the browser) · Data: `huggingface.co/datasets/sqlcf-lexsi/counterfactual-sql-data` · Code: `github.com/RishiiGamer2201/sexsi_hack` · `python verify_all.py` re-derives every number above from stored runs.
@@ -56,7 +57,7 @@ All data is synthetic: an e-commerce schema from a seeded generator, with no per
 
 ## 6. Model collection
 
-⟨TBD: SFT, GRPO-B and GRPO-C adapters, pending the licence answer. Each is labelled "improved" only if it beats SFT on verified accuracy (gate G3).⟩
+SFT (`sft_ho`), GRPO-B (improved: beats SFT, p = 0.006) and GRPO-C (null: no gain over SFT), as LoRA adapters on Tiny Aya Global. ⟨Publishing is pending the organisers' answer on releasing adapters of a gated model.⟩
 
 ## 7. Data collection
 
@@ -81,7 +82,14 @@ Audit set, 1302 items; Wilson 95% CIs.
 Share of gold-mutants that pass the single-DB check: **29.2%** at 50 customers, 0.8% at 500, 0.2% at 5,000. What makes a bug invisible is the size of the question's slice (city × year × category) more than the DB size: small slices are common in real questions.
 
 ### E3: what the training reward paid for (figure 3)
-`results/figure3_training_rewards.json`. Under B, 86% of rollouts passed the original DB; 8.2% of those failed a counterfactual and were still fully paid (10.7% in the first half of training, 5.9% in the second). C: ⟨TBD⟩.
+`results/figure3_training_rewards.json`, 1440 rollouts per run.
+
+| Run | Rollouts passing the original DB | Share of those failing a counterfactual (all) | First half | Second half |
+|---|---|---|---|---|
+| B (`R_exec_rex`) | 86.4% | 8.2% | 10.7% | 5.9% |
+| C (`R_cf_mean`) | 86.5% | 8.3% | 11.1% | 5.7% |
+
+Only about 7% of rollouts (86% × 8%) got a different reward under C than under B, and under `R_cf_mean` the difference is partial credit, not zero. Lucky passes fell over training in **both** runs, so the single-DB reward was not drifting toward lucky queries in the first place. With this little contrast between the two rewards, 60 steps could not separate them.
 
 ### E4: test evaluation
 331 items × 8 samples; verified = correct on the original and all 4 test counterfactual DBs.
@@ -91,10 +99,16 @@ Share of gold-mutants that pass the single-DB check: **29.2%** at 50 customers, 
 | base | 0.9% | 1.4% | 0.5% | 4.5% | 0.1% | 0.0% | 0.6% |
 | SFT (B/C init) | 9.4% | 14.5% | 5.1% | 65.4% | 4.9% | 2.1% | 9.2% |
 | GRPO-B | 12.7% | 17.8% | 5.1% | 64.0% | 8.1% | 3.9% | 9.9% |
-| GRPO-C | ⟨TBD⟩ | | | | | | |
+| GRPO-C | 9.0% | 14.0% | 5.1% | 61.2% | 4.7% | 2.2% | 8.8% |
+| Command A (1 sample, no tools) | 81.0% | 82.8% | 1.8% | n/a | n/a | n/a | 94.9% |
 
-- B vs SFT: +3.2 pts verified [1.8, 4.8], McNemar p = 0.006. B's lucky-pass rate is unchanged.
-- **H4** (C has fewer silent errors than B), **H5** (held-out family) and **H6** (smuggling): ⟨TBD⟩.
+- **B vs SFT:** +3.2 pts verified [1.8, 4.8], McNemar p = 0.006. B's lucky-pass rate is unchanged.
+- **C vs SFT:** −0.5 pts [−1.5, +0.6], p = 0.21: no change. **C vs B:** −3.7 pts [−5.3, −2.3], p < 0.001.
+- **H4 not met.** Pre-registered: C has fewer silent errors than B, exact McNemar p < 0.05. C 61.2% vs B 64.0%. The bootstrap difference over 8 samples is −2.9 pts [−5.3, −0.5], but McNemar on sample 0 gives p = 0.61. C's lower silent-error rate comes with lower verified accuracy, so it is not an improvement.
+- **H5 (held-out family F4):** no gain. SFT 9.2%, B 9.9%, C 8.8%.
+- **H6 (literal smuggling):** none at test for any trained model (0 of 2648 trajectories each), so there was nothing for C to remove.
+- **Gate G3:** B beats SFT on verified accuracy and is released as improved; C is released labelled as a null.
+- One training seed per condition: we cannot separate the B–C gap from run-to-run GRPO variance. B's gain over SFT may also be partly seed luck.
 - Caveat: the test generator catches 54 of 103 base-blind mutants, so test "verified" is *less* strict than the training reward.
 
 ### E5: ROI vs Command A
@@ -105,13 +119,14 @@ Command A (`command-a-03-2025`, trial API) answers each test item once, single-t
 | Command A | 81.0% [76.4, 84.8] | 82.8% | $4.25 | median 9.7 s, p90 42 s per query |
 | Tiny Aya SFT | 9.4% [8.4, 10.6] | 14.5% | $0.036 | 5.7 trajectories/s batched |
 | Tiny Aya GRPO-B | 12.7% [11.5, 14.0] | 17.8% | $0.041 | 5.1 trajectories/s batched |
-| Tiny Aya GRPO-C | ⟨TBD⟩ | | | |
+| Tiny Aya GRPO-C | 9.0% [7.9, 10.1] | 14.0% | $0.034 | 6.0 trajectories/s batched |
 
 - The small model is about 100× cheaper per query, and about 16× cheaper per *verified-correct* answer, but at 13% accuracy it is not a usable replacement. The honest ROI reading: counterfactual rewards are a cheap way to make a small model's training signal trustworthy, not a way to match a frontier model in 60 GRPO steps.
 - Throughput was measured on an RTX 5070 Ti laptop GPU (vLLM) and priced at our L4 VM's on-demand rate ($0.74/hr). Per-query latency was not measured for Tiny Aya.
 - **Command A falls into the fan-out trap too:** 0% verified on F2 (all 36 items from `F2_units_paid`). It joins `payments` directly, so an order with two payments counts its units twice, and it adds a `status != 'cancelled'` filter the question does not ask for. Lucky passes on the original DB: 1.8%.
 
 ### Nulls and what else we tried
+- **The training comparison is null.** C did not beat B (H4) or SFT. The reward audit shows the single-DB reward *can* be fooled, but on our GRPO prompts the policy rarely produced the queries that fool it (about 7% of rollouts), so B and C trained on nearly the same signal. A fair test needs prompts where lucky passes are common: larger slices of held-out compositions, or counterfactuals seeded from the model's own near-misses.
 - H2 missed its pre-registered threshold (above).
 - With all 11 train templates in SFT, the SFT model solved the GRPO prompts deterministically: only 8 of 2670 rollouts passed the original DB but failed a counterfactual, so B and C would have seen almost the same reward. We held 3 templates out of SFT (`sft_ho`) so the rewards differ; test templates were never touched.
 - vLLM LoRA crashes on Tiny Aya's tied embeddings, so GRPO adapters are merged (fp32 merge, saved fp16) before eval. vLLM sleep mode segfaults on wake-up (vLLM 0.22.1), so it is off.
