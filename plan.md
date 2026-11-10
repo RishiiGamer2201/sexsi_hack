@@ -85,7 +85,7 @@ Team **Teen_khapeetars** · Track 3 · Problem statements **#6 (data and databas
 
 Smoke numbers (G=2, 1 prompt): SFT 22 s/step (16 examples); GRPO step 9.6 s and 18.4 s; eval gen ~2 min per model for 4 items. Rewards were 0 (wrong or missing final SQL after 0.05 SFT epochs), so no GRPO gradient yet; the model also writes a tool call and a final ```sql block in one turn. Both should change after full SFT. **G2 still open:** time real-config steps (G=6, 4 prompts) at the start of GRPO-B.
 
-**Compute risk:** asia-south1-a had an L4 stockout for ~1.5 h on Nov 8 (`scripts/vm_start.sh` retries). Moving the VM to asia-south1-b/c needs Rishi's OK.
+**Compute risk:** asia-south1-a had an L4 stockout for ~1.5 h on Nov 8 (`scripts/vm_start.sh` retries). Moving the VM to asia-south1-b/c needs Rishii's OK.
 
 ---
 
