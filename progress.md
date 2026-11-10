@@ -26,6 +26,7 @@
 
 ### Nov 10
 
+- **Team lead is Shreshth** (per Rishi). ARTICLE §12 said "Rishi (lead)"; fixed. "Lead's OK" notes in plan/progress were Rishi's rules, now say so. GCP quota: Vertex serving L4 case #77369396 approved 1→2 (unused); CE 2-GPU request denied (unneeded); credit left ₹2,972.81; VM TERMINATED.
 - **AgentTune#11 closed as fixed.** Maintainer aryapratinavseth merged PR #12 (`e56a109`, 07:13 UTC) with `_has_real_where`, opt-in `result_match_reward`, `tests/test_sql_reward_hacking.py`, and a CHANGELOG entry citing #11. No comments on the issue. Their PR also fixed a second bug we had not seen: real rollouts store tool output as `str(result)`, so `query_reward` read every result as "no rows". Our training never used AgentTune's SQL reward, so our runs are unaffected. ARTICLE §3 updated.
 
 ### Nov 9
@@ -267,10 +268,10 @@
   - vLLM sleep mode segfaults on wake-up, so it is off.
 - **VM:**
   - asia-south1-a had an L4 stockout for about 1.5 h; `scripts/vm_start.sh` retries the start.
-  - Moving the VM to another zone needs the lead's OK.
+  - Moving the VM to another zone needs Rishi's OK.
   - `~/.ssh/config` must be mode 600, or SSH rejects it once teammates share the group.
 - **Access:**
-  - Aksh: VM user `aksh` with sudo, in the lead's user group, able to read the HF token, plus IAM `compute.instanceAdmin.v1` on the VM.
+  - Aksh: VM user `aksh` with sudo, in Rishi's `admin_wsl` user group, able to read the HF token, plus IAM `compute.instanceAdmin.v1` on the VM.
   - A grant mistakenly made to a placeholder email was revoked within minutes; the audit log shows no activity from it.
 - **VM setup:** created `sqlcf-l4`, pinned the vendor repos, installed torch 2.11, vLLM 0.22.1 and TRL 1.7.1, and copied the data and the hackathon HF read token to the VM.
 - **Earlier (CPU):**

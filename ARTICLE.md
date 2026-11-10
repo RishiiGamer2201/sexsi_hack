@@ -264,4 +264,4 @@ The training null says our prompts were too easy, not that the reward is useless
 
 ## 12. Team
 
-Rishi (lead), Aksh (`AkshAgg`), Shreshth (`hi-phi-r25i`).
+Shreshth (lead, `hi-phi-r25i`), Rishi, Aksh (`AkshAgg`).
