@@ -19,10 +19,14 @@
 1. **Go public right AFTER the submission form is sent, not before** (user, Nov 9). Must be done before judging's validity check (deadline Nov 14 AoE; private repos count as missing): `scripts/push_models.py --public --gated`, then Space, dataset, collection public; GitHub repo public too if linked.
 2. Publish the HF Article from ARTICLE.md (needs public repos, so same moment); final submission form.
 3. Null decision made: **accept and polish** (user, Nov 9). No GPU runs; VM stays off.
-4. Watch Lexsi-Labs/AgentTune#11 for a reply; open a PR if maintainers want it.
+4. (Done Nov 10) AgentTune#11 fixed upstream by PR #12.
 5. Optional polish: demo "shaky answer" flag (D5).
 
 ## Log
+
+### Nov 10
+
+- **AgentTune#11 closed as fixed.** Maintainer aryapratinavseth merged PR #12 (`e56a109`, 07:13 UTC) with `_has_real_where`, opt-in `result_match_reward`, `tests/test_sql_reward_hacking.py`, and a CHANGELOG entry citing #11. No comments on the issue. Their PR also fixed a second bug we had not seen: real rollouts store tool output as `str(result)`, so `query_reward` read every result as "no rows". Our training never used AgentTune's SQL reward, so our runs are unaffected. ARTICLE §3 updated.
 
 ### Nov 9
 
