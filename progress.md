@@ -23,6 +23,15 @@
 
 ## Log
 
+### Nov 12
+
+- **D1 done** (`results/d1_teacher_filter.json`, teacher answers in `results/teacher_command_a.jsonl`): 353/353 calls, no quota stop.
+  - Single-DB filter keeps 258 teacher answers (73.1%); the counterfactual filter keeps 211 (59.8%).
+  - **47 lucky answers (18.2% of what a single-DB filter keeps) are wrong on the copies** and would have gone into distillation data.
+  - By family (n / single / verified): F1 152 / 111 / 88, F2 81 / 27 / 3, F3 120 / 120 / 120. No smuggled answers.
+- **D2 data fixed before training:** the first `build` dropped rejected items (211 rows), which confounds data size with the teacher and leaves F2 with 3 rows. Now the 142 rejected items keep sft_ho's gold trajectory: 353 rows, all prefixes identical to `data/sft.jsonl`, 211 endings replaced by the teacher's plan + SQL.
+- D2 (SFT + E4 eval) running on the local RTX 5070 Ti: `runs/distil/d2.log`.
+
 ### Nov 11
 
 - **Rishii's task from the team notes (Sexsi Researchers PDF): distil Command A?** Checked on the Hub (hackathon token):
@@ -35,6 +44,12 @@
     - D1 (API only, no GPU): Command A writes a plan + SQL on the 907 train items, and we measure how many teacher answers a single-DB filter would keep that the copies reject.
     - D2 (L4): SFT Tiny Aya on the verified teacher traces and compare with `sft_ho` (9.4%).
   - Not started: waiting for the user's go (trial-key quota; GPU spend). The PDF's "$4.25" is now $4.24.
+- **D1 + D2 approved (user); deadline extended to Nov 15 AoE.**
+  - D2 runs on the local RTX 5070 Ti (free), not the VM. The VM stays TERMINATED.
+  - New `scripts/distil.py` (`items` / `score` / `build`): the teacher answers the same 353 items as `sft_ho`; D2 data rebuilds `data/sft.jsonl` with the same seed and check queries, swapping in the teacher's verified SQL with its plan in the final turn.
+  - `e5_command_a.py --plan`; `scripts/local_distil.sh` (SFT, eval, scoring).
+  - `evaluate.PAIRS` adds sft_distil vs sft_ho and B vs sft_distil. `verify_all.py` reruns D1.
+  - Pilot of 3 calls: plans sensible, all 3 verified. Full teacher run started: 353 calls at T=0.3.
 - **Form matched (user sent screenshots of the real form).** The form asks for a separate HF model collection and HF dataset collection, a required HF Article URL, a Discord username, and checkboxes. Changes:
   - New private collection `counterfactual-sql-data-rollouts-and-traces-6af479430243b7731f85d144` holds the dataset.
   - The model collection now holds the 3 adapters + the Space; the dataset was removed from it.

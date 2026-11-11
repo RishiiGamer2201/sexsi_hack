@@ -20,6 +20,7 @@ STEPS = [
     [PY, "evaluate.py", "score", "--traj", *TRAJ],
     [PY, "scripts/audit_skyrl.py"],
     [PY, "scripts/a4_selfconsistency.py"],
+    [PY, "scripts/distil.py", "score"],  # D1 (results/teacher_command_a.jsonl: train items, so not a traj_ file)
 ]  # scripts/a2_spider_lucky.py is left out: it needs the external Spider test-suite DBs
 
 for cmd in STEPS:

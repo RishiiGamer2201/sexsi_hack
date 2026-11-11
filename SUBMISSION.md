@@ -1,6 +1,6 @@
 # Lexsi submission pack
 
-The form field by field, ready to paste. Submission deadline **Nov 14, 2026, end of day AoE**. Resubmission is allowed and the latest one counts. The form says **every repo in the collections must be public by Nov 15, 11:59 PM AoE**, so the form can go in while the repos are still private. The HF Article field is required, and there is no GitHub fallback for it.
+The form field by field, ready to paste. Submission deadline **Nov 15, 2026, end of day AoE** (extended by a day, team news Nov 11). Resubmission is allowed and the latest one counts. The form says **every repo in the collections must be public by Nov 15, 11:59 PM AoE**, so the form can go in while the repos are still private. The HF Article field is required, and there is no GitHub fallback for it.
 
 Generate the paste files first: `python scripts/make_hf_article.py` writes `runs/abstract.txt` and `runs/hf_article.md`.
 

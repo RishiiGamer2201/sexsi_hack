@@ -4,6 +4,7 @@ no tool). Writes results/traj_command_a.jsonl in evaluate.py's trajectory format
 so a crash never spends trial quota twice.
 
   source .secrets.env && .venv-train/bin/python scripts/e5_command_a.py [--limit N]
+  teacher for D1/D2: ... --items runs/distil/items.jsonl --out results/teacher_command_a.jsonl --plan --temperature 0.3
 """
 import argparse
 import json
@@ -22,11 +23,17 @@ MODEL = "command-a-03-2025"
 TOOL_LINE = "Use the run_sql tool to explore the data and check your query before answering. "
 assert TOOL_LINE in SYSTEM
 SYS = SYSTEM.replace(TOOL_LINE, "You cannot run queries; answer from the schema and definitions. ")
+DONE_LINE = "When you are done, reply with one short sentence and your final query in a ```sql block."
+assert DONE_LINE in SYS
+# D1/D2 teacher prompt: a short plan before the SQL, so the student can learn the reasoning, not only the query
+SYS_PLAN = SYS.replace(DONE_LINE, "Reply with a short plan (2-4 lines: the tables and joins you need, the business "
+                       "filters, and the duplicate, fan-out or superseded-record traps to avoid), then your final "
+                       "query in a ```sql block.")
 
 
-def chat(key, user, temperature, retries=6):
+def chat(key, user, temperature, retries=6, system=SYS):
     body = json.dumps({"model": MODEL, "temperature": temperature,
-                       "messages": [{"role": "system", "content": SYS}, {"role": "user", "content": user}]}).encode()
+                       "messages": [{"role": "system", "content": system}, {"role": "user", "content": user}]}).encode()
     for i in range(retries):
         req = urllib.request.Request("https://api.cohere.com/v2/chat", body, method="POST", headers={
             "Authorization": f"Bearer {key}", "Content-Type": "application/json", "Accept": "application/json"})
@@ -48,6 +55,7 @@ if __name__ == "__main__":
     ap.add_argument("--temperature", type=float, default=0.7, help="same as E4")
     ap.add_argument("--limit", type=int, default=0)
     ap.add_argument("--gap", type=float, default=3.2, help="seconds between calls (trial: ~20 calls/min)")
+    ap.add_argument("--plan", action="store_true", help="teacher prompt: plan, then SQL (scripts/distil.py)")
     a = ap.parse_args()
     key = os.environ.get("CO_API_KEY") or sys.exit("CO_API_KEY not set: source .secrets.env")
     items = [json.loads(l) for l in open(a.items)][: a.limit or None]
@@ -56,7 +64,7 @@ if __name__ == "__main__":
     print(f"{len(done)} done, {len(todo)} to go", flush=True)
     with open(a.out, "a") as f:
         for n, it in enumerate(todo, 1):
-            text, lat, usage = chat(key, user_message(it), a.temperature)
+            text, lat, usage = chat(key, user_message(it), a.temperature, system=SYS_PLAN if a.plan else SYS)
             f.write(json.dumps({"model": "command_a", "id": it["id"], "sample": 0, "latency_s": round(lat, 3),
                                 "billed": usage.get("billed_units", {}),
                                 "messages": [{"role": "assistant", "content": text}]}) + "\n")

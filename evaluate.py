@@ -28,7 +28,8 @@ TABLES_RE = re.compile(r"\b(from|join)\s+(customers|products|orders|order_items|
 IN_LIST_RE = re.compile(r"\bIN\s*\(\s*\d+(\s*,\s*\d+){2,}\s*\)", re.I)
 # sft_ho = SFT with the GRPO-only templates held out; B and C start from it. sft = all-templates SFT (Nov 9)
 PAIRS = [("C", "B"), ("B", "sft_ho"), ("C", "sft_ho"), ("sft_ho", "base"), ("sft", "base"), ("sft", "sft_ho"),
-         ("C", "command_a"), ("B", "command_a"), ("sft_ho", "command_a")]  # command_a: E5, 1 sample per item
+         ("C", "command_a"), ("B", "command_a"), ("sft_ho", "command_a"),  # command_a: E5, 1 sample per item
+         ("sft_distil", "sft_ho"), ("B", "sft_distil")]  # D2: SFT on Command A's verified answers (scripts/distil.py)
 
 
 # ---------------- generation (GPU) ----------------
