@@ -34,6 +34,7 @@
   - **sft_distil 3.3% verified [2.7, 4.0] vs sft_ho 9.4%: −6.2 pts [−8.3, −4.1], McNemar p < 0.001.** Silent errors 76.2% vs 65.4%. F1 falls from 30.9% to 4.2%.
   - Cause: Command A adds `status != 'cancelled'` in 325 of 353 answers (gold: 71). 186 of the 211 verified teacher endings have it, because on those items it never changed a result on any DB. The student writes it in 56% of its test answers (sft_ho 14%). All F1 sample-0 losses are `F1_category_buyers` ("count orders of any status").
   - Written up as ARTICLE E9, the 60-second view, the README table, an ABSTRACT sentence and SUBMISSION facts. The distilled adapter is not pushed to HF (a negative result; local in `runs/sft_distil`).
+  - verify_all OK (every results/*.json reproduced), 10 tests pass, abstract.txt 482 words. HF dataset (still private) re-pushed with the teacher answers, D1 result, `sft_distil.jsonl` and `traj_sft_distil.jsonl`; card updated.
 
 ### Nov 11
 

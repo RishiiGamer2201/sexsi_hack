@@ -42,11 +42,13 @@ for split in ("audit", "train", "test"):
 | `train/grpo_items.jsonl` | GRPO prompts (SFT pass rate in (0,1); 3 templates held out of SFT) |
 | `sft.jsonl`, `sft_all_templates.jsonl` | Scripted oracle trajectories for the SFT warm start |
 | `results/e0_*.json`, `results/e1_*.json`, `figure*.png` | Reward audit (FP/FN per reward) and blind rate vs DB size |
-| `results/traj_<model>.jsonl` | Test trajectories: base, sft, sft_ho, GRPO B, GRPO C, Command A |
+| `results/traj_<model>.jsonl` | Test trajectories: base, sft, sft_ho, GRPO B, GRPO C, Command A, sft_distil (E9) |
 | `results/e4_eval.json` | Verified / single-DB accuracy, silent error, smuggling, pass^k, McNemar, bootstrap |
 | `results/a2_spider_lucky.json` | E6: Spider-dev lucky passes of 8 published systems (question indices only; predictions from bossben/ESMp, DBs from Zhong et al. 2020) |
 | `results/a3_skyrl_audit.json` | E7: SkyRL-SQL reward audit on the E0 candidates |
 | `results/a4_selfconsistency.json` | E8: gold-free majority vote and shaky-answer flag on the test trajectories |
+| `results/teacher_command_a.jsonl`, `results/d1_teacher_filter.json` | E9: Command A plan + SQL on the 353 SFT train items; lucky answers a single-DB filter would keep |
+| `sft_distil.jsonl` | E9: the SFT trajectories with the 211 counterfactual-verified teacher endings swapped in (`traj_sft_distil` is the resulting model) |
 | `runs/grpo_<B,C>_rewards.jsonl` | Every GRPO rollout: final SQL, reward, per-DB pass vector |
 | `runs/grpo_<B,C>/` | `lexsi_provenance.json`, training config and stats |
 
@@ -69,7 +71,7 @@ for split in ("audit", "train", "test"):
         shutil.copy(f, stage / split / f.name)
     with tarfile.open(stage / split / "dbs.tar.gz", "w:gz") as t:
         t.add(src / "dbs", arcname="dbs")
-for f in ("sft.jsonl", "sft_all_templates.jsonl"):
+for f in ("sft.jsonl", "sft_all_templates.jsonl", "sft_distil.jsonl"):
     shutil.copy(ROOT / "data" / f, stage / f)
 (stage / "results").mkdir()
 for f in (ROOT / "results").iterdir():
