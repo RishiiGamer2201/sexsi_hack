@@ -257,6 +257,26 @@ By family (items / single / verified): F1 152 / 111 / 88, F2 81 / 27 / 3, F3 120
 - **Why: a teacher habit that the copies could not see.** Command A adds `status != 'cancelled'` to 325 of its 353 answers; the gold endings have it in 71. In 186 of the 211 verified answers the filter happened not to change the result on the original DB or on any copy, so they passed. The student learned the habit: it writes the filter in 56% of its test answers (SFT: 14%). Every F1 item that SFT gets right and the distilled model gets wrong (first sample) is from the template that says "count orders of any status".
 - **The lesson for counterfactual checks:** they verify an answer, not the reasoning behind it. A copy only catches a wrong filter if the copy changes what that filter selects. A teacher's systematic bias passes on every item where the data happens to agree. The fix is to add copies that flip each filter the question does not ask for (here, cancelled orders on "any status" items), or to check distillation data with copies that the teacher's habits break. We did not have time to run that.
 
+### E10: DPO from one checkpoint, single-DB vs counterfactual labels
+GRPO trained B and C separately, so their runs differ in more than the reward. Here one fixed set of rollouts is labelled two ways, and only the labels differ.
+
+**Setup.**
+- **Source:** sft_ho's 2670 rollouts on the 445 GRPO prompts (G = 6, T = 1.0). They grade into 1971 verified (V), 170 lucky (L: right on the original, wrong on a copy) and 529 failed (F).
+- **std labels** (what a single-DB verifier prefers): chosen from V + L, rejected from F. This gives 420 pairs, 96 of them with a lucky answer as the chosen one.
+- **cf labels:** chosen from V, rejected from L + F, lucky first. This gives 351 pairs, 30 of them with a lucky answer rejected.
+- **Training:** at most 3 pairs per prompt; sigmoid DPO with β = 0.1, lr 2e-5, 1 epoch, effective batch 16, seed 0; same test set (`scripts/dpo.py`).
+
+| Model | Verified [95% CI] | Single DB | Lucky pass | Invalid tool calls | Silent error |
+|---|---|---|---|---|---|
+| sft_ho (start) | 9.4% [8.4, 10.6] | 14.5% | 5.1% | 17.2% | 65.4% |
+| DPO, std labels | 9.7% [8.6, 10.9] | 14.1% | 4.5% | 20.0% | 62.4% |
+| DPO, cf labels | 8.1% [7.1, 9.2] | 12.5% | 4.5% | 27.4% | 55.1% |
+
+- **Null to slightly negative.** std vs sft_ho: +0.2 pts [−1.0, +1.5]. cf vs std: −1.6 pts [−2.6, −0.6] (bootstrap over items, all 8 samples); McNemar on the first sample p = 0.40.
+- **The lower silent-error rate is not a gain.** An error only counts as silent if every tool call succeeded, and cf makes far more failing tool calls (27% vs 20%).
+- **Lucky passes did not move:** 4.5% under both label sets. Only 30 of the 351 cf pairs actually teach "a lucky answer is worse". The same 7% problem as GRPO (§8, Nulls): on these prompts the two verifiers mostly agree, so most cf pairs are ordinary right-vs-wrong pairs.
+- **Both runs lose F1** (30.9% → 21.2% std, 10.4% cf) and gain a little on F2 (1.0% → 4.5%). One seed each, and cf has fewer pairs (351 vs 420), so the cf–std gap is not clean evidence that counterfactual labels hurt. What it shows is that they did not help.
+
 ### E11: partial credit instead of 0 or 1
 Would an intermediate reward give GRPO more to learn from? `scripts/partial_credit.py` gives each DB a credit between 0 and 1:
 - 1 for a match;

@@ -41,7 +41,11 @@
     - Replaced with a short DPO loop in `scripts/dpo.py`. It keeps logits only after the prefix that chosen and rejected share, which is the same loss, and computes reference log-probs once with the sft_ho adapter. Training now runs (loss 0.69 to 0.26 by step 13). Running on the local GPU: `scripts/local_dpo.sh`, which trains, merges and evals both runs.
   - **E11, partial credit (`scripts/partial_credit.py`, CPU), done.** Partial credit gives 6–8 pts more GRPO groups a signal, but pays mutants 0.66 against 0.30 for the binary reward, and pays literal smuggling 0.86 under P_cf against 0 under strict. AUROC is unchanged. Side finding: C's `R_cf_mean` put lucky rollouts above the group mean 59% of the time; strict never does. No GPU run, because the audit already rules it out.
   - **E12, period-edge copies (`scripts/period_copies.py`, CPU, 19 s), done.** Date bugs generated from 777 year-filtered audit queries were paid 92.1% by one DB and 91.4% by the existing copies; with one period-edge copy, 32.9%. 0/1554 correct queries rejected. On real answers it rejects only 2/305 (B), 2/218 (C) and 1/223 (sft_ho) verified test answers, and 4/998 GRPO rollouts. All are order date used instead of payment date.
-  - E11 and E12 are in ARTICLE and verify_all, and on the dataset card. E10's write-up waits for the DPO evals.
+  - E11 and E12 are in ARTICLE and verify_all, and on the dataset card.
+  - **E10 done (local GPU; training 741 s std, 660 s cf).** Verified: sft_ho 9.4%, dpo_std 9.7%, dpo_cf 8.1%. cf vs std −1.6 pts [−2.6, −0.6], McNemar on sample 0 p = 0.40. Lucky passes 4.5% for both.
+    - cf's lower silent-error rate (55.1% vs 62.4%) comes from more invalid tool calls (27.4% vs 20.0%), not from fewer wrong answers.
+    - Only 30 cf pairs reject a lucky answer. F1 falls in both runs.
+    - Written up as ARTICLE E10, a README row and SUBMISSION facts. The adapters are not pushed (local in `runs/dpo_{std,cf}`).
 
 ### Nov 11
 

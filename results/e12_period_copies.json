@@ -370,6 +370,20 @@
    "verified_fail_period": 0,
    "verified_fail_share": 0.0
   },
+  "dpo_cf": {
+   "single_db_pass": 231,
+   "single_pass_fail_period": 6,
+   "verified": 191,
+   "verified_fail_period": 3,
+   "verified_fail_share": 0.015706806282722512
+  },
+  "dpo_std": {
+   "single_db_pass": 279,
+   "single_pass_fail_period": 11,
+   "verified": 230,
+   "verified_fail_period": 9,
+   "verified_fail_share": 0.0391304347826087
+  },
   "sft": {
    "single_db_pass": 311,
    "single_pass_fail_period": 0,

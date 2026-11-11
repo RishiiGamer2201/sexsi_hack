@@ -20,6 +20,7 @@ A text-to-SQL agent is usually rewarded for matching the gold answer on **one** 
 | Why: rollouts on which B's and C's rewards differed during training | about 7% |
 | Command A (single-turn) | 81.0% verified, $4.24 per 1k queries vs $0.06 for Tiny Aya B on an L4 |
 | Distilling Command A (E9): lucky teacher answers caught by the copies / SFT on the verified ones | 47 of 258 (18.2%) / **3.3%** verified vs 9.4%: the student copies a `status != 'cancelled'` habit the copies cannot see |
+| DPO from sft_ho, same rollouts, single-DB vs counterfactual labels (E10) | 9.7% vs 8.1% verified (start 9.4%): no gain; lucky passes 4.5% under both |
 | Partial credit instead of 0/1 (E11): mutants paid on average / literal smuggling paid | 0.66 vs 0.30 binary / 0.86 vs 0 strict: more signal, all of it towards wrong answers |
 | Period-edge copy for year questions (E12): date bugs paid / real verified answers it rejects | 91% → **33%**, 0 of 1554 correct rejected / under 1% (B 2 of 305, C 2 of 218) |
 
