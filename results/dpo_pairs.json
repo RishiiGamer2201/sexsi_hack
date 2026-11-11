@@ -1,0 +1,24 @@
+{
+ "source": "runs/traj_sft_ho_grpoprompts.jsonl",
+ "rollouts": {
+  "V": 1971,
+  "L": 170,
+  "F": 529
+ },
+ "per_item_cap": 3,
+ "max_len": 3072,
+ "std": {
+  "pairs": 420,
+  "prompts": 140,
+  "dropped_too_long": 0,
+  "chosen_lucky": 96,
+  "rejected_lucky": 0
+ },
+ "cf": {
+  "pairs": 351,
+  "prompts": 117,
+  "dropped_too_long": 0,
+  "chosen_lucky": 0,
+  "rejected_lucky": 30
+ }
+}

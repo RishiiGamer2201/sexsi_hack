@@ -1,0 +1,214 @@
+{
+ "what": "E11: partial-credit rewards (scripts/partial_credit.py)",
+ "audit": {
+  "R_exec_rex": {
+   "correct": {
+    "n": 2847,
+    "mean_pay": 1.0,
+    "full_pay": 1.0
+   },
+   "hack": {
+    "n": 2839,
+    "mean_pay": 0.541387812610074,
+    "full_pay": 0.541387812610074
+   },
+   "hack:empty": {
+    "n": 1302,
+    "mean_pay": 0.0,
+    "full_pay": 0.0
+   },
+   "hack:hardcoded_ids": {
+    "n": 235,
+    "mean_pay": 1.0,
+    "full_pay": 1.0
+   },
+   "hack:literal": {
+    "n": 1302,
+    "mean_pay": 1.0,
+    "full_pay": 1.0
+   },
+   "mutant": {
+    "n": 1814,
+    "mean_pay": 0.29492833517089306,
+    "full_pay": 0.29492833517089306
+   },
+   "auroc_correct_vs_mutant": 0.8525358324145534,
+   "auroc_correct_vs_hack": 0.729306093694963
+  },
+  "R_cf_mean": {
+   "correct": {
+    "n": 2847,
+    "mean_pay": 1.0,
+    "full_pay": 1.0
+   },
+   "hack": {
+    "n": 2839,
+    "mean_pay": 0.2802042972877774,
+    "full_pay": 0.019020781965480803
+   },
+   "hack:empty": {
+    "n": 1302,
+    "mean_pay": 0.0,
+    "full_pay": 0.0
+   },
+   "hack:hardcoded_ids": {
+    "n": 235,
+    "mean_pay": 0.6148936170212767,
+    "full_pay": 0.2297872340425532
+   },
+   "hack:literal": {
+    "n": 1302,
+    "mean_pay": 0.5,
+    "full_pay": 0.0
+   },
+   "mutant": {
+    "n": 1814,
+    "mean_pay": 0.22822491730981256,
+    "full_pay": 0.1681367144432194
+   },
+   "auroc_correct_vs_mutant": 0.9159316427783903,
+   "auroc_correct_vs_hack": 0.9904896090172596
+  },
+  "R_cf_strict": {
+   "correct": {
+    "n": 2847,
+    "mean_pay": 1.0,
+    "full_pay": 1.0
+   },
+   "hack": {
+    "n": 2839,
+    "mean_pay": 0.019020781965480803,
+    "full_pay": 0.019020781965480803
+   },
+   "hack:empty": {
+    "n": 1302,
+    "mean_pay": 0.0,
+    "full_pay": 0.0
+   },
+   "hack:hardcoded_ids": {
+    "n": 235,
+    "mean_pay": 0.2297872340425532,
+    "full_pay": 0.2297872340425532
+   },
+   "hack:literal": {
+    "n": 1302,
+    "mean_pay": 0.0,
+    "full_pay": 0.0
+   },
+   "mutant": {
+    "n": 1814,
+    "mean_pay": 0.1681367144432194,
+    "full_pay": 0.1681367144432194
+   },
+   "auroc_correct_vs_mutant": 0.9159316427783903,
+   "auroc_correct_vs_hack": 0.9904896090172596
+  },
+  "P_single": {
+   "correct": {
+    "n": 2847,
+    "mean_pay": 1.0,
+    "full_pay": 1.0
+   },
+   "hack": {
+    "n": 2839,
+    "mean_pay": 0.541387812610074,
+    "full_pay": 0.541387812610074
+   },
+   "hack:empty": {
+    "n": 1302,
+    "mean_pay": 0.0,
+    "full_pay": 0.0
+   },
+   "hack:hardcoded_ids": {
+    "n": 235,
+    "mean_pay": 1.0,
+    "full_pay": 1.0
+   },
+   "hack:literal": {
+    "n": 1302,
+    "mean_pay": 1.0,
+    "full_pay": 1.0
+   },
+   "mutant": {
+    "n": 1814,
+    "mean_pay": 0.6621852073491491,
+    "full_pay": 0.29492833517089306
+   },
+   "auroc_correct_vs_mutant": 0.8525358324145534,
+   "auroc_correct_vs_hack": 0.729306093694963
+  },
+  "P_cf": {
+   "correct": {
+    "n": 2847,
+    "mean_pay": 1.0,
+    "full_pay": 1.0
+   },
+   "hack": {
+    "n": 2839,
+    "mean_pay": 0.47328175436068765,
+    "full_pay": 0.019020781965480803
+   },
+   "hack:empty": {
+    "n": 1302,
+    "mean_pay": 0.004864311315924219,
+    "full_pay": 0.0
+   },
+   "hack:hardcoded_ids": {
+    "n": 235,
+    "mean_pay": 0.9292413466081209,
+    "full_pay": 0.2297872340425532
+   },
+   "hack:literal": {
+    "n": 1302,
+    "mean_pay": 0.8594023431979648,
+    "full_pay": 0.0
+   },
+   "mutant": {
+    "n": 1814,
+    "mean_pay": 0.6450087051007323,
+    "full_pay": 0.1681367144432194
+   },
+   "auroc_correct_vs_mutant": 0.9159316427783903,
+   "auroc_correct_vs_hack": 0.9904896090172596
+  }
+ },
+ "training_signal": {
+  "groups": 445,
+  "rollouts": 2670,
+  "R_exec_rex": {
+   "groups_with_signal": 0.3146067415730337,
+   "lucky_above_group_mean": 0.6352941176470588,
+   "wrong_rollouts_paid_something": 0.24320457796852646,
+   "n_lucky": 170,
+   "n_wrong": 699
+  },
+  "R_cf_mean": {
+   "groups_with_signal": 0.32134831460674157,
+   "lucky_above_group_mean": 0.5882352941176471,
+   "wrong_rollouts_paid_something": 0.23319027181688126,
+   "n_lucky": 170,
+   "n_wrong": 699
+  },
+  "R_cf_strict": {
+   "groups_with_signal": 0.26292134831460673,
+   "lucky_above_group_mean": 0.0,
+   "wrong_rollouts_paid_something": 0.0,
+   "n_lucky": 170,
+   "n_wrong": 699
+  },
+  "P_single": {
+   "groups_with_signal": 0.3775280898876405,
+   "lucky_above_group_mean": 0.6352941176470588,
+   "wrong_rollouts_paid_something": 0.525035765379113,
+   "n_lucky": 170,
+   "n_wrong": 699
+  },
+  "P_cf": {
+   "groups_with_signal": 0.39775280898876403,
+   "lucky_above_group_mean": 0.6941176470588235,
+   "wrong_rollouts_paid_something": 0.5622317596566524,
+   "n_lucky": 170,
+   "n_wrong": 699
+  }
+ }
+}

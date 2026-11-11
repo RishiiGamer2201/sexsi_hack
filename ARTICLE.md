@@ -257,6 +257,53 @@ By family (items / single / verified): F1 152 / 111 / 88, F2 81 / 27 / 3, F3 120
 - **Why: a teacher habit that the copies could not see.** Command A adds `status != 'cancelled'` to 325 of its 353 answers; the gold endings have it in 71. In 186 of the 211 verified answers the filter happened not to change the result on the original DB or on any copy, so they passed. The student learned the habit: it writes the filter in 56% of its test answers (SFT: 14%). Every F1 item that SFT gets right and the distilled model gets wrong (first sample) is from the template that says "count orders of any status".
 - **The lesson for counterfactual checks:** they verify an answer, not the reasoning behind it. A copy only catches a wrong filter if the copy changes what that filter selects. A teacher's systematic bias passes on every item where the data happens to agree. The fix is to add copies that flip each filter the question does not ask for (here, cancelled orders on "any status" items), or to check distillation data with copies that the teacher's habits break. We did not have time to run that.
 
+### E11: partial credit instead of 0 or 1
+Would an intermediate reward give GRPO more to learn from? `scripts/partial_credit.py` gives each DB a credit between 0 and 1:
+- 1 for a match;
+- for a single number, its closeness, 1 − |pred − gold| / |gold|;
+- otherwise the F1 of the result rows.
+
+`P_single` is the credit on the original DB; `P_cf` is the mean credit over the original and every copy. Both are scored on the same E0 candidates (mutant-blind copies) and the same 2670 sft_ho rollouts on the 445 GRPO prompts.
+
+| Reward | Mean pay: mutants / hacks | AUROC, correct vs mutant / hack | GRPO groups with any signal | Lucky rollouts above group mean | Wrong rollouts paid > 0 |
+|---|---|---|---|---|---|
+| `R_exec_rex` (one DB, 0/1; B) | 0.30 / 0.54 | 0.85 / 0.73 | 31.5% | 63.5% | 24.3% |
+| `R_cf_mean` (copies, 0/1 mean; C) | 0.23 / 0.28 | 0.92 / 0.99 | 32.1% | 58.8% | 23.3% |
+| `R_cf_strict` (all DBs) | 0.17 / 0.02 | 0.92 / 0.99 | 26.3% | 0% | 0% |
+| `P_single` (one DB, partial) | 0.66 / 0.54 | 0.85 / 0.73 | 37.8% | 63.5% | 52.5% |
+| `P_cf` (copies, partial) | 0.65 / 0.47 | 0.92 / 0.99 | 39.8% | 69.4% | 56.2% |
+
+- **More signal, but for the wrong answers.** Partial credit gives 6–8 pts more groups some reward variance. That is the argument for it. But it pays mutants more than twice as much as the binary reward (0.66 vs 0.30).
+- **It reopens smuggling.** A query that hard-codes a number close to the answer earns 0.86 under `P_cf`, against 0 under `R_cf_strict`. A near-miss number is exactly what lucky and hacked queries produce, so the copies cannot fix it.
+- **It ranks queries no better.** AUROC is the same as the binary reward on the same DBs. Partial credit adds no information about correctness, only gradient towards wrong answers that are close.
+- **A side finding about C.** Our C reward (`R_cf_mean`) still put lucky rollouts above their group's mean 59% of the time, because 1 of 2 copies right still earns half. `R_cf_strict` never does. This is one more reason C did not separate from B, and why §10 uses C-min (all DBs must pass).
+- We did not spend GPU on a partial-credit run: the audit already shows it pays for the behaviour we want to remove.
+
+### E12: period-edge copies for time-filtered questions
+Our questions ask about a year ("revenue from Delhi in 2024"). Would a copy built around the asked period catch date bugs? This tests the idea of a separate DB per month, at the year granularity our templates use. `scripts/period_copies.py` adds one copy per item, built as follows:
+- Half of the slice's orders in year Y move to Jan 1 and Dec 31 of Y, alternating.
+- Half of its orders in the other year move to the day just outside Y.
+- Payments, refunds and adjustments move with their order. A moved payment lands 0, 1 or its usual number of days after the order, so a Dec 31 order can be paid in January.
+- Every copy passes the business-rule checks.
+
+The date bugs are generated from each of the 777 year-filtered audit queries: Dec 31 excluded, Jan 1 excluded, Jan 1 of the next year included, and order date swapped with payment date. The whole run takes 19 s on a CPU.
+
+| Date bugs paid (n = 2535) [95% CI] | |
+|---|---|
+| Original DB only | 92.1% [91.0, 93.1] |
+| Original + the 2 mutant-blind copies (E0 setting) | 91.4% [90.2, 92.4] |
+| Original + the greedy copies (training reward) | 90.9% [89.7, 92.0] |
+| **Original + the 2 copies + the period-edge copy** | **32.9%** [31.1, 34.7] |
+| Correct queries (gold, paraphrases) rejected by the new copy | **0 / 1554** |
+
+- **The copies we had were blind to dates:** they edit cities, statuses and tiers, not when things happen. One period-edge copy cuts the date bugs paid from 91% to 33%, with no false rejects. Dropping Dec 31 goes from 97% paid to 19%.
+- **Our models rarely make these bugs, though.** Replaying real answers on the year items, the new copy rejects:
+  - 2 of B's 305 verified test answers, 2 of C's 218 and 1 of sft_ho's 223;
+  - 4 of sft_ho's 998 verified GRPO rollouts (0.4%).
+  
+  Each failure is the same bug: the question says "by payment date" and the model filters on the order date.
+- **So:** period copies close a real hole in the verifier, which matters for a stronger policy or a real warehouse. They would change our accuracy numbers by under 1 pt. The bug families a verifier needs are the ones the policy actually produces.
+
 ### Nulls and what else we tried
 - **The training comparison is null, and it is neither noise nor evidence that the counterfactual reward hurts.** On the eval set, C is 3.7 pts below B (95% CI [−5.3, −2.3], exact McNemar p < 0.001). That gap is real for these two adapters, but we trained one seed each, so we cannot say how much is GRPO run-to-run variance. Three facts explain why we expected little difference:
   1. **C really was stricter.** Replaying all 1440 training rollouts per run, C's reward was lower than B's on 7.1% (B run) and 7.2% (C run) of rollouts because they passed the original DB by luck. It was *higher* on only 0.1% and 0.3%.

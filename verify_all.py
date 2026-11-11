@@ -21,6 +21,8 @@ STEPS = [
     [PY, "scripts/audit_skyrl.py"],
     [PY, "scripts/a4_selfconsistency.py"],
     [PY, "scripts/distil.py", "score"],  # D1 (results/teacher_command_a.jsonl: train items, so not a traj_ file)
+    [PY, "scripts/partial_credit.py"],  # E11
+    [PY, "scripts/period_copies.py"],  # E12
 ]  # scripts/a2_spider_lucky.py is left out: it needs the external Spider test-suite DBs
 
 for cmd in STEPS:

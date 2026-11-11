@@ -20,6 +20,8 @@ A text-to-SQL agent is usually rewarded for matching the gold answer on **one** 
 | Why: rollouts on which B's and C's rewards differed during training | about 7% |
 | Command A (single-turn) | 81.0% verified, $4.24 per 1k queries vs $0.06 for Tiny Aya B on an L4 |
 | Distilling Command A (E9): lucky teacher answers caught by the copies / SFT on the verified ones | 47 of 258 (18.2%) / **3.3%** verified vs 9.4%: the student copies a `status != 'cancelled'` habit the copies cannot see |
+| Partial credit instead of 0/1 (E11): mutants paid on average / literal smuggling paid | 0.66 vs 0.30 binary / 0.86 vs 0 strict: more signal, all of it towards wrong answers |
+| Period-edge copy for year questions (E12): date bugs paid / real verified answers it rejects | 91% → **33%**, 0 of 1554 correct rejected / under 1% (B 2 of 305, C 2 of 218) |
 
 Every number is re-derived from stored runs by `python verify_all.py`. On Hugging Face: [model collection](https://huggingface.co/collections/sqlcf-lexsi/counterfactual-db-rewards-for-a-small-sql-agent-6af174f77dbae0bf0a54c3c4) (adapters + demo) and [data collection](https://huggingface.co/collections/sqlcf-lexsi/counterfactual-sql-data-rollouts-and-traces-6af479430243b7731f85d144): [demo](https://huggingface.co/spaces/sqlcf-lexsi/counterfactual-sql-demo), [data](https://huggingface.co/datasets/sqlcf-lexsi/counterfactual-sql-data), adapters [SFT](https://huggingface.co/sqlcf-lexsi/tiny-aya-global-sqlcf-sft) / [GRPO-B](https://huggingface.co/sqlcf-lexsi/tiny-aya-global-sqlcf-grpo-b) / [GRPO-C](https://huggingface.co/sqlcf-lexsi/tiny-aya-global-sqlcf-grpo-c). The adapters carry the base model's CC-BY-NC-4.0 licence and are gated with automatic approval.
 
@@ -69,6 +71,9 @@ source .secrets.env && .venv/bin/python scripts/e5_command_a.py            # E5:
 .venv/bin/python scripts/audit_skyrl.py                                    # E7: SkyRL-SQL reward audit
 .venv/bin/python scripts/a4_selfconsistency.py                             # E8: gold-free voting + shaky-answer flag
 .venv/bin/python scripts/agenttune_repro.py                                # AgentTune reward exploit: before / after patch
+.venv/bin/python scripts/partial_credit.py                                 # E11: partial-credit rewards
+.venv/bin/python scripts/period_copies.py                                  # E12: period-edge copies vs date bugs
+bash scripts/local_dpo.sh                                                  # E10: DPO std vs cf labels (16 GB GPU)
 # E6 needs external/testsuite_db/database (Zhong et al. test-suite DBs, Google Drive 1mkCx2GOFIqNesD4y8TDAO1yX1QZORP5w)
 # and external/ESMp (git clone https://github.com/bossben/ESMp, checkout 91dd85b)
 .venv/bin/python scripts/a2_spider_lucky.py                                # E6: Spider-dev lucky passes

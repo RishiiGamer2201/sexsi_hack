@@ -63,6 +63,9 @@ Generate the paste files first: `python scripts/make_hf_article.py` writes `runs
 - **Distilling Command A (E9, Rishii's task):**
   - The copies catch 47 lucky teacher answers, 18.2% of the 258 a single-DB filter keeps.
   - SFT on the 211 verified ones lowers Tiny Aya from 9.4% to 3.3% (p < 0.001), because the student learns a `status != 'cancelled'` habit the copies never flip.
+- **Aksh's tasks (E10–E12):**
+  - Partial credit (E11) pays mutants 0.66 on average, against 0.30 for the binary reward, and pays literal smuggling 0.86, against 0 for the strict reward. So it was not trained.
+  - A period-edge copy (E12) cuts date bugs paid from 91% to 33%, with 0 of 1554 correct queries rejected. It rejects under 1% of the models' real verified answers.
 - **Licences:**
   - adapters: CC-BY-NC-4.0 (the base model's licence), gated with automatic approval, per the organisers' Nov 9 ruling;
   - data: CC-BY-NC-4.0, synthetic, no personal data.

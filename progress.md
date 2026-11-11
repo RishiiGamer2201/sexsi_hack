@@ -35,6 +35,13 @@
   - Cause: Command A adds `status != 'cancelled'` in 325 of 353 answers (gold: 71). 186 of the 211 verified teacher endings have it, because on those items it never changed a result on any DB. The student writes it in 56% of its test answers (sft_ho 14%). All F1 sample-0 losses are `F1_category_buyers` ("count orders of any status").
   - Written up as ARTICLE E9, the 60-second view, the README table, an ABSTRACT sentence and SUBMISSION facts. The distilled adapter is not pushed to HF (a negative result; local in `runs/sft_distil`).
   - verify_all OK (every results/*.json reproduced), 10 tests pass, abstract.txt 482 words. HF dataset (still private) re-pushed with the teacher answers, D1 result, `sft_distil.jsonl` and `traj_sft_distil.jsonl`; card updated.
+- **Aksh's three items (from the team PDF), started on the user's "Do all 3":**
+  - **E10, DPO from one checkpoint (std vs counterfactual labels):** pairs come from sft_ho's 2670 GRPO-prompt rollouts (`scripts/dpo.py pairs`). Std has 420 pairs and cf has 351; none were dropped for length.
+    - TRL's DPOTrainer ran out of memory at step 0 every time. WSL reported it as "CUDA driver error: device not ready": the 262k-vocab logits over a ~1600-token sequence (prompt ~1270 tokens) are about 10 GB.
+    - Replaced with a short DPO loop in `scripts/dpo.py`. It keeps logits only after the prefix that chosen and rejected share, which is the same loss, and computes reference log-probs once with the sft_ho adapter. Training now runs (loss 0.69 to 0.26 by step 13). Running on the local GPU: `scripts/local_dpo.sh`, which trains, merges and evals both runs.
+  - **E11, partial credit (`scripts/partial_credit.py`, CPU), done.** Partial credit gives 6–8 pts more GRPO groups a signal, but pays mutants 0.66 against 0.30 for the binary reward, and pays literal smuggling 0.86 under P_cf against 0 under strict. AUROC is unchanged. Side finding: C's `R_cf_mean` put lucky rollouts above the group mean 59% of the time; strict never does. No GPU run, because the audit already rules it out.
+  - **E12, period-edge copies (`scripts/period_copies.py`, CPU, 19 s), done.** Date bugs generated from 777 year-filtered audit queries were paid 92.1% by one DB and 91.4% by the existing copies; with one period-edge copy, 32.9%. 0/1554 correct queries rejected. On real answers it rejects only 2/305 (B), 2/218 (C) and 1/223 (sft_ho) verified test answers, and 4/998 GRPO rollouts. All are order date used instead of payment date.
+  - E11 and E12 are in ARTICLE and verify_all, and on the dataset card. E10's write-up waits for the DPO evals.
 
 ### Nov 11
 
