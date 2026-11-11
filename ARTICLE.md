@@ -2,7 +2,7 @@
 
 Lexsi hackathon · Track 3 · Problem statements #6 (data and database agents) and #9 (reward design and reward-hacking defences) · team Teen_khapeetars
 
-> **Links:** [HF collection](https://huggingface.co/collections/sqlcf-lexsi/counterfactual-db-rewards-for-a-small-sql-agent-6af174f77dbae0bf0a54c3c4) · [demo](https://huggingface.co/spaces/sqlcf-lexsi/counterfactual-sql-demo) · [data](https://huggingface.co/datasets/sqlcf-lexsi/counterfactual-sql-data) · [code](https://github.com/RishiiGamer2201/sexsi_hack). All numbers are from stored runs in `results/`, and `python verify_all.py` re-derives them. The reward audit is the headline; the training comparison came out null and is reported as one.
+> **Links:** HF collections: [models](https://huggingface.co/collections/sqlcf-lexsi/counterfactual-db-rewards-for-a-small-sql-agent-6af174f77dbae0bf0a54c3c4), [data](https://huggingface.co/collections/sqlcf-lexsi/counterfactual-sql-data-rollouts-and-traces-6af479430243b7731f85d144) · [demo](https://huggingface.co/spaces/sqlcf-lexsi/counterfactual-sql-demo) · [data](https://huggingface.co/datasets/sqlcf-lexsi/counterfactual-sql-data) · [code](https://github.com/RishiiGamer2201/sexsi_hack). All numbers are from stored runs in `results/`, and `python verify_all.py` re-derives them. The reward audit is the headline; the training comparison came out null and is reported as one.
 
 ## 1. The judge's 60-second view
 
@@ -75,7 +75,7 @@ All data is synthetic: an e-commerce schema from a seeded generator, with no per
 
 ## 6. Model collection
 
-LoRA adapters (r = 16) on Tiny Aya Global, each with a card giving its test metrics and G3 label:
+[Model collection](https://huggingface.co/collections/sqlcf-lexsi/counterfactual-db-rewards-for-a-small-sql-agent-6af174f77dbae0bf0a54c3c4): the in-browser [demo](https://huggingface.co/spaces/sqlcf-lexsi/counterfactual-sql-demo) and three LoRA adapters (r = 16) on Tiny Aya Global, each with a card giving its test metrics and G3 label:
 
 | Repo | Model | G3 |
 |---|---|---|
@@ -87,7 +87,7 @@ The adapters are derivatives of a gated, non-commercial model. Each repo ships t
 
 ## 7. Data collection
 
-[`sqlcf-lexsi/counterfactual-sql-data`](https://huggingface.co/datasets/sqlcf-lexsi/counterfactual-sql-data): items, all SQLite DBs, SFT trajectories, E0/E1/E4 results, test trajectories for every model, and every GRPO rollout with its per-DB pass vector and reward.
+[Data collection](https://huggingface.co/collections/sqlcf-lexsi/counterfactual-sql-data-rollouts-and-traces-6af479430243b7731f85d144) with [`sqlcf-lexsi/counterfactual-sql-data`](https://huggingface.co/datasets/sqlcf-lexsi/counterfactual-sql-data): items, all SQLite DBs, SFT trajectories, E0/E1/E4 results, test trajectories for every model, and every GRPO rollout with its per-DB pass vector and reward.
 
 ## 8. Experiments
 

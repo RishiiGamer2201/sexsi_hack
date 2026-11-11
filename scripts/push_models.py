@@ -1,8 +1,9 @@
 """Push the LoRA adapters (SFT, GRPO-B, GRPO-C) to sqlcf-lexsi model repos, with the base model's licence, and
-gather demo + data + models in one HF collection. Private until --public; --gated makes the repos gated with
-automatic approval (organisers, Nov 9: public or auto-approved gating is fine; include the base model's licence).
+sync the two HF collections the form asks for (models + demo; dataset). Private until --public; --gated makes the
+repos gated with automatic approval (organisers, Nov 9: public or auto-approved gating is fine; include the base
+model's licence).
 
-  source .secrets.env && .venv-train/bin/python scripts/push_models.py [--public [--gated]] [--stage-only]
+  source .secrets.env && .venv-train/bin/python scripts/push_models.py [--public [--gated]] [--stage-only] [--collections-only]
 """
 import argparse
 import json
@@ -81,11 +82,12 @@ ap = argparse.ArgumentParser()
 ap.add_argument("--public", action="store_true")
 ap.add_argument("--gated", action="store_true", help="with --public: gated, automatic approval")
 ap.add_argument("--stage-only", action="store_true")
+ap.add_argument("--collections-only", action="store_true", help="only sync the two collections")
 a = ap.parse_args()
 
 stage = ROOT / "runs/models_stage"
 shutil.rmtree(stage, ignore_errors=True)
-for repo, (run, key, role, label) in MODELS.items():
+for repo, (run, key, role, label) in ({} if a.collections_only else MODELS).items():
     d = stage / repo
     d.mkdir(parents=True)
     src = ROOT / run / "adapter"
@@ -108,7 +110,7 @@ from huggingface_hub import HfApi  # noqa: E402
 
 token = os.environ.get("HF_TOKEN_HACK") or sys.exit("HF_TOKEN_HACK not set: source .secrets.env")
 api = HfApi(token=token)  # explicit hackathon token; never the cached default
-for repo in MODELS:
+for repo in ([] if a.collections_only else MODELS):
     rid = f"{ORG}/{repo}"
     api.create_repo(rid, private=not a.public, exist_ok=True)
     api.upload_folder(repo_id=rid, folder_path=str(stage / repo), commit_message="adapter + card + licence")
@@ -116,15 +118,21 @@ for repo in MODELS:
         api.update_repo_settings(rid, private=False, gated="auto" if a.gated else False)
     print(f"https://huggingface.co/{rid}")
 
-title = "Counterfactual-DB rewards for a small SQL agent"
-coll = next((c for c in api.list_collections(owner=ORG) if c.title == title), None) \
-    or api.create_collection(title, namespace=ORG, private=not a.public,
-                             description="Lexsi hackathon Track 3: demo, data and adapters")
-have = {i.item_id for i in api.get_collection(coll.slug).items}
-for item, kind in [(f"{ORG}/counterfactual-sql-demo", "space"), (f"{ORG}/counterfactual-sql-data", "dataset"),
-                   *[(f"{ORG}/{r}", "model") for r in MODELS]]:
-    if item not in have:
-        api.add_collection_item(coll.slug, item_id=item, item_type=kind)
-if a.public:
-    api.update_collection_metadata(coll.slug, private=False)
-print(f"https://huggingface.co/collections/{coll.slug}")
+# the form asks for one model collection and one dataset collection
+COLLS = {"Counterfactual-DB rewards for a small SQL agent": (
+             "Lexsi hackathon Track 3: LoRA adapters (SFT, GRPO-B, GRPO-C) and the in-browser demo",
+             [(f"{ORG}/{r}", "model") for r in MODELS] + [(f"{ORG}/counterfactual-sql-demo", "space")]),
+         "Counterfactual SQL data, rollouts and traces": (
+             "Lexsi hackathon Track 3: items, counterfactual DBs, SFT data, every GRPO rollout with per-DB rewards, "
+             "eval trajectories, results", [(f"{ORG}/counterfactual-sql-data", "dataset")])}
+for title, (desc, items) in COLLS.items():
+    coll = next((c for c in api.list_collections(owner=ORG) if c.title == title), None) \
+        or api.create_collection(title, namespace=ORG, private=not a.public, description=desc)
+    have = {i.item_id: i.item_object_id for i in api.get_collection(coll.slug).items}
+    for item, kind in items:
+        if item not in have:
+            api.add_collection_item(coll.slug, item_id=item, item_type=kind)
+    for item in set(have) - {i for i, _ in items}:  # drop strays, e.g. the dataset from the model collection
+        api.delete_collection_item(coll.slug, have[item])
+    api.update_collection_metadata(coll.slug, description=desc, **({"private": False} if a.public else {}))
+    print(f"https://huggingface.co/collections/{coll.slug}")

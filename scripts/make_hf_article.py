@@ -1,5 +1,6 @@
 """ARTICLE.md -> runs/hf_article.md for pasting into the Hugging Face Article editor: images load from the HF
-dataset (results/ is mirrored there), other repo-relative links become absolute GitHub URLs.
+dataset (results/ is mirrored there), other repo-relative links become absolute GitHub URLs. Also writes
+runs/abstract.txt (ABSTRACT.md as plain text for the form).
 
   python scripts/make_hf_article.py
 """
@@ -25,3 +26,8 @@ if __name__ == "__main__":
     (ROOT / "runs").mkdir(exist_ok=True)
     (ROOT / "runs/hf_article.md").write_text(out)
     print(f"wrote runs/hf_article.md ({len(out.split())} words)")
+    # plain-text abstract for the form's Abstract box: drop the title + track lines, strip ** and `
+    ab = re.sub(r"\*\*|`", "", (ROOT / "ABSTRACT.md").read_text().split("\n", 3)[3]).strip() + "\n"
+    assert len(ab.split()) < 500, len(ab.split())
+    (ROOT / "runs/abstract.txt").write_text(ab)
+    print(f"wrote runs/abstract.txt ({len(ab.split())} words)")

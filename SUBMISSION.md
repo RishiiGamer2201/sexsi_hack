@@ -1,42 +1,74 @@
 # Lexsi submission pack
 
-Everything the form asks for, ready to paste. Deadline **Nov 14, 2026, end of day AoE**; resubmission allowed, latest counts. Judging first checks validity: **artifacts public**, write-up and checklist submitted.
+The form field by field, ready to paste. Submission deadline **Nov 14, 2026, end of day AoE**. Resubmission is allowed and the latest one counts. The form says **every repo in the collections must be public by Nov 15, 11:59 PM AoE**, so the form can go in while the repos are still private. The HF Article field is required, and there is no GitHub fallback for it.
 
-## Go-live order (team rule: public only right after the form is sent)
+Generate the paste files first: `python scripts/make_hf_article.py` writes `runs/abstract.txt` and `runs/hf_article.md`.
 
-1. Send the form with the links below (the write-up field can be the GitHub `ARTICLE.md` link).
-2. Right after: `source .secrets.env && .venv-train/bin/python scripts/go_public.py` (dry run, check), then `--go`. Flips 3 adapters (gated, automatic approval), dataset, Space, collection and the GitHub repo to public.
-3. Publish the HF Article: `python scripts/make_hf_article.py`, paste `runs/hf_article.md` into huggingface.co › New Article (org `sqlcf-lexsi`), tag @hi-phi-r25i @LogicPalette @AkshAgg.
-4. Resubmit the form with the Article URL. Open every link logged out (private window) to confirm.
+## Page 1: Your team
 
-## Form fields
+- **Registered email:** the exact address one of us registered with (Shreshth's, as team lead, unless someone else registered).
+- **Abstract:** paste `runs/abstract.txt`. This is ABSTRACT.md as plain text, under 500 words; the script asserts the count.
+- **Discord username:** the submitter's own Discord username.
 
-- **Team:** Teen_khapeetars: Shreshth Rai (lead), Rishii Kumar Singh, Aksh Aggarwal.
-- **Registered email:** the team lead's registered address.
-- **Track / problem statements:** Track 3; #6 Data and database agents, #9 Reward design and reward-hacking defences.
+## Page 2: Your artifacts
+
+- **HF model collection:** https://huggingface.co/collections/sqlcf-lexsi/counterfactual-db-rewards-for-a-small-sql-agent-6af174f77dbae0bf0a54c3c4 (3 LoRA adapters + the demo Space).
+- **HF dataset collection:** https://huggingface.co/collections/sqlcf-lexsi/counterfactual-sql-data-rollouts-and-traces-6af479430243b7731f85d144 (`counterfactual-sql-data`: items, all DBs, SFT data, every GRPO rollout with per-DB rewards, eval trajectories, results).
+- **HF article:** the URL of the published Article (see go-live step 1).
+- **GitHub repo:** https://github.com/RishiiGamer2201/sexsi_hack
+
+## Page 3: Repos, models, tracks
+
+- **Repos used:** tick [x] AgentTune, [x] AuditKIT, [x] Other.
+  - If Other asks for names: SkyRL-SQL reward (`NovaSky-AI/SkyRL` `d870046`, E7); ESM+ predictions (`bossben/ESMp` `91dd85b`) and the Zhong et al. 2020 test-suite DBs (E6).
+- **Models used:** tick [x] Tiny Aya Global, [x] Other.
+  - If Other asks for names: Cohere Command A `command-a-03-2025`, used for the ROI comparison only.
+- **Track:** tick [x] Track 3: Agentic Fine-tuning.
+- **Problem statements (at most 2):** tick [x] Data and database agents, [x] Reward design and reward-hacking defences.
+
+## Go-live order
+
+1. **Publish the HF Article** at huggingface.co › New Article, under org `sqlcf-lexsi`:
+   - paste `runs/hf_article.md`;
+   - tag @hi-phi-r25i, @LogicPalette and @AkshAgg;
+   - copy its URL into the form.
+   - Its figures load from the dataset, so they show only once the dataset is public (step 3).
+2. Send the form.
+3. Right after that, run `source .secrets.env && .venv-train/bin/python scripts/go_public.py` as a dry run, then again with `--go`. This makes the following public:
+   - the 3 adapters (gated, automatic approval);
+   - the dataset and the Space;
+   - both collections;
+   - the GitHub repo.
+4. Open every link logged out, in a private window, before Nov 15, 11:59 PM AoE.
+
+## Facts the write-up and judges look for
+
 - **Title:** When Execution Success Lies: counterfactual-database rewards for a small SQL agent.
-- **Abstract (<500 words):** `ABSTRACT.md` (491 words).
-- **Model collection:** https://huggingface.co/collections/sqlcf-lexsi/counterfactual-db-rewards-for-a-small-sql-agent-6af174f77dbae0bf0a54c3c4
-  - https://huggingface.co/sqlcf-lexsi/tiny-aya-global-sqlcf-sft
-  - https://huggingface.co/sqlcf-lexsi/tiny-aya-global-sqlcf-grpo-b
-  - https://huggingface.co/sqlcf-lexsi/tiny-aya-global-sqlcf-grpo-c
-- **Dataset:** https://huggingface.co/datasets/sqlcf-lexsi/counterfactual-sql-data (items, DBs, SFT trajectories, every GRPO rollout, eval trajectories, results).
-- **Public deployment (demo):** https://huggingface.co/spaces/sqlcf-lexsi/counterfactual-sql-demo (runs in the browser).
-- **GitHub (reproducibility):** https://github.com/RishiiGamer2201/sexsi_hack (`python verify_all.py` re-derives every number).
-- **Write-up:** HF Article URL (step 3); fallback https://github.com/RishiiGamer2201/sexsi_hack/blob/main/ARTICLE.md
-- **Lexsi repos used:** AgentTune `d4db4c1` (multi-turn GRPO with tools, render/parse/fold, provenance; we patched its multi-turn token stream, and our SQL-reward report [AgentTune#11](https://github.com/Lexsi-Labs/AgentTune/issues/11) was fixed upstream in [PR #12](https://github.com/Lexsi-Labs/AgentTune/pull/12)); AuditKIT `9da5838` (silent-error framing, pass^k).
-- **Models used:** CohereLabs/tiny-aya-global 3.35B (trained policy, LoRA); Cohere Command A `command-a-03-2025` (ROI comparison only).
-- **Other data used:** Zhong et al. 2020 Spider test-suite DBs and the ESM+ prediction files (`bossben/ESMp` `91dd85b`) for E6; SkyRL-SQL's reward for E7. Not redistributed.
-- **Before/after (test, 331 items × 8, verified = right on original + all 4 copies):** SFT 9.4% → GRPO-B 12.7% verified (+3.2 pts, McNemar p = 0.006); pass^2 4.9% → 8.1%; silent error 65.4% → 64.0%. GRPO-C (counterfactual reward) 9.0%: null, reported as one.
-- **Reward before/after (the contribution):** hacks paid 54.1% → 1.9%; buggy mutants paid 29.5% → 16.8%; 0/2847 correct queries rejected; AgentTune `WHERE 1 = 1` exploit 3.10 → 2.20 with our patch.
-- **ROI:** Command A 81.0% verified at $4.24 per 1k queries vs Tiny Aya B $0.061 on one L4 ($0.74/hr): ~70× cheaper per query, ~11× per verified answer ($0.48 vs $5.24), not a replacement at 12.7%.
-- **Licences:** adapters CC-BY-NC-4.0 (base model's), gated with automatic approval per the organisers' Nov 9 ruling; data CC-BY-NC-4.0, synthetic, no personal data.
+- **Team Teen_khapeetars:** Shreshth Rai (lead), Rishii Kumar Singh, Aksh Aggarwal.
+- **Before/after (test set, 331 items × 8 samples; verified = right on the original DB and on all 4 copies):**
+  - verified accuracy: SFT 9.4% → GRPO-B 12.7% (+3.2 pts, McNemar p = 0.006);
+  - pass^2: 4.9% → 8.1%;
+  - silent errors: 65.4% → 64.0%;
+  - GRPO-C (counterfactual reward): 9.0%. This is a null result and is reported as one.
+- **Reward before/after (the contribution):**
+  - hacks paid: 54.1% → 1.9%;
+  - buggy mutants paid: 29.5% → 16.8%;
+  - correct queries rejected: 0 of 2847;
+  - AgentTune `WHERE 1 = 1` exploit: 3.10 → 2.20 with our patch;
+  - [AgentTune#11](https://github.com/Lexsi-Labs/AgentTune/issues/11) was fixed upstream in [PR #12](https://github.com/Lexsi-Labs/AgentTune/pull/12).
+- **ROI:**
+  - Command A reaches 81.0% verified at $4.24 per 1k queries. Tiny Aya B costs $0.061 per 1k on one L4 ($0.74/hr).
+  - Tiny Aya is about 70× cheaper per query and about 11× cheaper per verified answer ($0.48 vs $5.24).
+  - At 12.7% it is not a replacement for Command A.
+- **Licences:**
+  - adapters: CC-BY-NC-4.0 (the base model's licence), gated with automatic approval, per the organisers' Nov 9 ruling;
+  - data: CC-BY-NC-4.0, synthetic, no personal data.
 
 ## Checklist
 
-- [x] Every number reproduced by `verify_all.py` (Nov 11), tests pass, abstract 491 words
+- [x] Every number reproduced by `verify_all.py` (Nov 11); tests pass; abstract 491 words
 - [x] Git history scanned: no tokens or keys in any commit
-- [x] Article has all 9 sections the slides ask for (problem, repos, models, datasets, model and data collections, experiments, "with more credits", team tags)
+- [x] Two collections (models + demo; dataset), as the form asks
+- [ ] HF Article published
 - [ ] Form sent
-- [ ] `go_public.py --go` run; every link opens logged out
-- [ ] HF Article published; form resubmitted with its URL
+- [ ] `go_public.py --go` run; every link opens logged out (by Nov 15, 11:59 PM AoE)

@@ -16,7 +16,7 @@
 
 ## Next
 
-1. **Submission pack ready (Nov 11): follow [SUBMISSION.md](SUBMISSION.md).** Send form, then immediately `scripts/go_public.py --go` (all 6 HF items + GitHub; dry run by default), publish the HF Article from `scripts/make_hf_article.py`, resubmit with its URL. Public only right AFTER the form (user, Nov 9); before Nov 14 AoE.
+1. **Submission pack ready (Nov 11): follow [SUBMISSION.md](SUBMISSION.md)**, which is laid out like the real form's pages. The form requires the HF Article URL, so the Article has to be published before the form is sent. Then `scripts/go_public.py --go` (adapters, dataset, Space, both collections, GitHub). The form says every repo must be public by Nov 15, 11:59 PM AoE.
 2. Null decision made: **accept and polish** (user, Nov 9). No GPU runs; VM stays off.
 3. (Done Nov 10) AgentTune#11 fixed upstream by PR #12.
 4. Optional polish: demo "shaky answer" flag (D5).
@@ -25,6 +25,13 @@
 
 ### Nov 11
 
+- **Form matched (user sent screenshots of the real form).** The form asks for a separate HF model collection and HF dataset collection, a required HF Article URL, a Discord username, and checkboxes. Changes:
+  - New private collection `counterfactual-sql-data-rollouts-and-traces-6af479430243b7731f85d144` holds the dataset.
+  - The model collection now holds the 3 adapters + the Space; the dataset was removed from it.
+  - Both collections are set by `push_models.py --collections-only`.
+  - `hf_links.py` (all cards), `go_public.py` (both collections), ARTICLE header + §6/§7 and README updated.
+  - `make_hf_article.py` also writes `runs/abstract.txt` (plain text for the form).
+  - SUBMISSION.md rewritten page by page.
 - **Lexsi only (user): no Amazon symposium, no NeurIPS-style paper.** Removed `paper/` and its links (ARTICLE, README, SUBMISSION); ARTICLE §2 keeps the KaTeX reward math (Markdown + KaTeX, per Shreshth). HF readiness: new `scripts/hf_links.py` gives every HF card (3 adapters, dataset, Space) the same block of track, team handles and cross-links; model cards gain a "Use" snippet (base + PeftModel), dataset card a load snippet, Space card `short_description` + tags; `push_space.py` default now ships all 5 deployed runs. Only the README.md files were re-uploaded, repos stay private. `make_hf_article.py` now loads figures from the HF dataset (`resolve/main/results/...`). All 5 cards read back identical; Space RUNNING. `verify_all.py` OK; 9 CPU tests pass, `tests/test_precision.py` needs torch so runs in `.venv-train` (passes).
 - **LaTeX write-up** (superseded, removed same day, see above).
 - **Submission prep (Shreshth: get everything ready now).**
