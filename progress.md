@@ -25,6 +25,16 @@
 
 ### Nov 11
 
+- **Rishii's task from the team notes (Sexsi Researchers PDF): distil Command A?** Checked on the Hub (hackathon token):
+  - Neither model fits our hardware (1 L4, 24 GB; the 2-GPU request was denied), so the "quantised model" route is out:
+    - `CohereLabs/c4ai-command-a-03-2025` is 111B parameters, 222 GB in bf16, about 60 GB even at 4-bit;
+    - `CohereLabs/command-a-plus-05-2026-w4a4` is 219B parameters, 132 GB already quantised.
+  - The only route is the Cohere API (`scripts/e5_command_a.py` takes `--items`).
+  - Our train items already have gold SQL, so distilling Command A's SQL alone adds nothing over SFT on gold.
+  - What could add something:
+    - D1 (API only, no GPU): Command A writes a plan + SQL on the 907 train items, and we measure how many teacher answers a single-DB filter would keep that the copies reject.
+    - D2 (L4): SFT Tiny Aya on the verified teacher traces and compare with `sft_ho` (9.4%).
+  - Not started: waiting for the user's go (trial-key quota; GPU spend). The PDF's "$4.25" is now $4.24.
 - **Form matched (user sent screenshots of the real form).** The form asks for a separate HF model collection and HF dataset collection, a required HF Article URL, a Discord username, and checkboxes. Changes:
   - New private collection `counterfactual-sql-data-rollouts-and-traces-6af479430243b7731f85d144` holds the dataset.
   - The model collection now holds the 3 adapters + the Space; the dataset was removed from it.
