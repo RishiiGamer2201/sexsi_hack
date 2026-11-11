@@ -11,6 +11,8 @@ import shutil
 import sys
 from pathlib import Path
 
+from hf_links import LINKS
+
 ROOT = Path(__file__).resolve().parent.parent
 ORG = "sqlcf-lexsi"
 E4 = json.loads((ROOT / "results/e4_eval.json").read_text())
@@ -34,14 +36,14 @@ base_model: CohereLabs/tiny-aya-global
 library_name: peft
 license: cc-by-nc-4.0
 license_link: https://cohere.com/c4ai-cc-by-nc-license
-tags: [text-to-sql, grpo, lora, agenttune, counterfactual-rewards]
+tags: [text-to-sql, grpo, lora, agenttune, counterfactual-rewards, lexsi-hackathon]
 datasets: [{ORG}/counterfactual-sql-data]
 ---
 # {repo}
 
 LoRA adapter (r=16) for [CohereLabs/tiny-aya-global](https://huggingface.co/CohereLabs/tiny-aya-global): {role}.
-Lexsi hackathon, Track 3 (PS #6 + #9), team Teen_khapeetars. Code and write-up: github.com/RishiiGamer2201/sexsi_hack.
 
+{LINKS}
 **Status (gate G3): {label}.**
 
 Test set: 331 items x 8 samples, T=0.7, fresh databases from a different generator; "verified" = correct on the
@@ -54,9 +56,22 @@ original and all 4 counterfactual DBs.
 | Silent-error rate | {pct(v['silent_error'])} |
 | Held-out family F4, verified | {pct(v['verified_by_family']['F4'])} |
 
-Use: it is a multi-turn SQL agent with one `run_sql` tool, prompted and parsed the way AgentTune renders Tiny Aya
-(see `sqlcf/agent.py` and `evaluate.py gen` in the repo). vLLM LoRA fails on Tiny Aya's tied embeddings, so merge
-first: `python train.py merge --init <this adapter> --out merged` (fp32 merge, saved fp16).
+## Use
+
+Accept the [base model's licence](https://huggingface.co/CohereLabs/tiny-aya-global) first, then:
+
+```python
+from peft import PeftModel
+from transformers import AutoModelForCausalLM, AutoTokenizer
+
+base = AutoModelForCausalLM.from_pretrained("CohereLabs/tiny-aya-global", dtype="bfloat16", device_map="auto")
+model = PeftModel.from_pretrained(base, "{ORG}/{repo}")
+tok = AutoTokenizer.from_pretrained("{ORG}/{repo}")
+```
+
+It is a multi-turn SQL agent with one `run_sql` tool, prompted and parsed the way AgentTune renders Tiny Aya
+(see `sqlcf/agent.py` and `evaluate.py gen` in the repo). vLLM LoRA fails on Tiny Aya's tied embeddings, so for vLLM
+merge first: `python train.py merge --init <this adapter> --out merged` (fp32 merge, saved fp16).
 
 ## Licence
 {NOTICE}"""

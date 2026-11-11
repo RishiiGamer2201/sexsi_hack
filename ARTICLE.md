@@ -2,7 +2,7 @@
 
 Lexsi hackathon · Track 3 · Problem statements #6 (data and database agents) and #9 (reward design and reward-hacking defences) · team Teen_khapeetars
 
-> **Links:** [HF collection](https://huggingface.co/collections/sqlcf-lexsi/counterfactual-db-rewards-for-a-small-sql-agent-6af174f77dbae0bf0a54c3c4) · [demo](https://huggingface.co/spaces/sqlcf-lexsi/counterfactual-sql-demo) · [data](https://huggingface.co/datasets/sqlcf-lexsi/counterfactual-sql-data) · [code](https://github.com/RishiiGamer2201/sexsi_hack) · [LaTeX paper (PDF)](paper/main.pdf). All numbers are from stored runs in `results/`, and `python verify_all.py` re-derives them. The reward audit is the headline; the training comparison came out null and is reported as one.
+> **Links:** [HF collection](https://huggingface.co/collections/sqlcf-lexsi/counterfactual-db-rewards-for-a-small-sql-agent-6af174f77dbae0bf0a54c3c4) · [demo](https://huggingface.co/spaces/sqlcf-lexsi/counterfactual-sql-demo) · [data](https://huggingface.co/datasets/sqlcf-lexsi/counterfactual-sql-data) · [code](https://github.com/RishiiGamer2201/sexsi_hack). All numbers are from stored runs in `results/`, and `python verify_all.py` re-derives them. The reward audit is the headline; the training comparison came out null and is reported as one.
 
 ## 1. The judge's 60-second view
 

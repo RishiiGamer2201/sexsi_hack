@@ -1,5 +1,5 @@
-"""ARTICLE.md -> runs/hf_article.md for pasting into the Hugging Face Article editor: repo-relative links and images
-become absolute GitHub URLs (images render once the repo is public).
+"""ARTICLE.md -> runs/hf_article.md for pasting into the Hugging Face Article editor: images load from the HF
+dataset (results/ is mirrored there), other repo-relative links become absolute GitHub URLs.
 
   python scripts/make_hf_article.py
 """
@@ -8,7 +8,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 GH = "https://github.com/RishiiGamer2201/sexsi_hack"
-RAW = "https://raw.githubusercontent.com/RishiiGamer2201/sexsi_hack/main"
+RAW = "https://huggingface.co/datasets/sqlcf-lexsi/counterfactual-sql-data/resolve/main"
 
 
 def absolutize(md):

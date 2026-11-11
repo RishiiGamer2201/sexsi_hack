@@ -11,17 +11,29 @@ import sys
 import tarfile
 from pathlib import Path
 
+from hf_links import LINKS
+
 ROOT = Path(__file__).resolve().parent.parent
 REPO = "sqlcf-lexsi/counterfactual-sql-data"
 CARD = """---
 license: cc-by-nc-4.0
 language: [en]
-tags: [text-to-sql, reward-modeling, grpo, counterfactual, sqlite]
+tags: [text-to-sql, reward-modeling, grpo, counterfactual, sqlite, lexsi-hackathon]
 pretty_name: Counterfactual-DB rewards for SQL agents
 ---
 # Counterfactual-DB rewards for SQL agents: data, results and rollout logs
 
-Lexsi hackathon, Track 3 (PS #6 + #9). Code: github.com/RishiiGamer2201/sexsi_hack (`verify_all.py` re-derives every number).
+@@LINKS@@
+Every number in the write-up is re-derived from these files by `python verify_all.py` in the code repo.
+
+```python
+import tarfile
+from huggingface_hub import snapshot_download
+
+d = snapshot_download("sqlcf-lexsi/counterfactual-sql-data", repo_type="dataset")
+for split in ("audit", "train", "test"):
+    tarfile.open(f"{d}/{split}/dbs.tar.gz").extractall(f"{d}/{split}")  # SQLite DBs next to items.jsonl
+```
 
 | Path | What |
 |---|---|
@@ -40,7 +52,7 @@ Lexsi hackathon, Track 3 (PS #6 + #9). Code: github.com/RishiiGamer2201/sexsi_ha
 
 Synthetic e-commerce data from a seeded generator; no personal data. Rollouts contain outputs of
 Tiny Aya Global (CC-BY-NC-4.0) and Cohere Command A, hence the non-commercial licence.
-"""
+""".replace("@@LINKS@@", LINKS)
 
 ap = argparse.ArgumentParser()
 ap.add_argument("--public", action="store_true")

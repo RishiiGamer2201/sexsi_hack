@@ -23,7 +23,7 @@ Everything the form asks for, ready to paste. Deadline **Nov 14, 2026, end of da
 - **Dataset:** https://huggingface.co/datasets/sqlcf-lexsi/counterfactual-sql-data (items, DBs, SFT trajectories, every GRPO rollout, eval trajectories, results).
 - **Public deployment (demo):** https://huggingface.co/spaces/sqlcf-lexsi/counterfactual-sql-demo (runs in the browser).
 - **GitHub (reproducibility):** https://github.com/RishiiGamer2201/sexsi_hack (`python verify_all.py` re-derives every number).
-- **Write-up:** HF Article URL (step 3); fallback https://github.com/RishiiGamer2201/sexsi_hack/blob/main/ARTICLE.md. LaTeX version (NeurIPS style, 8 pages): https://github.com/RishiiGamer2201/sexsi_hack/blob/main/paper/main.pdf
+- **Write-up:** HF Article URL (step 3); fallback https://github.com/RishiiGamer2201/sexsi_hack/blob/main/ARTICLE.md
 - **Lexsi repos used:** AgentTune `d4db4c1` (multi-turn GRPO with tools, render/parse/fold, provenance; we patched its multi-turn token stream, and our SQL-reward report [AgentTune#11](https://github.com/Lexsi-Labs/AgentTune/issues/11) was fixed upstream in [PR #12](https://github.com/Lexsi-Labs/AgentTune/pull/12)); AuditKIT `9da5838` (silent-error framing, pass^k).
 - **Models used:** CohereLabs/tiny-aya-global 3.35B (trained policy, LoRA); Cohere Command A `command-a-03-2025` (ROI comparison only).
 - **Other data used:** Zhong et al. 2020 Spider test-suite DBs and the ESM+ prediction files (`bossben/ESMp` `91dd85b`) for E6; SkyRL-SQL's reward for E7. Not redistributed.

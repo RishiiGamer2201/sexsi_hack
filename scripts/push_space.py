@@ -13,6 +13,8 @@ import shutil
 import sys
 from pathlib import Path
 
+from hf_links import LINKS
+
 ROOT = Path(__file__).resolve().parent.parent
 REPO = "sqlcf-lexsi/counterfactual-sql-demo"
 CARD = """---
@@ -23,15 +25,19 @@ colorTo: green
 sdk: static
 app_file: index.html
 license: cc-by-nc-4.0
+short_description: Check SQL on counterfactual DBs the agent never saw
+tags: [text-to-sql, reward-hacking, lexsi-hackathon]
 ---
 A SQL query can match the answer on the one database an agent explored and still be wrong.
-Pick a test question and a recorded run of Tiny Aya Global (base / SFT / GRPO), or type your own SQL,
-and see it checked on the original DB plus counterfactual DBs the agent never saw, with the score
-each reward function gives. Runs in your browser (Pyodide); the first load takes 20-60 s.
-"""
+Pick a test question and a recorded run (Tiny Aya Global base, SFT, GRPO-B single-DB reward, GRPO-C
+counterfactual reward, or Command A), or type your own SQL, and see it checked on the original DB plus
+counterfactual DBs the agent never saw, with the score each reward function gives. Runs in your browser
+(Pyodide); the first load takes 20-60 s.
+
+@@LINKS@@""".replace("@@LINKS@@", LINKS)
 
 ap = argparse.ArgumentParser()
-ap.add_argument("--models", nargs="+", default=["base", "sft", "sft_ho"], help="results/traj_<model>.jsonl to ship")
+ap.add_argument("--models", nargs="+", default=["base", "sft_ho", "B", "C", "command_a"], help="results/traj_<model>.jsonl to ship")
 ap.add_argument("--public", action="store_true")
 ap.add_argument("--stage-only", action="store_true", help="build runs/space_stage, do not upload")
 a = ap.parse_args()
