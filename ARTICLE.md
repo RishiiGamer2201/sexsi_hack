@@ -2,7 +2,7 @@
 
 Lexsi hackathon · Track 3 · Problem statements #6 (data and database agents) and #9 (reward design and reward-hacking defences) · team Teen_khapeetars
 
-> DRAFT (Nov 9, revised). All numbers are from stored runs in `results/`. The reward audit is the headline; the training comparison came out null and is reported as one.
+> **Links:** [HF collection](https://huggingface.co/collections/sqlcf-lexsi/counterfactual-db-rewards-for-a-small-sql-agent-6af174f77dbae0bf0a54c3c4) · [demo](https://huggingface.co/spaces/sqlcf-lexsi/counterfactual-sql-demo) · [data](https://huggingface.co/datasets/sqlcf-lexsi/counterfactual-sql-data) · [code](https://github.com/RishiiGamer2201/sexsi_hack). All numbers are from stored runs in `results/`, and `python verify_all.py` re-derives them. The reward audit is the headline; the training comparison came out null and is reported as one.
 
 ## 1. The judge's 60-second view
 
@@ -27,11 +27,11 @@ Lexsi hackathon · Track 3 · Problem statements #6 (data and database agents) a
 | SFT | 9.4% [8.4, 10.6] | 65.4% | 5.1% | $0.57 |
 | **GRPO-B** (single-DB reward) | **12.7%** [11.5, 14.0]; vs SFT +3.2 pts [1.8, 4.8], McNemar p = 0.006 | 64.0% | 5.1% | **$0.48** |
 | GRPO-C (counterfactual reward) | 9.0% [7.9, 10.1]; vs SFT −0.5 pts, p = 0.21; vs B −3.7 pts [−5.3, −2.3] | 61.2% | 5.1% | $0.58 |
-| Command A (1 sample, no tools) | 81.0% [76.4, 84.8] | n/a | 1.8% | $5.25 |
+| Command A (1 sample, no tools) | 81.0% [76.4, 84.8] | n/a | 1.8% | $5.24 |
 
 Tiny Aya B is about 70× cheaper than Command A per query and about **11× cheaper per verified-correct answer**, but at 12.7% accuracy it does not replace it. Picking each item's most common answer out of the 8 samples (no gold needed) raises B to 16.9% and C to 13.6% (§8, E8).
 
-Demo: `huggingface.co/spaces/sqlcf-lexsi/counterfactual-sql-demo` (runs in the browser) · Data: `huggingface.co/datasets/sqlcf-lexsi/counterfactual-sql-data` · Code: `github.com/RishiiGamer2201/sexsi_hack` · `python verify_all.py` re-derives every number above from stored runs.
+[Demo](https://huggingface.co/spaces/sqlcf-lexsi/counterfactual-sql-demo) (runs in the browser) · [Data](https://huggingface.co/datasets/sqlcf-lexsi/counterfactual-sql-data) · [Code](https://github.com/RishiiGamer2201/sexsi_hack) · `python verify_all.py` re-derives every number above from stored runs.
 
 ## 2. Problem and approach
 
@@ -54,7 +54,7 @@ Question: *"How many units of grocery products were in orders that received a pa
 
 - `CohereLabs/tiny-aya-global` (3.35B): CC-BY-NC-4.0, gated. The policy we train.
 - Cohere Command A (`command-a-03-2025`, trial API): ROI comparison only.
-- Our LoRA adapters inherit the base model's terms. Whether they can be released un-gated is with the organisers.
+- Our LoRA adapters inherit the base model's terms. The organisers ruled (Discord, Nov 9) that adapters of the gated base may be published with its licence included, gated with automatic approval; ours are.
 
 ## 5. Datasets and licences
 
@@ -72,20 +72,22 @@ LoRA adapters (r = 16) on Tiny Aya Global, each with a card giving its test metr
 
 | Repo | Model | G3 |
 |---|---|---|
-| `sqlcf-lexsi/tiny-aya-global-sqlcf-sft` | SFT (`sft_ho`), the init of both GRPO runs | baseline, 9.4% verified |
-| `sqlcf-lexsi/tiny-aya-global-sqlcf-grpo-b` | GRPO-B, single-DB reward | improved: 12.7%, beats SFT (p = 0.006) |
-| `sqlcf-lexsi/tiny-aya-global-sqlcf-grpo-c` | GRPO-C, counterfactual reward | null: 9.0%, no gain over SFT (p = 0.21) |
+| [`sqlcf-lexsi/tiny-aya-global-sqlcf-sft`](https://huggingface.co/sqlcf-lexsi/tiny-aya-global-sqlcf-sft) | SFT (`sft_ho`), the init of both GRPO runs | baseline, 9.4% verified |
+| [`sqlcf-lexsi/tiny-aya-global-sqlcf-grpo-b`](https://huggingface.co/sqlcf-lexsi/tiny-aya-global-sqlcf-grpo-b) | GRPO-B, single-DB reward | improved: 12.7%, beats SFT (p = 0.006) |
+| [`sqlcf-lexsi/tiny-aya-global-sqlcf-grpo-c`](https://huggingface.co/sqlcf-lexsi/tiny-aya-global-sqlcf-grpo-c) | GRPO-C, counterfactual reward | null: 9.0%, no gain over SFT (p = 0.21) |
 
 The adapters are derivatives of a gated, non-commercial model. Each repo ships the base model's CC-BY-NC-4.0 licence and a notice pointing to Cohere's licence addendum and Acceptable Use Policy, and is gated with automatic approval. To use them you need access to `CohereLabs/tiny-aya-global`. vLLM's LoRA path crashes on Tiny Aya's tied embeddings, so merge first (`train.py merge`, fp32 merge saved as fp16).
 
 ## 7. Data collection
 
-`sqlcf-lexsi/counterfactual-sql-data`: items, all SQLite DBs, SFT trajectories, E0/E1/E4 results, test trajectories for every model, and every GRPO rollout with its per-DB pass vector and reward.
+[`sqlcf-lexsi/counterfactual-sql-data`](https://huggingface.co/datasets/sqlcf-lexsi/counterfactual-sql-data): items, all SQLite DBs, SFT trajectories, E0/E1/E4 results, test trajectories for every model, and every GRPO rollout with its per-DB pass vector and reward.
 
 ## 8. Experiments
 
 ### E0: reward audit (figure 1)
 Audit set, 1302 items; Wilson 95% CIs.
+
+![Figure 1: per bug family F1–F4, share of gold-mutants and of hacks each reward fully pays (false positives), and share of correct SQL it does not fully pay (false negatives, all zero)](results/figure1_reward_audit.png)
 
 | Reward | FP on gold mutants (n=1814) | FP on hacks (n=2839) | FN on gold + paraphrases (n=2847) |
 |---|---|---|---|
@@ -112,8 +114,12 @@ The remaining 1.9% of hacks paid by the counterfactual reward are all hard-coded
 ### E1: how often bugs are invisible on one DB (figure 2)
 Share of gold-mutants that pass the single-DB check: **29.2%** at 50 customers, 0.8% at 500, 0.2% at 5,000. What makes a bug invisible is the size of the question's slice (city × year × category) more than the DB size: small slices are common in real questions.
 
+![Figure 2: share of gold-mutants that pass the single-DB check, by number of customers in the DB and bug family](results/figure2_blind_rate.png)
+
 ### E3: what the training reward paid for (figure 3)
 `results/figure3_training_rewards.json`, 1440 rollouts per run.
+
+![Figure 3: per GRPO step for runs B and C, share of rollouts passing the original DB (left) and share of those that fail a counterfactual, i.e. lucky passes the single-DB reward pays (right)](results/figure3_training_rewards.png)
 
 | Run | Rollouts passing the original DB | Share of those failing a counterfactual (all) | First half | Second half |
 |---|---|---|---|---|
@@ -166,7 +172,7 @@ Command A (`command-a-03-2025`, trial API) answers each test item once, single-t
 
 | Model | Verified | Single-DB | $ per 1k queries | Speed |
 |---|---|---|---|---|
-| Command A | 81.0% [76.4, 84.8] | 82.8% | $4.25 | median 9.7 s, p90 42 s per query |
+| Command A | 81.0% [76.4, 84.8] | 82.8% | $4.24 | median 9.7 s, p90 42 s per query |
 | Tiny Aya SFT | 9.4% [8.4, 10.6] | 14.5% | $0.054 | 3.8 trajectories/s batched on L4 (scaled) |
 | Tiny Aya GRPO-B | 12.7% [11.5, 14.0] | 17.8% | $0.061 | 3.4 trajectories/s batched on L4 (measured) |
 | Tiny Aya GRPO-C | 9.0% [7.9, 10.1] | 14.0% | $0.052 | 4.0 trajectories/s batched on L4 (scaled) |
@@ -264,4 +270,4 @@ The training null says our prompts were too easy, not that the reward is useless
 
 ## 12. Team
 
-Shreshth Rai (lead, `hi-phi-r25i`), Rishii Kumar Singh, Aksh Aggarwal (`AkshAgg`).
+Shreshth Rai (lead, [@hi-phi-r25i](https://huggingface.co/hi-phi-r25i)), Rishii Kumar Singh ([@LogicPalette](https://huggingface.co/LogicPalette)), Aksh Aggarwal ([@AkshAgg](https://huggingface.co/AkshAgg)).

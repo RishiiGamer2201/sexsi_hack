@@ -16,13 +16,22 @@
 
 ## Next
 
-1. **Go public right AFTER the submission form is sent, not before** (user, Nov 9). Must be done before judging's validity check (deadline Nov 14 AoE; private repos count as missing): `scripts/push_models.py --public --gated`, then Space, dataset, collection public; GitHub repo public too if linked.
-2. Publish the HF Article from ARTICLE.md (needs public repos, so same moment); final submission form.
+1. **Submission pack ready (Nov 11): follow [SUBMISSION.md](SUBMISSION.md).** Send form, then immediately `scripts/go_public.py --go` (all 6 HF items + GitHub; dry run by default), publish the HF Article from `scripts/make_hf_article.py`, resubmit with its URL. Public only right AFTER the form (user, Nov 9); before Nov 14 AoE.
+2. Optional, after Lexsi: Amazon Trusted AI Symposium poster (deadline Nov 30; 4-page NeurIPS PDF; track Evaluation & benchmarking). Needs Shreshth + Aksh OK, affiliations, emails.
 3. Null decision made: **accept and polish** (user, Nov 9). No GPU runs; VM stays off.
 4. (Done Nov 10) AgentTune#11 fixed upstream by PR #12.
 5. Optional polish: demo "shaky answer" flag (D5).
 
 ## Log
+
+### Nov 11
+
+- **Submission prep (Shreshth: get everything ready now).**
+  - Added `SUBMISSION.md` (every form field + go-live order + checklist), `scripts/go_public.py` (dry run shows all 6 HF items and GitHub still private), and `scripts/make_hf_article.py` (ARTICLE → `runs/hf_article.md` with absolute links).
+  - ARTICLE: DRAFT banner replaced by links, all HF/GitHub links clickable, figures 1–3 embedded, §4 licence line updated to the organisers' ruling, §12 HF handles (Rishii = @LogicPalette).
+  - Rounding fix: Command A is $4.2445 per 1k queries, so $4.24 (was $4.25) and $5.24 per 1k verified (was $5.25), in ARTICLE, README and ABSTRACT.
+  - Git history scanned (61 commits): no tokens or keys. Commit author email will be visible once the repo is public. Removed a stray empty file `0`.
+  - `verify_all.py` OK, 9 tests pass, abstract 491 words.
 
 ### Nov 10
 

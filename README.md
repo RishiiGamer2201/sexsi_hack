@@ -1,6 +1,6 @@
 # When Execution Success Lies — counterfactual-DB rewards for a small SQL agent
 
-Lexsi hackathon, Track 3 (PS #6 + #9), team Teen_khapeetars. Full write-up: [ARTICLE.md](ARTICLE.md). Plan: [plan.md](plan.md). Log: [progress.md](progress.md). Background: [research.md](research.md).
+Lexsi hackathon, Track 3 (PS #6 + #9), team Teen_khapeetars. Full write-up: [ARTICLE.md](ARTICLE.md). Submission pack: [SUBMISSION.md](SUBMISSION.md). Plan: [plan.md](plan.md). Log: [progress.md](progress.md). Background: [research.md](research.md).
 
 ## Judge's 60-second view
 
@@ -18,9 +18,9 @@ A text-to-SQL agent is usually rewarded for matching the gold answer on **one** 
 | Test verified accuracy (Tiny Aya 3.35B): base / SFT / GRPO-B single-DB reward / GRPO-C counterfactual reward | 0.9% / 9.4% / **12.7%** / 9.0% |
 | GRPO-C vs GRPO-B (pre-registered H4) | **null**: C is not better (−3.7 pts verified, p < 0.001; silent error p = 0.61) |
 | Why: rollouts on which B's and C's rewards differed during training | about 7% |
-| Command A (single-turn) | 81.0% verified, $4.25 per 1k queries vs $0.06 for Tiny Aya B on an L4 |
+| Command A (single-turn) | 81.0% verified, $4.24 per 1k queries vs $0.06 for Tiny Aya B on an L4 |
 
-Every number is re-derived from stored runs by `python verify_all.py`. Demo, data and models: one `sqlcf-lexsi` collection on Hugging Face (private until submission). The adapters carry the base model's CC-BY-NC-4.0 licence and are gated with automatic approval.
+Every number is re-derived from stored runs by `python verify_all.py`. Demo, data and models: one [`sqlcf-lexsi` collection](https://huggingface.co/collections/sqlcf-lexsi/counterfactual-db-rewards-for-a-small-sql-agent-6af174f77dbae0bf0a54c3c4) on Hugging Face: [demo](https://huggingface.co/spaces/sqlcf-lexsi/counterfactual-sql-demo), [data](https://huggingface.co/datasets/sqlcf-lexsi/counterfactual-sql-data), adapters [SFT](https://huggingface.co/sqlcf-lexsi/tiny-aya-global-sqlcf-sft) / [GRPO-B](https://huggingface.co/sqlcf-lexsi/tiny-aya-global-sqlcf-grpo-b) / [GRPO-C](https://huggingface.co/sqlcf-lexsi/tiny-aya-global-sqlcf-grpo-c). The adapters carry the base model's CC-BY-NC-4.0 licence and are gated with automatic approval.
 
 ## Setup (Linux / WSL)
 
