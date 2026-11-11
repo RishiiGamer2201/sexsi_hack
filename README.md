@@ -1,6 +1,6 @@
 # When Execution Success Lies — counterfactual-DB rewards for a small SQL agent
 
-Lexsi hackathon, Track 3 (PS #6 + #9), team Teen_khapeetars. Full write-up: [ARTICLE.md](ARTICLE.md). Submission pack: [SUBMISSION.md](SUBMISSION.md). Plan: [plan.md](plan.md). Log: [progress.md](progress.md). Background: [research.md](research.md).
+Lexsi hackathon, Track 3 (PS #6 + #9), team Teen_khapeetars. Full write-up: [ARTICLE.md](ARTICLE.md), also as a LaTeX paper: [paper/main.pdf](paper/main.pdf) (source `paper/main.tex`, build `cd paper && latexmk -pdf main.tex`). Submission pack: [SUBMISSION.md](SUBMISSION.md). Plan: [plan.md](plan.md). Log: [progress.md](progress.md). Background: [research.md](research.md).
 
 ## Judge's 60-second view
 

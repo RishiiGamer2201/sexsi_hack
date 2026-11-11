@@ -1,0 +1,4 @@
+% ponytail: minimal stand-in for CTAN `environ` (not installed here; no sudo). Provides only \NewEnviron with
+% \BODY, which is all neurips_2025.sty uses. Install texlive-latex-extra and delete this file to use the real one.
+\ProvidesPackage{environ}[2026/11/11 local shim: NewEnviron via NewDocumentEnvironment]
+\newcommand\NewEnviron[2]{\NewDocumentEnvironment{#1}{+b}{\def\BODY{##1}#2}{}}

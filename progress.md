@@ -26,6 +26,7 @@
 
 ### Nov 11
 
+- **LaTeX write-up (Shreshth's voice note: "fully TeX write-up; if Markdown, use KaTeX").** `paper/main.tex` (NeurIPS 2025 style, `[preprint]`, 8 pages) compiled to `paper/main.pdf`, same numbers as ARTICLE, figures 1–3, 19 references (titles only where verified). `paper/environ.sty` is a 3-line local stand-in for CTAN `environ` (not installed, no sudo). ARTICLE §2 now has the reward definitions as KaTeX math; ARTICLE, README and SUBMISSION link the PDF. HF Space untouched (update later only if new experiments). 4-page Amazon cut still to do (after Nov 14).
 - **Submission prep (Shreshth: get everything ready now).**
   - Added `SUBMISSION.md` (every form field + go-live order + checklist), `scripts/go_public.py` (dry run shows all 6 HF items and GitHub still private), and `scripts/make_hf_article.py` (ARTICLE → `runs/hf_article.md` with absolute links).
   - ARTICLE: DRAFT banner replaced by links, all HF/GitHub links clickable, figures 1–3 embedded, §4 licence line updated to the organisers' ruling, §12 HF handles (Rishii = @LogicPalette).
