@@ -30,7 +30,10 @@
   - **47 lucky answers (18.2% of what a single-DB filter keeps) are wrong on the copies** and would have gone into distillation data.
   - By family (n / single / verified): F1 152 / 111 / 88, F2 81 / 27 / 3, F3 120 / 120 / 120. No smuggled answers.
 - **D2 data fixed before training:** the first `build` dropped rejected items (211 rows), which confounds data size with the teacher and leaves F2 with 3 rows. Now the 142 rejected items keep sft_ho's gold trajectory: 353 rows, all prefixes identical to `data/sft.jsonl`, 211 endings replaced by the teacher's plan + SQL.
-- D2 (SFT + E4 eval) running on the local RTX 5070 Ti: `runs/distil/d2.log`.
+- **D2 done (local RTX 5070 Ti):** SFT 1205 s. The merge crashed the WSL VM once (the VM restarted; a retry worked). The eval ran out of GPU memory at `--gpu-mem 0.75` because another project's Windows process (`voxsplit`) holds part of the card; it was left alone, and the eval ran at 0.6 (649 s).
+  - **sft_distil 3.3% verified [2.7, 4.0] vs sft_ho 9.4%: −6.2 pts [−8.3, −4.1], McNemar p < 0.001.** Silent errors 76.2% vs 65.4%. F1 falls from 30.9% to 4.2%.
+  - Cause: Command A adds `status != 'cancelled'` in 325 of 353 answers (gold: 71). 186 of the 211 verified teacher endings have it, because on those items it never changed a result on any DB. The student writes it in 56% of its test answers (sft_ho 14%). All F1 sample-0 losses are `F1_category_buyers` ("count orders of any status").
+  - Written up as ARTICLE E9, the 60-second view, the README table, an ABSTRACT sentence and SUBMISSION facts. The distilled adapter is not pushed to HF (a negative result; local in `runs/sft_distil`).
 
 ### Nov 11
 

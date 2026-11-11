@@ -31,6 +31,8 @@ Lexsi hackathon · Track 3 · Problem statements #6 (data and database agents) a
 
 Tiny Aya B is about 70× cheaper than Command A per query and about **11× cheaper per verified-correct answer**, but at 12.7% accuracy it does not replace it. Picking each item's most common answer out of the 8 samples (no gold needed) raises B to 16.9% and C to 13.6% (§8, E8).
 
+**Distilling Command A (E9).** As a data filter, the copies catch 47 lucky teacher answers (18.2% of what a single-DB filter keeps). But SFT on the 211 verified teacher answers *lowers* Tiny Aya from 9.4% to **3.3%**. The student picked up Command A's habit of adding `status != 'cancelled'`. In those 211 answers the filter never changed a result, so the copies could not see it.
+
 [Demo](https://huggingface.co/spaces/sqlcf-lexsi/counterfactual-sql-demo) (runs in the browser) · [Data](https://huggingface.co/datasets/sqlcf-lexsi/counterfactual-sql-data) · [Code](https://github.com/RishiiGamer2201/sexsi_hack) · `python verify_all.py` re-derives every number above from stored runs.
 
 ## 2. Problem and approach
@@ -230,6 +232,30 @@ For each test item, each model has 8 samples. Without gold, we can pick the most
 - Voting helps, but voting on 5 DBs adds nothing over voting on 1 (difference within ±1 pt for every model). A "shaky answer" flag (fewer than half of the samples agree) catches 53–59% of wrong answers at 94–98% precision, again with no gain from the extra DBs (AUROC 0.67–0.74 either way).
 - This is a null, and we report it as one. At 10–15% accuracy, wrong answers rarely agree with each other, so one DB already splits them. Our copies are also built per item from the gold query's bug families, so this is not yet a gold-free verifier.
 - All three trained models reach about the same pass@8 (21.5–22.4%). GRPO-B's gain is in picking its right answer more often, not in finding new ones.
+
+### E9: distilling Command A, with the copies as the data filter
+Can the copies clean distillation data? Command A (T = 0.3, single-turn, asked for a 2–4 line plan and then the SQL) answered the 353 train items behind our SFT adapter (`scripts/distil.py`, trial key).
+
+**D1: what a single-DB filter would let through.**
+
+| Filter on the teacher's answers | Kept (n = 353) [95% CI] |
+|---|---|
+| Right on the original train DB | 258, 73.1% [68.2, 77.4] |
+| Right on the original and all its train copies | 211, 59.8% [54.6, 64.8] |
+| **Lucky: kept by the single-DB filter only** | **47, 18.2% of what it keeps** |
+
+By family (items / single / verified): F1 152 / 111 / 88, F2 81 / 27 / 3, F3 120 / 120 / 120. No smuggled answers. A single-DB filter would put 47 wrong teacher queries into the student's data. As a share of all its answers that is 13.3%, about 7× Command A's lucky-pass rate on the test set (1.8%, E5), because these train items were built for the bug families the copies target.
+
+**D2: SFT on the verified answers.** Same 353 items, seed, check queries, epochs and settings as SFT (`sft_ho`). The 211 verified teacher answers replace the gold ending (plan + SQL); the other 142 keep the gold trajectory. Trained on the laptop GPU, same 331 × 8 test set.
+
+| Model | Verified [95% CI] | Single DB | Silent error |
+|---|---|---|---|
+| SFT (gold endings) | 9.4% [8.4, 10.6] | 14.5% | 65.4% |
+| SFT on verified teacher endings | **3.3%** [2.7, 4.0] | 11.2% | 76.2% |
+
+- **Distillation hurt:** −6.2 pts verified [−8.3, −4.1], McNemar p < 0.001. Almost all of it is F1 (30.9% → 4.2%).
+- **Why: a teacher habit that the copies could not see.** Command A adds `status != 'cancelled'` to 325 of its 353 answers; the gold endings have it in 71. In 186 of the 211 verified answers the filter happened not to change the result on the original DB or on any copy, so they passed. The student learned the habit: it writes the filter in 56% of its test answers (SFT: 14%). Every F1 item that SFT gets right and the distilled model gets wrong (first sample) is from the template that says "count orders of any status".
+- **The lesson for counterfactual checks:** they verify an answer, not the reasoning behind it. A copy only catches a wrong filter if the copy changes what that filter selects. A teacher's systematic bias passes on every item where the data happens to agree. The fix is to add copies that flip each filter the question does not ask for (here, cancelled orders on "any status" items), or to check distillation data with copies that the teacher's habits break. We did not have time to run that.
 
 ### Nulls and what else we tried
 - **The training comparison is null, and it is neither noise nor evidence that the counterfactual reward hurts.** On the eval set, C is 3.7 pts below B (95% CI [−5.3, −2.3], exact McNemar p < 0.001). That gap is real for these two adapters, but we trained one seed each, so we cannot say how much is GRPO run-to-run variance. Three facts explain why we expected little difference:
