@@ -1,6 +1,6 @@
 # Lexsi submission pack
 
-The form field by field, ready to paste. Submission deadline **Nov 15, 2026, end of day AoE** (extended by a day, team news Nov 11). Resubmission is allowed and the latest one counts. The form says **every repo in the collections must be public by Nov 15, 11:59 PM AoE**, so the form can go in while the repos are still private. The HF Article field is required, and there is no GitHub fallback for it.
+The form field by field, ready to paste. Submission deadline **Nov 15, 2026, end of day AoE** (extended by a day, team news Nov 11). Resubmission is allowed and the latest one counts. The form says **every repo in the collections must be public by Nov 15, 11:59 PM AoE**, so the form can go in while the repos are still private. The HF Article field is required; the organisers accept an HTML page on HF (our project-page Space).
 
 Generate the paste files first: `python scripts/make_hf_article.py` writes `runs/abstract.txt` and `runs/hf_article.md`.
 
@@ -14,7 +14,7 @@ Generate the paste files first: `python scripts/make_hf_article.py` writes `runs
 
 - **HF model collection:** https://huggingface.co/collections/sqlcf-lexsi/counterfactual-db-rewards-for-a-small-sql-agent-6af174f77dbae0bf0a54c3c4 (3 LoRA adapters + the demo Space).
 - **HF dataset collection:** https://huggingface.co/collections/sqlcf-lexsi/counterfactual-sql-data-rollouts-and-traces-6af479430243b7731f85d144 (`counterfactual-sql-data`: items, all DBs, SFT data, every GRPO rollout with per-DB rewards, eval trajectories, results).
-- **HF article:** the URL of the published Article (see go-live step 1).
+- **HF article:** https://huggingface.co/spaces/sqlcf-lexsi/counterfactual-sql-article (project page built from ARTICLE.md by `scripts/make_site.py`; organisers said on Nov 12 that an HTML page on HF or Markdown on GitHub is accepted).
 - **GitHub repo:** https://github.com/RishiiGamer2201/sexsi_hack
 
 ## Page 3: Repos, models, tracks
@@ -28,11 +28,7 @@ Generate the paste files first: `python scripts/make_hf_article.py` writes `runs
 
 ## Go-live order
 
-1. **Publish the HF Article** at huggingface.co › New Article, under org `sqlcf-lexsi`:
-   - paste `runs/hf_article.md`;
-   - tag @hi-phi-r25i, @LogicPalette and @AkshAgg;
-   - copy its URL into the form.
-   - Its figures load from the dataset, so they show only once the dataset is public (step 3).
+1. **Refresh the article page:** `source .secrets.env && .venv-train/bin/python scripts/make_site.py` (Space `sqlcf-lexsi/counterfactual-sql-article`, private; `go_public.py` makes it public). Put its URL in the form.
 2. Send the form.
 3. Right after that, run `source .secrets.env && .venv-train/bin/python scripts/go_public.py` as a dry run, then again with `--go`. This makes the following public:
    - the 3 adapters (gated, automatic approval);
@@ -76,6 +72,6 @@ Generate the paste files first: `python scripts/make_hf_article.py` writes `runs
 - [x] Every number reproduced by `verify_all.py` (Nov 11); tests pass; abstract 491 words
 - [x] Git history scanned: no tokens or keys in any commit
 - [x] Two collections (models + demo; dataset), as the form asks
-- [ ] HF Article published
+- [ ] Article page Space refreshed (`make_site.py`)
 - [ ] Form sent
 - [ ] `go_public.py --go` run; every link opens logged out (by Nov 15, 11:59 PM AoE)

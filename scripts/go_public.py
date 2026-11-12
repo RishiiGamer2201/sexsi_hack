@@ -13,7 +13,8 @@ from huggingface_hub import HfApi
 
 ORG = "sqlcf-lexsi"
 REPOS = [(f"{ORG}/tiny-aya-global-sqlcf-{m}", "model") for m in ("sft", "grpo-b", "grpo-c")] + [
-    (f"{ORG}/counterfactual-sql-data", "dataset"), (f"{ORG}/counterfactual-sql-demo", "space")]
+    (f"{ORG}/counterfactual-sql-data", "dataset"), (f"{ORG}/counterfactual-sql-demo", "space"),
+    (f"{ORG}/counterfactual-sql-article", "space")]
 COLLECTIONS = [f"{ORG}/counterfactual-db-rewards-for-a-small-sql-agent-6af174f77dbae0bf0a54c3c4",  # models + demo
                f"{ORG}/counterfactual-sql-data-rollouts-and-traces-6af479430243b7731f85d144"]  # dataset
 GITHUB = "RishiiGamer2201/sexsi_hack"

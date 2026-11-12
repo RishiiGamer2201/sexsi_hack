@@ -16,7 +16,7 @@
 
 ## Next
 
-1. **Submission pack ready (Nov 11): follow [SUBMISSION.md](SUBMISSION.md)**, which is laid out like the real form's pages. The form requires the HF Article URL, so the Article has to be published before the form is sent. Then `scripts/go_public.py --go` (adapters, dataset, Space, both collections, GitHub). The form says every repo must be public by Nov 15, 11:59 PM AoE.
+1. **Submission pack ready (Nov 11): follow [SUBMISSION.md](SUBMISSION.md)**, which is laid out like the real form's pages. The form's HF Article URL is the project-page Space (`scripts/make_site.py`). Then `scripts/go_public.py --go` (adapters, dataset, Space, both collections, GitHub). The form says every repo must be public by Nov 15, 11:59 PM AoE.
 2. Null decision made: **accept and polish** (user, Nov 9). No GPU runs; VM stays off.
 3. (Done Nov 10) AgentTune#11 fixed upstream by PR #12.
 4. Optional polish: demo "shaky answer" flag (D5).
@@ -25,6 +25,7 @@
 
 ### Nov 12
 
+- **Article as a project page (Shreshth, team chat Nov 12: "html with tex compilation", Nerfies-style).** New `scripts/make_site.py`: ARTICLE.md becomes a Bulma hero with Code/Demo/Dataset/Models buttons, the article body (marked.js), KaTeX math (cut out before Markdown parsing so `_` survives; prices like $0.57 are left alone), the figures copied in, and BibTeX. Pushed to the static Space `sqlcf-lexsi/counterfactual-sql-article` (private); added to `go_public.py`. Checked in headless Edge at 1280 px and 500 px (9 formulas, 3 figures, no KaTeX errors). SUBMISSION's HF Article field now points at this Space (organisers: an HTML page on HF or MD on GitHub is accepted).
 - **D1 done** (`results/d1_teacher_filter.json`, teacher answers in `results/teacher_command_a.jsonl`): 353/353 calls, no quota stop.
   - Single-DB filter keeps 258 teacher answers (73.1%); the counterfactual filter keeps 211 (59.8%).
   - **47 lucky answers (18.2% of what a single-DB filter keeps) are wrong on the copies** and would have gone into distillation data.
