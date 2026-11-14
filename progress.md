@@ -26,6 +26,16 @@
 
 ### Nov 14
 
+- **Second training seed for B and C (team go, 14 Nov ~20:15 IST).** E13's C-vs-B gap uses only one training run each, so we are adding a second.
+  - **Runs:** `scripts/vm_seed1.sh` runs GRPO-B, then GRPO-C. Both use the default config plus `--seed 1`. The flag changes the prompt order and the torch RNG; the vLLM engine seed is fixed by TRL.
+  - **Driver:** `scripts/laptop_seed1.sh` runs unattended:
+    1. retries the VM start until 16 Nov 06:00 IST;
+    2. checks that the VM's SFT adapter md5 matches the local one;
+    3. launches the runs and watches them;
+    4. copies the adapters back and releases the autostop hold;
+    5. runs the local merge, then E4 and E13 generation for B_s1 and C_s1.
+  - **Status:** asia-south1-a has been in L4 stockout since 20:27 IST. Per the team rule we keep retrying and do not move zones.
+  - **Cost:** about 7.5 VM-hours (~$5.5).
 - **E13 done (19:23 IST, 36 min on the local 5070 Ti, $0).** Results in `results/e13_spider_ours.json`; trajectories in `results/spider_{base,sft_ho,B,C}.jsonl`. These were renamed from `traj_spider_*` so the `traj_*` globs in verify_all, evaluate.py and demo.py don't pick them up. Re-scoring is byte-identical.
 
   | Model | EX | TS | Lucky share of EX passes |
