@@ -11,7 +11,12 @@ is lucky teacher answers that would leak into distillation data. D2 rebuilds dat
       --out results/teacher_command_a.jsonl --plan --temperature 0.3
   python scripts/distil.py score                     # D1 -> results/d1_teacher_filter.json
   python scripts/distil.py build                     # D2 data -> data/sft_distil.jsonl
+  D3, int4 local teacher (scripts/teacher_local.py): same commands with --teacher <file> --tag int4
+  -> results/d1_teacher_filter_int4.json, data/sft_distil_int4.jsonl
+  D4, logit distillation: build --raw-final keeps the teacher's exact text as the final turn (its saved log-probs
+  are for that text) -> data/sft_distil_int4_raw.jsonl, rows marked "teacher_final"; scripts/logit_distil.py trains on it
 """
+import argparse
 import json
 import random
 import sys
@@ -29,6 +34,8 @@ ITEMS = ROOT / "data/train/items.jsonl"
 SFT = ROOT / "data/sft.jsonl"
 SUB = ROOT / "runs/distil/items.jsonl"
 TEACHER = ROOT / "results/teacher_command_a.jsonl"  # not traj_*: those are test trajectories (verify_all)
+TAG = ""
+RAW = False
 BASES = ["S_s101", "S_s102", "S_s103"]  # build_sft defaults
 
 
@@ -43,6 +50,10 @@ def sft_items():
 
 def teacher():
     return {r["id"]: r["messages"][-1]["content"] for r in map(json.loads, open(TEACHER))}
+
+
+def tagged(path: Path) -> Path:
+    return path.with_name(f"{path.stem}_{TAG}{path.suffix}") if TAG else path
 
 
 def score():
@@ -60,6 +71,7 @@ def score():
             f[2] += g[it["id"]]["verified"]
     res = {"what": "D1: Command A teacher answers (plan + SQL, T=0.3) on the 353 sft_ho train items, graded on the "
                    "original train DB and its train counterfactual copies",
+           "teacher": str(TEACHER.relative_to(ROOT)) if TEACHER.is_relative_to(ROOT) else str(TEACHER),
            "n": n, "has_sql": wilson(sum(x["has_sql"] for x in g.values()), n),
            "kept_by_single_db_filter": wilson(len(single), n), "kept_by_counterfactual_filter": wilson(len(verified), n),
            "lucky_kept_only_by_single_db": len(single) - len(verified),
@@ -67,7 +79,7 @@ def score():
            "smuggled": sum(x["smuggled"] for x in g.values()),
            "by_family_n_single_verified": fam,
            "lucky_ids": sorted(set(single) - set(verified))}
-    out = ROOT / "results/d1_teacher_filter.json"
+    out = tagged(ROOT / "results/d1_teacher_filter.json")
     out.write_text(json.dumps(res, indent=1))
     print(json.dumps({k: v for k, v in res.items() if k != "lucky_ids"}, indent=1))
 
@@ -87,17 +99,26 @@ def build():
             db = it["dbs"][0].split("/")[-2]
             msgs[-3]["tool_calls"][0]["function"]["arguments"]["sql_command"] = sql
             msgs[-2]["content"] = run_sql(db, sql)
-            msgs[-1]["content"] = f"{plan}\n```sql\n{sql}\n```"
+            msgs[-1]["content"] = text if RAW else f"{plan}\n```sql\n{sql}\n```"
             n_teacher += 1
+            rows.append({"id": it["id"], "messages": msgs} | ({"teacher_final": True} if RAW else {}))
+            continue
         rows.append({"id": it["id"], "messages": msgs})
     assert [r["id"] for r in rows] == [json.loads(l)["id"] for l in open(SFT)]
-    out = ROOT / "data/sft_distil.jsonl"
+    out = tagged(ROOT / "data/sft_distil.jsonl")
+    out = out.with_name(out.stem + "_raw.jsonl") if RAW else out
     out.write_text("".join(json.dumps(r) + "\n" for r in rows))
     print(f"{n_teacher} of {len(items)} trajectories end with the teacher's verified plan + SQL -> {out}")
 
 
 if __name__ == "__main__":
-    cmd = sys.argv[1] if len(sys.argv) > 1 else ""
+    ap = argparse.ArgumentParser(usage=__doc__)
+    ap.add_argument("cmd", nargs="?", default="")
+    ap.add_argument("--teacher", type=Path, default=TEACHER)
+    ap.add_argument("--tag", default="", help="suffix for the output files, e.g. int4")
+    ap.add_argument("--raw-final", action="store_true", help="build: the teacher's exact text as the final turn (D4)")
+    a = ap.parse_args()
+    cmd, TEACHER, TAG, RAW = a.cmd, a.teacher, a.tag, a.raw_final
     if cmd == "items":
         SUB.parent.mkdir(parents=True, exist_ok=True)
         SUB.write_text("".join(json.dumps(it) + "\n" for it in sft_items()))

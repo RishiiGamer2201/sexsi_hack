@@ -30,7 +30,10 @@ IN_LIST_RE = re.compile(r"\bIN\s*\(\s*\d+(\s*,\s*\d+){2,}\s*\)", re.I)
 PAIRS = [("C", "B"), ("B", "sft_ho"), ("C", "sft_ho"), ("sft_ho", "base"), ("sft", "base"), ("sft", "sft_ho"),
          ("C", "command_a"), ("B", "command_a"), ("sft_ho", "command_a"),  # command_a: E5, 1 sample per item
          ("sft_distil", "sft_ho"), ("B", "sft_distil"),  # D2: SFT on Command A's verified answers (scripts/distil.py)
-         ("dpo_cf", "dpo_std"), ("dpo_std", "sft_ho"), ("dpo_cf", "sft_ho")]  # E10: DPO, single-DB vs CF labels
+         ("dpo_cf", "dpo_std"), ("dpo_std", "sft_ho"), ("dpo_cf", "sft_ho"),  # E10: DPO, single-DB vs CF labels
+         ("sft_distil_int4", "sft_distil"), ("sft_distil_int4", "sft_ho"),  # D3: int4 local teacher, text only
+         ("kd_a1", "kd_a0"), ("kd_a0", "sft_ho"), ("kd_a1", "sft_ho"),  # D4: logit distillation vs its CE-only control
+         ("kd_a1x", "kd_a0"), ("kd_a1x", "sft_ho")]  # D4 rerun: KD only where both tokenisers emit the same token
 
 
 # ---------------- generation (GPU) ----------------
