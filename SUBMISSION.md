@@ -69,7 +69,7 @@ Generate the paste files first: `python scripts/make_hf_article.py` writes `runs
 
 ## Checklist
 
-- [x] Every number reproduced by `verify_all.py` (Nov 11); tests pass; abstract 491 words
+- [x] Every number reproduced by `verify_all.py` (Nov 14); tests pass; abstract rewritten Nov 15 (fewer numbers, plain wording)
 - [x] Git history scanned: no tokens or keys in any commit
 - [x] Two collections (models + demo; dataset), as the form asks
 - [ ] Article page Space refreshed (`make_site.py`)
