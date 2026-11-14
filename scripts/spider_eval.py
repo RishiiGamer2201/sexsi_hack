@@ -11,7 +11,7 @@ from external/ESMp/spider_dev/gold.txt (checked identical: 1034/1034 db_id and q
 Scoring is scripts/a2_spider_lucky.score (E6): EX = matches gold on the original DB, TS = also on every suite DB.
 
   bash scripts/local_spider.sh                                    # GPU: gen for base, sft_ho, B, C, then score
-  python scripts/spider_eval.py score  ->  results/e13_spider_ours.json   (CPU, from results/traj_spider_*.jsonl)
+  python scripts/spider_eval.py score  ->  results/e13_spider_ours.json   (CPU, from results/spider_*.jsonl)
 """
 import argparse
 import json
@@ -137,7 +137,7 @@ def gen(a):
             if calls:
                 nxt.append(i)
         live = nxt
-    out = Path(a.out_dir) / f"traj_spider_{a.name}.jsonl"
+    out = Path(a.out_dir) / f"spider_{a.name}.jsonl"
     with open(out, "w") as f:
         for j, conv in enumerate(convs):
             f.write(json.dumps({"model": a.name, "id": its[j // a.n]["id"], "sample": j % a.n, "messages": conv[2:]}) + "\n")
@@ -159,7 +159,7 @@ def score(a):
     per_item = {}
     with Pool(16) as pool:
         for m in MODELS:
-            p = Path(a.out_dir) / f"traj_spider_{m}.jsonl"
+            p = Path(a.out_dir) / f"spider_{m}.jsonl"
             if not p.exists():
                 continue
             rows = [json.loads(l) for l in open(p)]

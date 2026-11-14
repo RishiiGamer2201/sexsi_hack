@@ -26,7 +26,21 @@
 
 ### Nov 14
 
-- **E13: our models on a real benchmark (Spider dev + Zhong test-suite DBs), running on the local GPU since 18:47 IST.** Team asked for a real-world test without building data. New `scripts/spider_eval.py` (+ `scripts/local_spider.sh`): base, sft_ho, B, C each answer the 1034 Spider-dev questions (4 samples, T = 0.7, same agent loop and prompt as E4 except the schema), graded EX (original DB) vs TS (original + every test-suite DB) with E6's scorer. Questions from HF `xlangai/spider` (CC BY-SA 4.0) in `external/spider_hf/`, checked 1034/1034 against ESM+ gold. Smoke (sft_ho, 8 questions × 2) passed: 6/16 TS. Out of distribution for the trained models (they saw one retail schema), so a transfer test. Result: `results/e13_spider_ours.json`.
+- **E13 done (19:23 IST, 36 min on the local 5070 Ti, $0).** Results in `results/e13_spider_ours.json`; trajectories in `results/spider_{base,sft_ho,B,C}.jsonl`. These were renamed from `traj_spider_*` so the `traj_*` globs in verify_all, evaluate.py and demo.py don't pick them up. Re-scoring is byte-identical.
+
+  | Model | EX | TS | Lucky share of EX passes |
+  |---|---|---|---|
+  | base | 15.4 | 12.6 | 18.3 |
+  | SFT | 38.5 | 29.1 | 24.4 |
+  | B | 38.0 | 27.9 | 26.4 |
+  | C | 39.1 | 29.9 | 23.6 |
+
+  - **C vs B, TS:** +1.9 [+0.6, +3.3] (paired bootstrap over questions). EX +1.1 [−0.3, +2.5]. Lucky rate −0.8 [−1.8, +0.2]. McNemar on sample 0: p = 0.14.
+  - **B vs SFT, TS:** −1.2 [−2.5, +0.1].
+  - **C vs SFT, TS:** +0.7 [−0.5, +2.1].
+  - **The order flips relative to our own test set (C −3.7 there).** One seed each and not pre-registered, so suggestive only.
+  - **ARTICLE changes:** new section E13 (§8), plus E13 in the TL;DR, the audit table, licences (§5) and limitations.
+- **E13: our models on a real benchmark (Spider dev + Zhong test-suite DBs), started on the local GPU at 18:47 IST.** Team asked for a real-world test without building data. New `scripts/spider_eval.py` (+ `scripts/local_spider.sh`): base, sft_ho, B, C each answer the 1034 Spider-dev questions (4 samples, T = 0.7, same agent loop and prompt as E4 except the schema), graded EX (original DB) vs TS (original + every test-suite DB) with E6's scorer. Questions from HF `xlangai/spider` (CC BY-SA 4.0) in `external/spider_hf/`, checked 1034/1034 against ESM+ gold. Smoke (sft_ho, 8 questions × 2) passed: 6/16 TS. Out of distribution for the trained models (they saw one retail schema), so a transfer test. Result: `results/e13_spider_ours.json`.
 - **D3 + D4: Command A int4 as a local teacher, text and logit distillation. Done; negative result. B (12.7%) is still the best model.**
   - **Teacher:** `gghfez/command-a-03-2025-AWQ` (int4 AWQ W4A16, 68.2 GB, downloaded pre-quantised, no quantisation by us), vLLM 0.22.1 on one RunPod A100 SXM 80 GB (`--gpu-mem 0.95 --max-model-len 3072 --eager`; 57.8 GiB weights, 60k-token KV cache). About 2 h of pod time for teacher, training and eval. Runbook: `docs/RUNPOD_INT4_TEACHER.md`, `scripts/runpod_teacher.sh`.
   - **int4 vs API on the test set** (`results/e5_int4_accuracy.json`): 77.0% verified [72.2, 81.2] vs 81.0%, −3.9 pts, McNemar p = 0.047; most of the gap is F1 (100% → 83.3%). `has_sql` 100%, lucky 6 vs 6.

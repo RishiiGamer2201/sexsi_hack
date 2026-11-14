@@ -25,7 +25,7 @@ STEPS = [
     [PY, "scripts/int4_accuracy.py"],  # int4 teacher vs API on the test set
     [PY, "scripts/partial_credit.py"],  # E11
     [PY, "scripts/period_copies.py"],  # E12
-]  # scripts/a2_spider_lucky.py is left out: it needs the external Spider test-suite DBs
+]  # scripts/a2_spider_lucky.py and spider_eval.py score (E6, E13) are left out: they need the external Spider test-suite DBs
 
 for cmd in STEPS:
     print("==", " ".join(cmd[1:4]), flush=True)

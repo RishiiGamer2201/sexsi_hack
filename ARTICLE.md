@@ -6,7 +6,7 @@ Lexsi hackathon · Track 3 · Problem statements #6 (data and database agents) a
 
 ## 1. The judge's 60-second view
 
-**TL;DR.** Execution rewards for text-to-SQL check the answer on **one** database, so a wrong query that happens to give the right number gets paid. We built a reward auditor that checks answers on code-generated *counterfactual* copies of the database as well. On our audit it cuts the share of hacking queries that get paid from **54.1% to 1.9%**, and of buggy gold-mutants from **29.5% to 16.8%**, while rejecting **0 of 2847** correct queries. The same holes are open in two public rewards (AgentTune's built-in SQL reward and SkyRL-SQL's) and on a real benchmark: **8–15% of the Spider-dev answers that eight published systems "get right" fail on Zhong et al.'s test-suite databases**. We also patched AgentTune's reward. Training a 3.35B agent on the counterfactual reward did **not** beat the single-DB reward (H4 and H5 not supported). We explain why: on our training prompts the two rewards disagreed on only 7% of rollouts. Section 10 pre-registers the run that would test it properly.
+**TL;DR.** Execution rewards for text-to-SQL check the answer on **one** database, so a wrong query that happens to give the right number gets paid. We built a reward auditor that checks answers on code-generated *counterfactual* copies of the database as well. On our audit it cuts the share of hacking queries that get paid from **54.1% to 1.9%**, and of buggy gold-mutants from **29.5% to 16.8%**, while rejecting **0 of 2847** correct queries. The same holes are open in two public rewards (AgentTune's built-in SQL reward and SkyRL-SQL's) and on a real benchmark: **8–15% of the Spider-dev answers that eight published systems "get right" fail on Zhong et al.'s test-suite databases**. We also patched AgentTune's reward. Training a 3.35B agent on the counterfactual reward did **not** beat the single-DB reward (H4 and H5 not supported). We explain why: on our training prompts the two rewards disagreed on only 7% of rollouts. On real data that we did not build, the order flips. On Spider dev, scored on Zhong's test-suite DBs, the counterfactual-reward model is **1.9 pts above** the single-DB one [0.6, 3.3] and pays fewer lucky passes (E13; one seed each, so suggestive only). Section 10 pre-registers the run that would test it properly.
 
 **The reward audit (the contribution).**
 
@@ -18,6 +18,7 @@ Lexsi hackathon · Track 3 · Problem statements #6 (data and database agents) a
 | AgentTune built-in SQL reward: `WHERE 1 = 1` + always answer "yes" | 3.10, the same as honest SQL on every yes-question; **our patch: 2.20** (with result matching 1.20 vs 5.10) | `results/e0_agenttune.json`, `tests/test_agenttune_reward.py` |
 | SkyRL-SQL reward (set comparison, one DB) on the same candidates | pays 37.5% of mutants and 53.2% of hacks; copies alone → 27.2% / 1.9%; copies + strict comparator → 16.8% / 1.9% | `results/a3_skyrl_audit.json` |
 | Real benchmark: Spider-dev answers that pass the original DB but fail a test-suite DB, 8 published systems | **8.1% to 14.9%** of their correct-looking answers; highest for the prompted LLMs (Claude 14.9%, C3 14.1%) | `results/a2_spider_lucky.json` |
+| Our own models on Spider dev (out of distribution), test-suite accuracy | SFT 29.1%, B 27.9%, **C 29.9%**: C vs B **+1.9 pts** [0.6, 3.3]. Lucky share: B 26.4% vs C 23.6% | `results/e13_spider_ours.json` |
 
 **Before → after (test set, 331 items × 8 samples, different generator; verified = right on the original and all 4 copies).**
 
@@ -74,6 +75,13 @@ All data is synthetic: an e-commerce schema from a seeded generator, with no per
 | audit | 1302 | E0/E1 reward audit |
 | train | 907 | SFT (462 trajectories) and GRPO prompts |
 | test | 331 (214 in held-out F4) | E4, different generator |
+
+E6 and E13 use public Spider data that is not ours:
+- **Questions:** Spider dev, `xlangai/spider`, CC BY-SA 4.0.
+- **Gold SQL:** from ESM+.
+- **Test-suite DBs:** Zhong et al.
+
+We do not redistribute them. `results/spider_*.jsonl` keep only our models' turns and the tool outputs. The tool outputs are up to 20 rows from a Spider DB, so those files fall under CC BY-SA 4.0.
 
 ## 6. Model collection
 
@@ -341,6 +349,41 @@ The date bugs are generated from each of the 777 year-filtered audit queries: De
   Each failure is the same bug: the question says "by payment date" and the model filters on the order date.
 - **So:** period copies close a real hole in the verifier, which matters for a stronger policy or a real warehouse. They would change our accuracy numbers by under 1 pt. The bug families a verifier needs are the ones the policy actually produces.
 
+### E13: our own models on a real benchmark (Spider dev)
+E6 used other systems' predictions. Here we run our four models on all 1034 Spider-dev questions (20 real databases) and grade them the same way:
+- **EX** means the answer matches gold on the original Spider DB.
+- **TS** means it also matches on every distilled test-suite DB of Zhong, Yu & Klein (2020). These are counterfactual copies that someone else built for evaluation; none of them is ours.
+- **Setup.**
+  - The agent loop, tool and decoding are the same as in E4: up to 5 `run_sql` steps, 4 samples per question at temperature 0.7.
+  - The system prompt is our training prompt with the retail schema replaced by the question's Spider schema.
+  - No prompt hit the context limit.
+- **This is out of distribution.** Our models were trained on one retail schema, so read E13 as a transfer test of the reward, not as a Spider score.
+- **Cost.** The run took 36 minutes on a local RTX 5070 Ti (`scripts/local_spider.sh`, `scripts/spider_eval.py`), at $0.
+
+| Model | EX [95% CI] | TS [95% CI] | Lucky share of EX passes |
+|---|---|---|---|
+| Tiny Aya base | 15.4% [14.4, 16.6] | 12.6% [11.6, 13.7] | 18.3% [15.5, 21.5] |
+| SFT (`sft_ho`) | 38.5% [37.1, 40.0] | 29.1% [27.8, 30.5] | 24.4% [22.4, 26.6] |
+| GRPO-B (single-DB reward) | 38.0% [36.5, 39.5] | 27.9% [26.6, 29.3] | **26.4%** [24.3, 28.7] |
+| **GRPO-C** (counterfactual reward) | 39.1% [37.6, 40.6] | **29.9%** [28.5, 31.3] | **23.6%** [21.6, 25.7] |
+
+All four rows are over 4136 samples. The CIs treat the 4 samples of a question as independent, so they are slightly too narrow. The comparisons below use a paired bootstrap over questions instead.
+
+- **SFT transfers.** Training on one retail schema more than doubles Spider TS: +16.5 pts [14.4, 18.6] over base. Almost all of the gain comes from format, not SQL skill:
+  - 98% of SFT answers end with a final query, against 41% for base.
+  - Among answers that do end with one, EX is about the same: 39% for SFT, 37% for base.
+- **On Spider, the B–C order flips.**
+  - On our own test set C was 3.7 pts *below* B. On Spider TS, C is **+1.9 pts above B [+0.6, +3.3]** (paired bootstrap over questions).
+  - On EX the gap is only +1.1 [−0.3, +2.5], and C pays fewer lucky passes: −0.8 pts of samples [−1.8, +0.2].
+  - So C's gain comes mostly from answers that survive the test-suite DBs. That is what a counterfactual reward should teach.
+  - B shows the mirror image: compared with SFT it loses TS (−1.2 [−2.5, +0.1]) and gains lucky share.
+- **This is not proof.**
+  - Each run has one seed, and the comparison was not pre-registered.
+  - An exact McNemar test on the first sample alone gives C vs B p = 0.14.
+  - C vs SFT is +0.7 [−0.5, +2.1].
+  - We read E13 as the first sign, on data we did not build, that the reward changes *which* answers the policy learns. §10 is still the test that would settle it.
+- **Our models are luckier than published systems.** 18–26% of their EX passes fail a test-suite DB, against 8–15% for the eight systems in E6. Base is already at 18%, so much of this comes with the small model. Training on the single-DB reward (B) raises it most.
+
 ### Nulls and what else we tried
 - **The training comparison is null, and it is neither noise nor evidence that the counterfactual reward hurts.** On the eval set, C is 3.7 pts below B (95% CI [−5.3, −2.3], exact McNemar p < 0.001). That gap is real for these two adapters, but we trained one seed each, so we cannot say how much is GRPO run-to-run variance. Three facts explain why we expected little difference:
   1. **C really was stricter.** Replaying all 1440 training rollouts per run, C's reward was lower than B's on 7.1% (B run) and 7.2% (C run) of rollouts because they passed the original DB by luck. It was *higher* on only 0.1% and 0.3%.
@@ -378,9 +421,9 @@ The training null says our prompts were too easy, not that the reward is useless
 > **Threats to validity**
 > - **One seed** per training condition: the B–C gap (−3.7 pts) is significant across eval items but not across runs.
 > - **One model** (Tiny Aya Global 3.35B) and 60 GRPO steps on one L4.
-> - **Synthetic schemas:** one e-commerce schema, 18 templates; real warehouses have messier semantics. E6 (Spider) is the only real-data check, and it uses other systems' predictions, not our model's.
+> - **Synthetic schemas:** one e-commerce schema, 18 templates; real warehouses have messier semantics. The real-data checks are E6 (other systems' predictions on Spider) and E13 (our models on Spider dev, out of distribution, one seed per run, not pre-registered).
 > - **Gold-informed copies:** our copies are generated from each item's bug families, which know the gold query. A deployable verifier would build them from the schema alone (E8 is therefore an analysis, not a product).
-> - **Comparator:** our strict comparator is stricter than the official Spider script, so E6's absolute EX/TS are not leaderboard numbers.
+> - **Comparator:** our strict comparator is stricter than the official Spider script, so the absolute EX/TS in E6 and E13 are not leaderboard numbers.
 
 - F4 is described only in SQL terms: superseded and corrected records.
 - The test generator is less strict than the training reward (54 of 103 base-blind mutants caught).
