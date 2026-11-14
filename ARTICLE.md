@@ -31,7 +31,7 @@ Lexsi hackathon · Track 3 · Problem statements #6 (data and database agents) a
 
 Tiny Aya B is about 70× cheaper than Command A per query and about **11× cheaper per verified-correct answer**, but at 12.7% accuracy it does not replace it. Picking each item's most common answer out of the 8 samples (no gold needed) raises B to 16.9% and C to 13.6% (§8, E8).
 
-**Distilling Command A (E9).** As a data filter, the copies catch 47 lucky teacher answers (18.2% of what a single-DB filter keeps). But SFT on the 211 verified teacher answers *lowers* Tiny Aya from 9.4% to **3.3%**. The student picked up Command A's habit of adding `status != 'cancelled'`. In those 211 answers the filter never changed a result, so the copies could not see it.
+**Distilling Command A (E9).** As a data filter, the copies catch 47 lucky teacher answers (18.2% of what a single-DB filter keeps). But SFT on the 211 verified teacher answers *lowers* Tiny Aya from 9.4% to **3.3%**. The student picked up Command A's habit of adding `status != 'cancelled'`. In those 211 answers the filter never changed a result, so the copies could not see it. Running a 4-bit Command A ourselves (77.0% verified) and adding logit distillation does not help either: **6.9%**, the same as training on its text alone (§8, D3 + D4).
 
 [Demo](https://huggingface.co/spaces/sqlcf-lexsi/counterfactual-sql-demo) (runs in the browser) · [Data](https://huggingface.co/datasets/sqlcf-lexsi/counterfactual-sql-data) · [Code](https://github.com/RishiiGamer2201/sexsi_hack) · `python verify_all.py` re-derives every number above from stored runs.
 
@@ -256,6 +256,23 @@ By family (items / single / verified): F1 152 / 111 / 88, F2 81 / 27 / 3, F3 120
 - **Distillation hurt:** −6.2 pts verified [−8.3, −4.1], McNemar p < 0.001. Almost all of it is F1 (30.9% → 4.2%).
 - **Why: a teacher habit that the copies could not see.** Command A adds `status != 'cancelled'` to 325 of its 353 answers; the gold endings have it in 71. In 186 of the 211 verified answers the filter happened not to change the result on the original DB or on any copy, so they passed. The student learned the habit: it writes the filter in 56% of its test answers (SFT: 14%). Every F1 item that SFT gets right and the distilled model gets wrong (first sample) is from the template that says "count orders of any status".
 - **The lesson for counterfactual checks:** they verify an answer, not the reasoning behind it. A copy only catches a wrong filter if the copy changes what that filter selects. A teacher's systematic bias passes on every item where the data happens to agree. The fix is to add copies that flip each filter the question does not ask for (here, cancelled orders on "any status" items), or to check distillation data with copies that the teacher's habits break. We did not have time to run that.
+
+**D3 + D4: a local 4-bit teacher, and logit distillation.** Was the API the limit? Logit distillation needs the teacher's per-token probabilities, which the API does not return. So we ran a pre-quantised 4-bit Command A ourselves (`gghfez/command-a-03-2025-AWQ`, 68 GB; vLLM on one A100 80 GB, about 2 h of pod time; runbook in `docs/RUNPOD_INT4_TEACHER.md`). It saved the top-20 log-probabilities at every step.
+
+- **The 4-bit teacher:** 77.0% verified [72.2, 81.2] vs 81.0% via the API (−3.9 pts, McNemar p = 0.047, mostly F1: 100% → 83.3%). On the 353 train items the copies filter it almost exactly as before: 208 verified (API 211), 47 lucky (`results/e5_int4_accuracy.json`, `results/d1_teacher_filter_int4.json`).
+- **Different tokenisers:** Tiny Aya and Command A split text differently. So the KL term is applied only where the teacher's sampled token is exactly the student's token. That keeps 72% of positions and 99.7% of the teacher's top-20 probability mass (`scripts/logit_distil.py --align exact`).
+
+| Student (same settings as SFT, 331 × 8) | Verified [95% CI] | Single DB | Silent error |
+|---|---|---|---|
+| SFT (gold endings) | 9.4% [8.4, 10.6] | 14.5% | 65.4% |
+| D3: SFT on the 4-bit teacher's verified answers | 3.7% [3.0, 4.5] | 8.8% | 73.8% |
+| D4 control: the teacher's exact text, cross-entropy only | 6.9% [6.0, 7.9] | 11.9% | 68.1% |
+| D4: + KL to the teacher's top-20 | 6.9% [6.0, 8.0] | 11.9% | 67.3% |
+
+- **Quantisation is not the cause:** D3 vs D2 is +0.4 pts [−1.0, +1.8].
+- **Logit targets add nothing over the text:** D4 vs its control is +0.1 pts [−1.0, +1.2]. Both are below SFT (D4: −2.5 pts [−4.1, −0.9]). GRPO-B (12.7%) stays our best model.
+- **Same cause as D2:** the teacher's habits transfer. Final SQL with a `cancelled` filter: SFT 17%, D4 control 67%, D4 51%, D3 65%. Answers are about 2.4× longer than gold. The fix is to select the data (drop teacher answers whose filters differ from gold), not to change the loss.
+- **A bug we caught on the way:** the first KD run matched tokens only by their starting character. On 22% of its positions the target's top token was not the token in the text, and the student fell to 1.2% (35% of its answers had no SQL). The exact-token rule above fixes it, and `tests/test_logit_distil.py` guards it.
 
 ### E10: DPO from one checkpoint, single-DB vs counterfactual labels
 GRPO trained B and C separately, so their runs differ in more than the reward. Here one fixed set of rollouts is labelled two ways, and only the labels differ.

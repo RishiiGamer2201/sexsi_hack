@@ -1,0 +1,89 @@
+{
+ "what": "D1: Command A teacher answers (plan + SQL, T=0.3) on the 353 sft_ho train items, graded on the original train DB and its train counterfactual copies",
+ "teacher": "results/teacher_command_a_int4.jsonl",
+ "n": 353,
+ "has_sql": [
+  1.0,
+  0.989234439034014,
+  1.0
+ ],
+ "kept_by_single_db_filter": [
+  0.7223796033994334,
+  0.6734588414367665,
+  0.7665122830061236
+ ],
+ "kept_by_counterfactual_filter": [
+  0.5892351274787535,
+  0.537219706844916,
+  0.6393292157022308
+ ],
+ "lucky_kept_only_by_single_db": 47,
+ "lucky_share_of_single_db_kept": 0.1843137254901961,
+ "smuggled": 0,
+ "by_family_n_single_verified": {
+  "F1": [
+   152,
+   111,
+   88
+  ],
+  "F2": [
+   81,
+   24,
+   0
+  ],
+  "F3": [
+   120,
+   120,
+   120
+  ]
+ },
+ "lucky_ids": [
+  "F1_customer_list|Delhi|apparel|S_s103",
+  "F1_customer_list|Delhi|home|S_s101",
+  "F1_customer_list|Delhi|home|S_s102",
+  "F1_customer_list|Indore|apparel|S_s103",
+  "F1_customer_list|Indore|books|S_s101",
+  "F1_customer_list|Indore|electronics|S_s103",
+  "F1_customer_list|Jaipur|books|S_s103",
+  "F1_customer_list|Jaipur|electronics|S_s101",
+  "F1_customer_list|Jaipur|home|S_s101",
+  "F1_customer_list|Kochi|apparel|S_s101",
+  "F1_customer_list|Kochi|toys|S_s103",
+  "F1_customer_list|Mumbai|electronics|S_s101",
+  "F1_customer_list|Mumbai|toys|S_s101",
+  "F1_customer_list|Nagpur|electronics|S_s103",
+  "F1_customer_list|Nagpur|grocery|S_s101",
+  "F1_customer_list|Nagpur|toys|S_s101",
+  "F1_customer_list|Pune|apparel|S_s103",
+  "F1_customer_list|Pune|electronics|S_s103",
+  "F1_customer_list|Pune|home|S_s101",
+  "F1_customer_list|Pune|toys|S_s101",
+  "F1_customer_list|Surat|apparel|S_s103",
+  "F1_customer_list|Surat|books|S_s102",
+  "F1_customer_list|Surat|electronics|S_s101",
+  "F2_item_value_paid|Delhi|2024|S_s101",
+  "F2_item_value_paid|Delhi|2024|S_s103",
+  "F2_item_value_paid|Delhi|2025|S_s102",
+  "F2_item_value_paid|Delhi|2025|S_s103",
+  "F2_item_value_paid|Indore|2024|S_s103",
+  "F2_item_value_paid|Indore|2025|S_s101",
+  "F2_item_value_paid|Jaipur|2024|S_s102",
+  "F2_item_value_paid|Kochi|2024|S_s101",
+  "F2_item_value_paid|Mumbai|2024|S_s102",
+  "F2_item_value_paid|Mumbai|2025|S_s102",
+  "F2_item_value_paid|Nagpur|2024|S_s103",
+  "F2_item_value_paid|Nagpur|2025|S_s102",
+  "F2_item_value_paid|Pune|2024|S_s103",
+  "F2_item_value_paid|Surat|2024|S_s103",
+  "F2_item_value_paid|Surat|2025|S_s103",
+  "F2_paid_for_category|books|2024|S_s101",
+  "F2_paid_for_category|books|2025|S_s101",
+  "F2_paid_for_category|grocery|2025|S_s103",
+  "F2_paid_for_category|home|2024|S_s101",
+  "F2_paid_for_category|home|2024|S_s102",
+  "F2_paid_for_category|home|2025|S_s101",
+  "F2_paid_for_category|home|2025|S_s102",
+  "F2_paid_for_category|toys|2024|S_s101",
+  "F2_paid_for_category|toys|2025|S_s101"
+ ]
+}

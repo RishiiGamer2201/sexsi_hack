@@ -370,6 +370,13 @@
    "verified_fail_period": 0,
    "verified_fail_share": 0.0
   },
+  "command_a_int4": {
+   "single_db_pass": 139,
+   "single_pass_fail_period": 0,
+   "verified": 133,
+   "verified_fail_period": 0,
+   "verified_fail_share": 0.0
+  },
   "dpo_cf": {
    "single_db_pass": 231,
    "single_pass_fail_period": 6,
@@ -384,6 +391,27 @@
    "verified_fail_period": 9,
    "verified_fail_share": 0.0391304347826087
   },
+  "kd_a0": {
+   "single_db_pass": 234,
+   "single_pass_fail_period": 15,
+   "verified": 160,
+   "verified_fail_period": 5,
+   "verified_fail_share": 0.03125
+  },
+  "kd_a1": {
+   "single_db_pass": 39,
+   "single_pass_fail_period": 4,
+   "verified": 27,
+   "verified_fail_period": 0,
+   "verified_fail_share": 0.0
+  },
+  "kd_a1x": {
+   "single_db_pass": 205,
+   "single_pass_fail_period": 13,
+   "verified": 151,
+   "verified_fail_period": 3,
+   "verified_fail_share": 0.019867549668874173
+  },
   "sft": {
    "single_db_pass": 311,
    "single_pass_fail_period": 0,
@@ -397,6 +425,13 @@
    "verified": 54,
    "verified_fail_period": 2,
    "verified_fail_share": 0.037037037037037035
+  },
+  "sft_distil_int4": {
+   "single_db_pass": 135,
+   "single_pass_fail_period": 10,
+   "verified": 74,
+   "verified_fail_period": 0,
+   "verified_fail_share": 0.0
   },
   "sft_ho": {
    "single_db_pass": 275,

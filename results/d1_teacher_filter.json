@@ -1,5 +1,6 @@
 {
  "what": "D1: Command A teacher answers (plan + SQL, T=0.3) on the 353 sft_ho train items, graded on the original train DB and its train counterfactual copies",
+ "teacher": "results/teacher_command_a.jsonl",
  "n": 353,
  "has_sql": [
   1.0,

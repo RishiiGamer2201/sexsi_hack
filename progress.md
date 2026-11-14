@@ -5,6 +5,7 @@
 ## Current state (Nov 9)
 
 - **All experiments done** (E0, E1, E2, E3 B + C, E4, E5, manual audit, plus zero-GPU E6 Spider, E7 SkyRL, E8 self-consistency, AgentTune patch). Training comparison is a null: B 12.7% verified, C 9.0%, SFT 9.4%.
+- **Nov 14: D3 + D4 distillation from int4 Command A done (RunPod A100).** No student beats sft_ho: D3 3.7%, kd_a0 6.9%, kd_a1x (fixed logit distillation) 6.9%. B stays best. See the Nov 14 log entry.
 - **VM `sqlcf-l4`: TERMINATED**, no job queued. Start with `bash scripts/vm_start.sh` only if a new run is approved.
 - **Write-up:** ARTICLE.md revised per plan §9C (TL;DR leads with the audit, before/after table, hack catalogue, E6–E8, null paragraph, prior art, threats box, pre-registered §10). README judge's view updated. ABSTRACT.md not yet updated with E6–E8.
 - **Report to user:** `reports/Strengthening results Nov 9.md`.
@@ -22,6 +23,28 @@
 4. Optional polish: demo "shaky answer" flag (D5).
 
 ## Log
+
+### Nov 14
+
+- **D3 + D4: Command A int4 as a local teacher, text and logit distillation. Done; negative result. B (12.7%) is still the best model.**
+  - **Teacher:** `gghfez/command-a-03-2025-AWQ` (int4 AWQ W4A16, 68.2 GB, downloaded pre-quantised, no quantisation by us), vLLM 0.22.1 on one RunPod A100 SXM 80 GB (`--gpu-mem 0.95 --max-model-len 3072 --eager`; 57.8 GiB weights, 60k-token KV cache). About 2 h of pod time for teacher, training and eval. Runbook: `docs/RUNPOD_INT4_TEACHER.md`, `scripts/runpod_teacher.sh`.
+  - **int4 vs API on the test set** (`results/e5_int4_accuracy.json`): 77.0% verified [72.2, 81.2] vs 81.0%, −3.9 pts, McNemar p = 0.047; most of the gap is F1 (100% → 83.3%). `has_sql` 100%, lucky 6 vs 6.
+  - **D3 filter on the 353 train items** (`results/d1_teacher_filter_int4.json`): 208 verified (API 211), 47 lucky (API 47); `cancelled` filter in 308 answers (API 324). The teacher also saved top-20 log-probs plus token ids per step (`results/teacher_command_a_int4.logprobs.jsonl`, 353/353 rows, tokens rebuild the text in 353/353).
+  - **Students** (Tiny Aya, LoRA r=16, 2 epochs, lr 1e-4, trained on the pod's A100; verified on 331 × 8, in `results/e4_eval.json`):
+
+    | Model | Data / loss | Verified |
+    |---|---|---|
+    | `sft_distil_int4` (D3) | int4 teacher's verified answers, reformatted (TRL SFT) | 3.7% [3.0, 4.5] |
+    | `kd_a0` | teacher's exact text, CE only (`scripts/logit_distil.py --alpha 0`) | 6.9% [6.0, 7.9] |
+    | `kd_a1` | + KL to teacher top-20, `--align start` | 1.2% [0.9, 1.7] |
+    | `kd_a1x` | + KL, `--align exact` | 6.9% [6.0, 8.0] |
+
+    D3 vs D2 +0.4 [−1.0, +1.8] (quantisation is not the cause). kd_a1x vs kd_a0 +0.1 [−1.0, +1.2]; kd_a1x vs sft_ho −2.5 [−4.1, −0.9].
+  - **Bug found and fixed in `logit_distil.align`:** it kept a position when the teacher and student tokens started at the same character, without checking that they were the same token (teacher `.` vs student `.custom`). On 22% of kd_a1's 34,205 KD positions the target's top token was not the text's token (17.7%: absent from the target). kd_a1 learned those targets: 35% of answers without SQL, 60.5% of final SQL fails to run, 517 `--` comments, 343 `'canceled'` filters. Fix: `--align exact` (default) keeps a position only if the teacher's sampled token is the student's token; 72% of positions kept, mapped mass 99.7%, target ≠ text on 0.9%. Regression test in `tests/test_logit_distil.py` (4 pass).
+  - **Why text distillation fails:** the teacher's habits transfer. Final SQL with a `cancelled` filter: sft_ho 17%, kd_a0 67%, kd_a1x 51%, D3 65%. Final answers are about 2.4× longer than gold. The counterfactual filter keeps these answers because the filter changes no result on the train DBs. A fix would be data selection (drop teacher answers whose filters differ from gold), not a different loss.
+  - Write-up for the team: https://claude.ai/artifact/MA5jpqHm7FtoRNaLbLUEox. ARTICLE.md not changed. Adapters are not pushed to HF (negative results; local in `runs/{sft_distil_int4,kd_a0,kd_a1,kd_a1x}`).
+  - **Merged into main (Rishii).** ARTICLE.md: D3 + D4 subsection under E9 plus one sentence in the 60-second view; project page Space rebuilt. `verify_all.py` on Python 3.14 regenerates `e4_eval.json` with identical values (key order only), and `d1_teacher_filter.json` / `e12_period_copies.json` now include the new field and models; regenerated files committed so verify_all passes.
+  - `results/e4_eval.json` rescored with the new trajectories (Python 3.12: all earlier models and comparisons unchanged); `verify_all.py` now also reproduces the D3 filter and the int4 accuracy file.
 
 ### Nov 12
 
