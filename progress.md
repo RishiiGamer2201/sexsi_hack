@@ -26,6 +26,12 @@
 
 ### Nov 14
 
+- **ARTICLE.md restructured as a paper (15 Nov, Shreshth's request).**
+  - **Structure:** Abstract, Introduction with four contributions, Related work, Method, Reward audit, Training (with Spider transfer), Cost and distillation, Other things we tried, Limitations and the next experiment, Conclusion, References.
+  - **Appendices:** A holds artifacts, licences and Lexsi tools; B holds every detailed table; C holds implementation notes.
+  - **Style:** the main text has few numbers, no arrows or em dashes, and plain wording. Every number and table from the old version is kept, in the main text or the appendix.
+  - **Project page:** `make_site.py` now takes the author line from the article subtitle.
+  - **Abstract:** ABSTRACT.md rewritten in the same style earlier the same day.
 - **Second training seed for B and C (team go, 14 Nov ~20:15 IST).** E13's C-vs-B gap uses only one training run each, so we are adding a second.
   - **Runs:** `scripts/vm_seed1.sh` runs GRPO-B, then GRPO-C. Both use the default config plus `--seed 1`. The flag changes the prompt order and the torch RNG; the vLLM engine seed is fixed by TRL.
   - **Driver:** `scripts/laptop_seed1.sh` runs unattended:

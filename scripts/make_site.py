@@ -91,8 +91,7 @@ pre.bib {{ font-size: .8rem; white-space: pre-wrap; }}
 <body>
 <section class="hero"><div class="hero-body"><div class="container has-text-centered" style="max-width: 960px">
 <h1 class="title is-1 publication-title">{title}</h1>
-<p class="subtitle meta">Shreshth Rai · Rishii Kumar Singh · Aksh Aggarwal</p>
-<p class="subtitle meta is-6">{sub}</p>
+<p class="subtitle meta">{sub}</p>
 <div class="links">{buttons}</div>
 <p class="is-size-7 has-text-grey mt-3">Every number comes from stored runs in <code>results/</code>; <code>python verify_all.py</code> re-derives them.</p>
 </div></div></section>

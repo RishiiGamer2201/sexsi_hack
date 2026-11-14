@@ -72,6 +72,6 @@ Generate the paste files first: `python scripts/make_hf_article.py` writes `runs
 - [x] Every number reproduced by `verify_all.py` (Nov 14); tests pass; abstract rewritten Nov 15 (fewer numbers, plain wording)
 - [x] Git history scanned: no tokens or keys in any commit
 - [x] Two collections (models + demo; dataset), as the form asks
-- [ ] Article page Space refreshed (`make_site.py`)
+- [x] Article page Space refreshed (`make_site.py`), paper layout, Nov 15
 - [ ] Form sent
 - [ ] `go_public.py --go` run; every link opens logged out (by Nov 15, 11:59 PM AoE)
