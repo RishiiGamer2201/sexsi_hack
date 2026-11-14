@@ -14,4 +14,4 @@ t=$(date +%s)
 [ -d "runs/$name" ] && mv "runs/$name" "runs/stale_${name}_$t"
 SQLCF_REWARD_LOG=runs/${name}_rewards.jsonl /usr/bin/time -f "grpo %e s" .venv-train/bin/python train.py grpo \
   --reward "$reward" --init runs/sft/adapter --out "runs/$name" "$@" && echo "== GRPO OK"
-bash scripts/vm_autostop.sh
+[ -n "${NO_AUTOSTOP:-}" ] || bash scripts/vm_autostop.sh  # NO_AUTOSTOP=1 when another run is chained after this one
