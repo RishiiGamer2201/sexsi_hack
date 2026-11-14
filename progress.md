@@ -26,6 +26,7 @@
 
 ### Nov 14
 
+- **E13: our models on a real benchmark (Spider dev + Zhong test-suite DBs), running on the local GPU since 18:47 IST.** Team asked for a real-world test without building data. New `scripts/spider_eval.py` (+ `scripts/local_spider.sh`): base, sft_ho, B, C each answer the 1034 Spider-dev questions (4 samples, T = 0.7, same agent loop and prompt as E4 except the schema), graded EX (original DB) vs TS (original + every test-suite DB) with E6's scorer. Questions from HF `xlangai/spider` (CC BY-SA 4.0) in `external/spider_hf/`, checked 1034/1034 against ESM+ gold. Smoke (sft_ho, 8 questions × 2) passed: 6/16 TS. Out of distribution for the trained models (they saw one retail schema), so a transfer test. Result: `results/e13_spider_ours.json`.
 - **D3 + D4: Command A int4 as a local teacher, text and logit distillation. Done; negative result. B (12.7%) is still the best model.**
   - **Teacher:** `gghfez/command-a-03-2025-AWQ` (int4 AWQ W4A16, 68.2 GB, downloaded pre-quantised, no quantisation by us), vLLM 0.22.1 on one RunPod A100 SXM 80 GB (`--gpu-mem 0.95 --max-model-len 3072 --eager`; 57.8 GiB weights, 60k-token KV cache). About 2 h of pod time for teacher, training and eval. Runbook: `docs/RUNPOD_INT4_TEACHER.md`, `scripts/runpod_teacher.sh`.
   - **int4 vs API on the test set** (`results/e5_int4_accuracy.json`): 77.0% verified [72.2, 81.2] vs 81.0%, −3.9 pts, McNemar p = 0.047; most of the gap is F1 (100% → 83.3%). `has_sql` 100%, lucky 6 vs 6.
