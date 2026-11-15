@@ -31,8 +31,9 @@ from sqlcf.rewards import final_sql  # noqa: E402
 
 QUESTIONS = ROOT / "external/spider_hf/spider/validation-00000-of-00001.parquet"
 GOLD = ROOT / "external/ESMp/spider_dev/gold.txt"
-MODELS = ["base", "sft_ho", "B", "C"]
-PAIRS = [("C", "B"), ("B", "sft_ho"), ("C", "sft_ho"), ("sft_ho", "base")]
+MODELS = ["base", "sft_ho", "B", "C", "B_cur", "Cmin_cur"]  # *_cur: E14 curriculum pilot
+PAIRS = [("C", "B"), ("B", "sft_ho"), ("C", "sft_ho"), ("sft_ho", "base"),
+         ("Cmin_cur", "B_cur"), ("B_cur", "sft_ho"), ("Cmin_cur", "sft_ho"), ("B_cur", "B"), ("Cmin_cur", "C")]
 MAX_LEN, MAX_NEW = 8192, 1024
 SYSTEM = """You are a careful data analyst working with a SQLite database.
 

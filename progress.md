@@ -425,3 +425,8 @@
   completion logits over Tiny Aya's 262k vocabulary). SFT-model trajectories on the 36 curriculum items are short
   (p50 269 tokens, p99 500, max 1100; a 768 cap truncates 0.9%, the same as 1024), so attempt 4 (19:45 IST) uses
   `--max-completion 768 --vllm-mem 0.40` for both arms.
+- E14 B_cur trained (60/60, 19:45 to 23:08 IST); evaluated locally while Cmin_cur trains (17 min for merge + E4 + Spider).
+  Training log: original-DB pass 0.70 to 0.93, all-copies pass 0.11 to ~0.20-0.28, lucky share of passes flat ~0.7-0.8.
+  Test set (results/e14/e4_eval.json): B_cur verified 7.1% vs SFT-ho 9.4% (-2.3 [-3.7, -1.0]) and vs B 12.7%.
+  Spider (results/e14_spider.json): B_cur TS 27.6% vs SFT-ho 29.1% (-1.6 [-2.8, -0.3]); lucky share of EX 28.3%,
+  the highest of our models (+1.5 pts lucky rate vs SFT-ho [+0.6, +2.5]). Waiting on Cmin_cur (~02:40 IST).

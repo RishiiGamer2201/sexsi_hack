@@ -33,7 +33,8 @@ PAIRS = [("C", "B"), ("B", "sft_ho"), ("C", "sft_ho"), ("sft_ho", "base"), ("sft
          ("dpo_cf", "dpo_std"), ("dpo_std", "sft_ho"), ("dpo_cf", "sft_ho"),  # E10: DPO, single-DB vs CF labels
          ("sft_distil_int4", "sft_distil"), ("sft_distil_int4", "sft_ho"),  # D3: int4 local teacher, text only
          ("kd_a1", "kd_a0"), ("kd_a0", "sft_ho"), ("kd_a1", "sft_ho"),  # D4: logit distillation vs its CE-only control
-         ("kd_a1x", "kd_a0"), ("kd_a1x", "sft_ho")]  # D4 rerun: KD only where both tokenisers emit the same token
+         ("kd_a1x", "kd_a0"), ("kd_a1x", "sft_ho"),  # D4 rerun: KD only where both tokenisers emit the same token
+         ("Cmin_cur", "B_cur"), ("B_cur", "sft_ho"), ("Cmin_cur", "sft_ho"), ("B_cur", "B"), ("Cmin_cur", "C")]  # E14: curriculum pilot
 
 
 # ---------------- generation (GPU) ----------------
