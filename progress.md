@@ -421,3 +421,7 @@
   rejected `--max-completion`; both arms exited in seconds and the driver stopped the VM (~25 min billed).
   The driver now copies train.py to the VM. Attempt 3 (19:2x IST) relaunched by hand on the same VM after a
   first try at the scp edit did not apply; B_cur training with the new flags from 19:27 IST.
+- E14 attempt 3 OOMed again at step 4/60 with a 1536-token cap (tried to allocate 1.60 GiB, 1.19 GiB free; the
+  completion logits over Tiny Aya's 262k vocabulary). SFT-model trajectories on the 36 curriculum items are short
+  (p50 269 tokens, p99 500, max 1100; a 768 cap truncates 0.9%, the same as 1024), so attempt 4 (19:45 IST) uses
+  `--max-completion 768 --vllm-mem 0.40` for both arms.

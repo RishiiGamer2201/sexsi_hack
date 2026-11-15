@@ -16,7 +16,7 @@ ZONES="asia-south1-b asia-south1-c asia-southeast1-a asia-southeast1-b asia-sout
 ITEMS=data/train/curriculum_items.jsonl
 # attempt 1 (Nov 15 13:55) OOMed at step 3/60 on both arms (22 GiB L4; the hard prompts run long).
 # Same settings for both arms: shorter completions, a smaller vLLM share, no allocator fragmentation.
-ARGS="--items $ITEMS --max-completion 1536 --vllm-mem 0.40"; ENV="PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True"
+ARGS="--items $ITEMS --max-completion 768 --vllm-mem 0.40"; ENV="PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True"
 ist() { TZ=Asia/Kolkata date "+%d %b %H:%M"; }
 try() { for i in 1 2 3; do "$@" && return 0; echo "crash $i: $*"; sleep 15; done; return 1; }
 
