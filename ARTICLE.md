@@ -251,16 +251,9 @@ All of these are reported in full in Appendix B. Most are nulls.
 - **Partial credit.** Giving each database a score between 0 and 1 gives GRPO more groups with some signal. But it pays buggy queries more than twice as much as the binary reward, and it pays a hard-coded number that is close to the answer. It ranks queries no better, so we did not train with it. The same analysis shows that our C reward still put lucky rollouts above their group's mean more than half the time, because getting 1 of 2 copies right still earns half. The strict version never does.
 - **Period-edge copies.** Our copies edit cities, statuses and tiers, not dates. One extra copy that moves orders to the edges of the asked year catches about two thirds of date bugs, with no correct query rejected. Our models rarely make these bugs, though, so it would change our accuracy numbers by under 1 point. A verifier needs the bug families the policy actually produces.
 
-## 8. Limitations and the next experiment
+## 8. The next experiment
 
-- **One training seed** per reward. The gaps between B and C, on our test set and on Spider, hold across questions but not necessarily across training runs.
-- **One model** (Tiny Aya Global 3.35B) and 60 GRPO steps on one L4.
-- **Synthetic training data.** We trained on one synthetic e-commerce schema with 18 templates; real warehouses have messier semantics. Our real-data test is Spider (Sections 4.4 and 5.4), where our models are out of distribution and we have no training data of our own.
-- **The copies know the gold query.** We generate them from each item's bug families. A deployable verifier would have to build them from the schema alone, so the voting study in Section 7 is an analysis, not a product.
-- **Strict comparator.** Ours is stricter than the official Spider script, so our absolute Spider numbers are not leaderboard numbers.
-- **The test generator is less strict than the training reward.** It catches 54 of 103 base-blind mutants, so "verified" on the test set is the weaker check.
-
-**The experiment we would run next, with the prediction fixed now:**
+We would run this next, with the prediction fixed now:
 - **Curriculum.** Sample SFT 8 times on small-slice train items. Keep the items where some but not all samples pass the original database, and at least 20% of those passes fail a copy.
 - **Runs.** Train B against C-min (all databases must pass) and C-penalty (a negative reward for a lucky pass), with 3 seeds each and 120 steps. Evaluate on the same test set.
 - **Prediction.** C-min beats B by at least 2 points verified (mean of 3 seeds), and B's share of lucky passes rises during training while C-min's does not. If the gap is under 2 points, or its 3-seed interval includes 0, we report a second null.

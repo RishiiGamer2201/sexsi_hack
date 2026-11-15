@@ -34,6 +34,7 @@
 - **Aksh + Shreshth follow-up (12:41–12:44 IST): links and the "synthetic" wording.**
   - **References are links.** Each arXiv ID and GitHub repo in the list is a link. On the project page every in-text citation (45 of them) jumps to its entry; checked in the rendered DOM, with no broken anchors. AuditKIT and SkyRL are now cited in the text.
   - **"Synthetic" fixed.** §3.1 no longer says "all our data is synthetic". It now names both kinds: synthetic for training, the audit and our test set, and real Spider data (Sections 4.4 and 5.4). The limitation now reads "Synthetic training data". The dataset card's "synthetic" stays, because the released data is synthetic; we do not redistribute Spider.
+- **Limitations section removed (Shreshth, 12:56 IST).** §8 is now "The next experiment". The caveats tied to specific results stay where the result is stated: one seed (abstract, §5.3, §5.4), Spider as a transfer test rather than a leaderboard score (§5.4), and the scorer note (B4).
 - **Second seed:** VM still in L4 stockout (375 tries by 12:14 IST). The driver keeps retrying until 16 Nov 06:00 IST.
 
 ### Nov 14
