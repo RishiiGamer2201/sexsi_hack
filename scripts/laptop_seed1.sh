@@ -21,11 +21,15 @@ done
 echo "== VM started $(ist) IST after $n stockouts"
 for _ in $(seq 20); do ssh_ true && break; sleep 15; done
 want=$(md5sum runs/sft/adapter/adapter_model.safetensors | cut -c1-32)
-got=$(ssh_ "cd ~/sexsi_hack && git pull -q && md5sum runs/sft/adapter/adapter_model.safetensors | cut -c1-32")
+got=$(ssh_ "cd ~/sexsi_hack && md5sum runs/sft/adapter/adapter_model.safetensors | cut -c1-32")
 if [ "$want" != "$got" ]; then
   echo "== SFT adapter mismatch (VM: '$got'), stopping VM"
   gcloud compute instances stop sqlcf-l4 --project $P --zone $Z --quiet; exit 1
 fi
+# the VM cannot git pull (no GitHub credentials; Nov 16 03:18 run died on it), so copy the code over
+for f in scripts/vm_seed1.sh scripts/vm_grpo.sh scripts/vm_autostop.sh train.py; do
+  try gcloud compute scp $f "sqlcf-l4:~/sexsi_hack/$f" --project $P --zone $Z || { echo "== scp $f failed, stopping VM"; gcloud compute instances stop sqlcf-l4 --project $P --zone $Z --quiet; exit 1; }
+done
 ssh_ "cd ~/sexsi_hack && touch runs/HOLD_AUTOSTOP && (setsid nohup bash scripts/vm_seed1.sh > /dev/null 2>&1 < /dev/null &) && sleep 5 && pgrep -fc vm_seed1.sh"
 echo "== launched vm_seed1.sh $(ist) IST"
 
