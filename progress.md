@@ -26,6 +26,13 @@
 
 ### Nov 15
 
+- **Aksh's checks (13:10–13:28 IST).** `devChaudhari7/rl-sql` returns 404 on GitHub (repo and user), so it is dropped from related work and references. It came from the Nov 9 research notes and was never verified. AgentTune issue #11 is now named in Appendix A, the AgentTune reference and the README (with PR #12). README brought in line with the paper: title, no arrows, a Spider GRPO-C vs GRPO-B row, and a link to the project page.
+- **E14 curriculum pilot (Rishii's go, 15 Nov ~13:10 IST). This runs the §8 "next experiment", scaled down to fit the deadline.**
+  - **Curriculum** (`scripts/curriculum.py`, no new sampling): from SFT-ho's existing 6 rollouts per GRPO prompt (T = 1.0), keep items where some but not all pass the original DB and at least 20% of those passes fail a copy. That leaves 36 of 445 items (F3 net revenue 14, F1 paying customers 11, F2 refunded category 11). On them, 89% of original-DB passes are lucky, against about 8% in the original GRPO runs.
+  - **Runs:** B (`R_exec_rex`) against C-min (`R_cf_strict`), 1 seed, 60 steps, same config as the original runs. C-penalty and seeds 2–3 are dropped for time.
+  - **Local GPU does not fit GRPO:** at `--vllm-mem 0.5` the vLLM KV cache needs 0.56 GiB and only 0.46 GiB is left, and two model copies alone take about 13.4 GB of the 16 GB.
+  - **Temp VM:** `scripts/laptop_e14.sh` snapshots sqlcf-l4's disk, boots `sqlcf-e14` in the first zone with a free L4 (zone move approved by Rishii), runs both conditions, copies results back, and deletes the temp VM and snapshot. Then it merges and runs E4 + E13 generation locally. About 8.5 VM-hours (~$6.3).
+  - **After the run:** §8 comes out of the article and a short results section replaces it (Rishii's call).
 - **Shreshth's second round on the paper (15 Nov, ~13:00 IST).**
   - **Abstract** (ABSTRACT.md and the article): the Spider result now leads the training paragraph. C beats B by about 2 points of test-suite accuracy with fewer lucky passes, one seed, second seed under way. 353 words.
   - **Distillation removed** from the abstract, the introduction, §6 (now "Cost against Command A") and Appendix B (old B9 dropped, B10–B13 renumbered B9–B12). Also removed from README and SUBMISSION. The raw results (E9, D2–D4) stay in `results/` and git history.

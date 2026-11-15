@@ -390,7 +390,7 @@ Full report: [reports/Stronger counterfactual SQL entry.md](reports/Stronger%20c
 - SpotIt (arXiv 2510.26840): an SMT search for a distinguishing DB. It cuts top BIRD-dev systems by 10–14 points, but most disagreements are bad gold. Evaluation only; no window functions.
 - Gold noise: 52.8% of BIRD Mini-Dev has annotation errors (arXiv 2601.08778). This supports our choice of generated DBs with trusted gold.
 - Helff et al. (arXiv 2604.15149): the non-SQL analogue. With a normal verifier, a hacking gap opens around step 250; with a perturbation verifier it stays near zero. We trained 60 steps.
-- Unreviewed repo devChaudhari7/rl-sql scores rewards on 3 seeded DBs per schema.
+- Unreviewed repo devChaudhari7/rl-sql scores rewards on 3 seeded DBs per schema. (Nov 15: GitHub returns 404 for this repo and its user, so it was dropped from the article.)
 - **Our novelty delta:** solver-free, bug-family-targeted copies (answer-changing plus answer-preserving), hidden from the agent, used as a hard RL reward at 3B with a single-variable ablation, plus a gold-mutant audit of an open-source reward.
 
 **Why the training null is expected.**
