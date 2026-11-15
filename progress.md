@@ -417,3 +417,6 @@
   Attempt 2, same settings for both arms: `--max-completion 1536` (new train.py flag, default stays 2048),
   `--vllm-mem 0.40`, `PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True`; laptop_e14.sh now restarts the stopped VM.
   GPU quota is 1 L4 across all regions, so the seed-1 retry on sqlcf-l4 cannot start while E14 runs.
+- E14 attempt 2 (16:33 IST) never trained: the temp VM's `git pull` fails silently, so it ran the old train.py, which
+  rejected `--max-completion`; both arms exited in seconds and the driver stopped the VM (~25 min billed).
+  The driver now copies train.py to the VM. Attempt 3 relaunched.
