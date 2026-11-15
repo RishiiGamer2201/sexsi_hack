@@ -10,7 +10,7 @@ Text-to-SQL agents trained with reinforcement learning usually get rewarded when
 
 We first checked the reward itself, without training anything. On a single database, almost a third of realistic buggy queries get paid. With the copies, about one in six do, and queries that try to game the reward almost never get through. No correct query was rejected. Two public SQL rewards, AgentTune's and SkyRL-SQL's, have the same holes, and we patched AgentTune's. The problem is not specific to our data: on Spider, between 8 and 15 percent of the answers that eight published systems get right fail on Zhong et al.'s test-suite databases.
 
-We then trained Tiny Aya Global (3.35B) with GRPO, once with each reward. On our own test set the stricter reward did not help. Logging every rollout shows why: the two rewards disagreed on only about 7 percent of them, because our training questions were too easy for lucky answers to come up. The real-world benchmark tells a different story. On Spider, a public set of real databases that we did not build, the model trained with the copies beats the model trained on one database by about two points of test-suite accuracy, and it makes fewer lucky passes. That comes from one training run per reward, and a second seed is under way. Self-hosted, our model costs far less per query than Cohere Command A, but it is much less accurate and does not replace it.
+We then trained Tiny Aya Global (3.35B) with GRPO, once with each reward. On our own test set the stricter reward did not help. Logging every rollout shows why: the two rewards disagreed on only about 7 percent of them, because our training questions were too easy for lucky answers to come up. The real-world benchmark tells a different story. On Spider, a public set of real databases that we did not build, the model trained with the copies beats the model trained on one database by about two points of test-suite accuracy, and it makes fewer lucky passes. A second pair of runs, trained only on hard questions where lucky answers are common, repeats that two-point gap on Spider; on our own test set it is again a null. Self-hosted, our model costs far less per query than Cohere Command A, but it is much less accurate and does not replace it.
 
 ## 1. Introduction
 
@@ -24,7 +24,7 @@ We make four contributions:
 
 1. **An audit of the reward itself.** We generate realistic buggy versions of each gold query, plus a set of reward hacks, and measure how often each reward pays them. The copies cut both, and reject no correct query (Section 4).
 2. **The same audit on rewards and systems that are not ours.** AgentTune's built-in SQL reward and SkyRL-SQL's reward have the same holes, and so do the Spider predictions of eight published systems. We patched AgentTune's reward, and its maintainers merged a fix (Section 4).
-3. **A controlled training comparison.** Two GRPO runs of Tiny Aya Global (3.35B) differ only in the reward. On our own test set the stricter reward did not help, and we show why. On Spider, real databases we did not build, the model trained with the copies beat the single-database model on test-suite accuracy and made fewer lucky passes (Section 5).
+3. **A controlled training comparison.** Two GRPO runs of Tiny Aya Global (3.35B) differ only in the reward. On our own test set the stricter reward did not help, and we show why. On Spider, real databases we did not build, the model trained with the copies beat the single-database model on test-suite accuracy and made fewer lucky passes (Section 5). A second pair of runs on hard questions repeated the Spider gap (Section 8).
 4. **A cost comparison.** We compare a small self-hosted agent with Cohere Command A, per query and per verified answer (Section 6).
 
 The reward audit is our main result. We report the training results as they came out, including the ones that did not go our way.
@@ -199,7 +199,7 @@ The gap between B and C is real for these two adapters. With one training seed e
 2. **The training prompts were too easy for that to matter.** How fast RL learns depends on how much the reward varies under the policy, not on how accurate the reward is (Razin et al., 2025). RLVR also tolerates far more reward noise than 7% (Lv et al., 2025).
 3. **Others see the same pattern.** DualSQL trained Qwen3-8B with a stricter comparator and saw almost no change on its headline metric.
 
-A fair test needs prompts where lucky passes are common. Section 8 sets one out, with the prediction fixed in advance.
+A fair test needs prompts where lucky passes are common. Section 8 runs one, with the prediction fixed in advance.
 
 ### 5.4 Transfer to a real benchmark: Spider
 
@@ -251,18 +251,37 @@ All of these are reported in full in Appendix B. Most are nulls.
 - **Partial credit.** Giving each database a score between 0 and 1 gives GRPO more groups with some signal. But it pays buggy queries more than twice as much as the binary reward, and it pays a hard-coded number that is close to the answer. It ranks queries no better, so we did not train with it. The same analysis shows that our C reward still put lucky rollouts above their group's mean more than half the time, because getting 1 of 2 copies right still earns half. The strict version never does.
 - **Period-edge copies.** Our copies edit cities, statuses and tiers, not dates. One extra copy that moves orders to the edges of the asked year catches about two thirds of date bugs, with no correct query rejected. Our models rarely make these bugs, though, so it would change our accuracy numbers by under 1 point. A verifier needs the bug families the policy actually produces.
 
-## 8. The next experiment
+## 8. A curriculum of hard questions
 
-We would run this next, with the prediction fixed now:
-- **Curriculum.** Sample SFT 8 times on small-slice train items. Keep the items where some but not all samples pass the original database, and at least 20% of those passes fail a copy.
-- **Runs.** Train B against C-min (all databases must pass) and C-penalty (a negative reward for a lucky pass), with 3 seeds each and 120 steps. Evaluate on the same test set.
-- **Prediction.** C-min beats B by at least 2 points verified (mean of 3 seeds), and B's share of lucky passes rises during training while C-min's does not. If the gap is under 2 points, or its 3-seed interval includes 0, we report a second null.
+Section 5.3 blamed easy prompts. So we built a training set where lucky passes are common, and fixed the prediction before training.
+
+- **Curriculum.** We sampled the SFT model 8 times on each of the 445 GRPO training items. We kept the items where some but not all samples pass the original database, and at least 20% of those passes fail a copy. That leaves 36 items from three templates; 89% of the SFT model's single-database passes on them are lucky.
+- **Runs.** GRPO-B (single-database reward) against GRPO-C-min, whose reward pays only when the query is right on the original and all copies. Both start from the same SFT adapter, with the same settings as Section 3.3 except one: completions are capped at 768 tokens, because longer ones ran out of memory on the 24 GB L4. The cap cuts 0.9% of the SFT model's trajectories on these items. For time, we ran one seed and 60 steps per arm, and dropped a third arm with a penalty for lucky passes.
+- **Prediction.** C-min beats B by at least 2 points verified on our test set, and B's share of lucky passes rises during training while C-min's does not. Otherwise we report a second null.
+
+**Table 4.** Curriculum runs. Training rows cover steps 11 to 60 (960 rollouts per run). Test set as in Table 2; Spider as in Section 5.4.
+
+| | GRPO-B, curriculum | GRPO-C-min, curriculum | C-min minus B [95% CI] |
+|---|---|---|---|
+| Training: rollouts passing the original database | 87.5% | 77.9% | |
+| Training: rollouts passing all databases | 23.6% | 31.8% | |
+| Training: lucky share of original-database passes | 73.0% | 59.1% | |
+| Test set: verified (SFT: 9.4%) | 7.1% | 6.3% | −0.8 pts [−1.8, +0.2] |
+| Test set: silent error | 63.7% | 56.5% | |
+| Spider: test-suite accuracy (SFT: 29.1%) | 27.6% | 29.7% | **+2.1 pts [+0.9, +3.4]** |
+| Spider: lucky share of passes | 28.3% | 25.3% | lucky rate −0.9 pts [−1.9, +0.1] |
+
+**The prediction failed on our test set.** C-min is not ahead of B, so this is a second null there. Both curriculum models fell below the SFT model they started from: 60 steps on 36 items from three templates is narrow training.
+
+**The rewards did pull apart this time.** B learned to pass the database it was paid on, but about three in four of those passes stayed lucky, from 84% in the first 10 steps. Its lucky share did not rise, as we had predicted; it just stayed high. Under C-min the lucky share fell from 78% to 59%, and more rollouts were right on every database.
+
+**On Spider the gap came back.** C-min beats B by 2.1 points of test-suite accuracy, with fewer lucky passes. The main runs gave 1.9 points (Section 5.4). This pair used different prompts and a stricter reward, so it is a second, independent sample of the same comparison, though each pair is still one run per reward. The curriculum B is the only one of our models below SFT on Spider (−1.6 points [−2.8, −0.3]), and it has the highest lucky share of any of them.
 
 ## 9. Conclusion
 
 A reward that checks an SQL answer on one database pays for bugs that the data happens to hide. In our audit that happened to almost a third of realistic bugs, in two public rewards, and in the outputs of published systems on Spider. Running the same query on a few generated copies closes most of that hole and turns away nearly every reward hack, without rejecting correct queries.
 
-Whether the stricter reward also trains a better agent is still open. On our own prompts the two rewards rarely disagreed, so the training comparison could not separate them. On Spider, the first data we did not build, the model trained with the copies came out slightly ahead and made fewer lucky passes. We have said what result would settle it, and we release everything needed to check our numbers.
+Whether the stricter reward also trains a better agent is still open. On our own prompts the two rewards rarely disagreed, so the training comparison could not separate them. On Spider, the first data we did not build, the model trained with the copies came out about two points ahead and made fewer lucky passes, in two independent pairs of runs. On our own test set neither pair put it ahead, including the one we pre-registered. We release everything needed to check our numbers.
 
 ## References
 

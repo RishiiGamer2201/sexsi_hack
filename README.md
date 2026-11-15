@@ -19,6 +19,7 @@ A text-to-SQL agent is usually rewarded for matching the gold answer on **one** 
 | GRPO-C vs GRPO-B (pre-registered H4) | **null**: C is not better (−3.7 pts verified, p < 0.001; silent error p = 0.61) |
 | Why: rollouts on which B's and C's rewards differed during training | about 7% |
 | Spider dev, our models (real databases we did not build): test-suite accuracy, GRPO-C vs GRPO-B | 29.9% vs 27.9%, +1.9 pts [+0.6, +3.3]; lucky share of passes 23.6% vs 26.4% (one training run each) |
+| Curriculum pilot (36 hard train questions; one run each): GRPO-C-min vs GRPO-B | Spider 29.7% vs 27.6%, +2.1 pts [+0.9, +3.4]; our test set 6.3% vs 7.1%, −0.8 pts [−1.8, +0.2] (pre-registered prediction failed) |
 | Command A (single-turn) | 81.0% verified, $4.24 per 1k queries vs $0.06 for Tiny Aya B on an L4 |
 | DPO from sft_ho, same rollouts, single-DB vs counterfactual labels (E10) | 9.7% vs 8.1% verified (start 9.4%): no gain; lucky passes 4.5% under both |
 | Partial credit instead of 0/1 (E11): mutants paid on average / literal smuggling paid | 0.66 vs 0.30 binary / 0.86 vs 0 strict: more signal, all of it towards wrong answers |

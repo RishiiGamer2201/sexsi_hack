@@ -430,3 +430,15 @@
   Test set (results/e14/e4_eval.json): B_cur verified 7.1% vs SFT-ho 9.4% (-2.3 [-3.7, -1.0]) and vs B 12.7%.
   Spider (results/e14_spider.json): B_cur TS 27.6% vs SFT-ho 29.1% (-1.6 [-2.8, -0.3]); lucky share of EX 28.3%,
   the highest of our models (+1.5 pts lucky rate vs SFT-ho [+0.6, +2.5]). Waiting on Cmin_cur (~02:40 IST).
+
+### Nov 16
+- E14 Cmin_cur trained (60/60, to 02:40 IST). The laptop driver died at the copy step (laptop_e14.sh was edited while
+  running); adapters copied by hand, temp VM sqlcf-e14 and snapshot sqlcf-l4-e14 deleted 02:54 IST. Cmin_cur
+  evaluated locally (17 min).
+- E14 results (results/e14/e4_eval.json, results/e14_spider.json), C-min minus B, one run each:
+  test set verified 6.3% vs 7.1%, -0.8 [-1.8, +0.2] (pre-registered >= +2 failed: second null; both below SFT 9.4%);
+  Spider TS 29.7% vs 27.6%, +2.1 [+0.9, +3.4], lucky rate -0.9 [-1.9, +0.1] (main pair: +1.9 [+0.6, +3.3]).
+  Training steps 11-60: all-DB pass 31.8% vs 23.6%, lucky share of original-DB passes 59.1% vs 73.0%.
+- ARTICLE §8 is now "A curriculum of hard questions" (results, Table 4), replacing the plan. Abstract ("second seed
+  under way" replaced by the E14 replication), intro contribution 3, §5.3 pointer, conclusion and README updated.
+  Site re-uploaded.
