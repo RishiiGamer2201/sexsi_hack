@@ -442,3 +442,7 @@
 - ARTICLE §8 is now "A curriculum of hard questions" (results, Table 4), replacing the plan. Abstract ("second seed
   under way" replaced by the E14 replication), intro contribution 3, §5.3 pointer, conclusion and README updated.
   Site re-uploaded.
+- Seed 1: with E14's VM deleted, the 1-L4 quota freed and sqlcf-l4 started at 03:18 IST (after 768 stockouts), but the
+  driver's adapter check chained `git pull &&` (the VM cannot pull) and stopped it. Fixed (68aae4e: scp the code,
+  check the md5 without pulling); relaunched 03:22 IST. GRPO-B seed 1 training at ~207 s/step: B_s1 ~06:50,
+  C_s1 ~10:25 IST, then local merge + E4 + Spider (~40 min).
