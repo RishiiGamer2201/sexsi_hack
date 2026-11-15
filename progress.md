@@ -412,3 +412,8 @@
   - E1 blind rate: S size 0.292.
 
   See `plan.md`, "Status".
+- E14 attempt 1 (temp VM sqlcf-e14, asia-southeast1-c, 13:54 to 14:30 IST): both arms hit CUDA OOM at step 3/60
+  (22 GiB L4; the hard curriculum prompts produce long trajectories; 279 s/step). The driver stopped the VM.
+  Attempt 2, same settings for both arms: `--max-completion 1536` (new train.py flag, default stays 2048),
+  `--vllm-mem 0.40`, `PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True`; laptop_e14.sh now restarts the stopped VM.
+  GPU quota is 1 L4 across all regions, so the seed-1 retry on sqlcf-l4 cannot start while E14 runs.

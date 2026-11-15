@@ -14,6 +14,9 @@ ZONES="asia-south1-b asia-south1-c asia-southeast1-a asia-southeast1-b asia-sout
  asia-east1-c asia-northeast1-a asia-northeast1-b asia-northeast1-c europe-west4-a europe-west4-b europe-west4-c
  us-central1-a us-central1-b us-central1-c us-east1-b us-east1-c us-east1-d us-west1-a us-west1-b us-west1-c"
 ITEMS=data/train/curriculum_items.jsonl
+# attempt 1 (Nov 15 13:55) OOMed at step 3/60 on both arms (22 GiB L4; the hard prompts run long).
+# Same settings for both arms: shorter completions, a smaller vLLM share, no allocator fragmentation.
+ARGS="--items $ITEMS --max-completion 1536 --vllm-mem 0.40"; ENV="PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True"
 ist() { TZ=Asia/Kolkata date "+%d %b %H:%M"; }
 try() { for i in 1 2 3; do "$@" && return 0; echo "crash $i: $*"; sleep 15; done; return 1; }
 
@@ -22,7 +25,13 @@ gcloud compute snapshots describe $SNAP --project $P >/dev/null 2>&1 ||
   gcloud compute disks snapshot "$disk" --project $P --zone $SRC_Z --snapshot-names $SNAP --quiet || { echo "== snapshot failed"; exit 1; }
 echo "== snapshot $SNAP of $disk ready $(ist) IST"
 
-Z=""; n=0
+# reuse the temp VM if attempt 1 left it stopped
+Z=$(gcloud compute instances list --project $P --filter="name=$VM" --format="value(zone.basename())")
+n=0
+while [ -n "$Z" ] && ! gcloud compute instances start $VM --project $P --zone $Z --quiet >/dev/null 2>&1; do
+  n=$((n + 1)); [ "$(date +%s)" -gt "$DEADLINE" ] && { echo "== gave up restarting $VM $(ist) IST"; exit 1; }
+  echo "restart of $VM in $Z failed x$n, $(ist) IST"; sleep 120
+done
 while [ -z "$Z" ]; do
   for z in $ZONES; do
     gcloud compute instances create $VM --project $P --zone "$z" --machine-type g2-standard-4 \
@@ -34,7 +43,7 @@ while [ -z "$Z" ]; do
   [ "$(date +%s)" -gt "$DEADLINE" ] && { echo "== gave up $(ist) IST after $n rounds"; gcloud compute snapshots delete $SNAP --project $P --quiet; exit 1; }
   echo "no L4 in any zone, round $n, $(ist) IST"; sleep 300
 done
-echo "== $VM created in $Z $(ist) IST"
+echo "== $VM up in $Z $(ist) IST"
 ssh_() { gcloud compute ssh $VM --project $P --zone $Z --command "$1" 2>/dev/null; }
 cleanup() {
   gcloud compute instances delete $VM --project $P --zone $Z --quiet && echo "== deleted $VM $(ist) IST"
@@ -48,7 +57,7 @@ gcloud compute scp $ITEMS "$VM:~/sexsi_hack/$ITEMS" --project $P --zone $Z &&
   gcloud compute scp scripts/vm_grpo.sh scripts/vm_autostop.sh "$VM:~/sexsi_hack/scripts/" --project $P --zone $Z ||
   { echo "== scp failed"; cleanup; exit 1; }
 # the second run autostops (after the HOLD is released or 30 min), so a dead laptop cannot leave the VM billing
-ssh_ "cd ~/sexsi_hack && touch runs/HOLD_AUTOSTOP && (setsid nohup bash -c 'NO_AUTOSTOP=1 bash scripts/vm_grpo.sh R_exec_rex grpo_B_cur --items $ITEMS > runs/grpo_B_cur.log 2>&1; bash scripts/vm_grpo.sh R_cf_strict grpo_Cmin_cur --items $ITEMS > runs/grpo_Cmin_cur.log 2>&1' > /dev/null 2>&1 < /dev/null &) && sleep 5 && pgrep -fc '[v]m_grpo.sh'"
+ssh_ "cd ~/sexsi_hack && touch runs/HOLD_AUTOSTOP && (setsid nohup bash -c 'export $ENV; NO_AUTOSTOP=1 bash scripts/vm_grpo.sh R_exec_rex grpo_B_cur $ARGS > runs/grpo_B_cur.log 2>&1; bash scripts/vm_grpo.sh R_cf_strict grpo_Cmin_cur $ARGS > runs/grpo_Cmin_cur.log 2>&1' > /dev/null 2>&1 < /dev/null &) && sleep 5 && pgrep -fc '[v]m_grpo.sh'"
 echo "== launched B_cur then Cmin_cur $(ist) IST"
 
 while :; do

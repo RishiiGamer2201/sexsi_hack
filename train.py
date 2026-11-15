@@ -127,7 +127,7 @@ def grpo(a):
         # generation batch of G*prompts rollouts per optimizer step
         max_steps=a.steps, num_generations=a.G, per_device_train_batch_size=1,
         gradient_accumulation_steps=a.G * a.prompts, learning_rate=1e-5, beta=0.02, temperature=1.0,
-        max_completion_length=2048, max_steps_per_turn=4, gradient_checkpointing=True,
+        max_completion_length=a.max_completion, max_steps_per_turn=4, gradient_checkpointing=True,
         bf16=True, logging_steps=1, save_steps=20, report_to=[], seed=a.seed,
         use_vllm=a.vllm, vllm_mode="colocate", vllm_gpu_memory_utilization=a.vllm_mem,
         # no vllm_enable_sleep_mode: TRL's wake-up reload_weights segfaults (vLLM 0.22.1, smoke #4)
@@ -168,6 +168,7 @@ if __name__ == "__main__":
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--save-every", type=int, default=0, help="SFT checkpoint interval in steps, resumed on restart (0 = none)")
     ap.add_argument("--batch", type=int, default=2, choices=[1, 2, 4], help="SFT per-device batch; effective batch stays 16 (1 for a 16 GB card)")
+    ap.add_argument("--max-completion", type=int, default=2048, help="GRPO max completion tokens per trajectory")
     ap.add_argument("--no-vllm", dest="vllm", action="store_false")
     ap.add_argument("--vllm-mem", type=float, default=0.45, help="colocated vLLM share of GPU memory (3.35B bf16 weights ~6.7 GB)")
     a = ap.parse_args()
