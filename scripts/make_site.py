@@ -140,6 +140,25 @@ el.querySelectorAll("table").forEach(t => {{ const w = document.createElement("d
 el.querySelectorAll("p > img:only-child").forEach(img => {{
   const f = document.createElement("figure"), c = document.createElement("figcaption");
   c.textContent = img.alt; img.parentElement.replaceWith(f); f.append(img, c); }});
+// clickable citations: "Zhu et al., 2026", "Zhong, Yu & Klein (2020)", "Ai, 2026" -> #ref-<surname><year> in References
+const rh = [...el.querySelectorAll("h2")].find(h => h.textContent.trim() === "References");
+const refs = rh && rh.nextElementSibling, keys = new Set();
+if (refs) refs.querySelectorAll("li").forEach(li => {{
+  const m = li.textContent.match(/^(.+?)(?:,.*?)? \\((\\d{{4}}[ab]?)\\)/);
+  if (m) {{ const k = m[1].trim().replace(/\\W/g, "") + m[2]; li.id = "ref-" + k; keys.add(k); }} }});
+const CITE = /\\b(Team Cohere|Lexsi Labs|[A-Z][A-Za-z'-]+)((?: et al\\.)|(?:,? [A-Z][a-z]+)*(?: & [A-Z][A-Za-z]+)?),? (?:\\((\\d{{4}}[ab]?)\\)|(\\d{{4}}[ab]?)\\b)/g;
+const tw = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, {{ acceptNode: n =>
+  n.parentElement.closest("a, code, pre, .katex") || (refs && refs.contains(n)) ? 2 : 1 }});
+const texts = []; while (tw.nextNode()) texts.push(tw.currentNode);
+texts.forEach(n => {{
+  const s = n.nodeValue; let last = 0, frag = null;
+  for (const m of s.matchAll(CITE)) {{
+    const k = m[1].replace(/\\W/g, "") + (m[3] || m[4]); if (!keys.has(k)) continue;
+    frag = frag || document.createDocumentFragment();
+    frag.append(s.slice(last, m.index));
+    const a = document.createElement("a"); a.href = "#ref-" + k; a.className = "cite"; a.textContent = m[0];
+    frag.append(a); last = m.index + m[0].length; }}
+  if (frag) {{ frag.append(s.slice(last)); n.replaceWith(frag); }} }});
 // abstract block: the "Abstract" heading and its paragraphs, up to the next h2
 const ah = [...el.querySelectorAll("h2")].find(h => h.textContent.trim() === "Abstract");
 if (ah) {{ const box = document.createElement("section"); box.className = "abstract"; ah.before(box);

@@ -52,7 +52,7 @@ Other related lines:
 
 ### 3.1 Data and counterfactual copies
 
-All our data is synthetic: an e-commerce schema (customers, orders, order items, payments, refunds, invoices) from a seeded generator, with no personal data. Questions come from templates. Each template belongs to one of four bug families:
+We use two kinds of data. Training, the reward audit and our own test set are synthetic: an e-commerce schema (customers, orders, order items, payments, refunds, invoices) from a seeded generator, with no personal data. Questions come from templates. Each template belongs to one of four bug families:
 
 - **F1** duplicates and fan-out joins;
 - **F2** status filters (cancelled or placed rows);
@@ -60,6 +60,8 @@ All our data is synthetic: an e-commerce schema (customers, orders, order items,
 - **F4** superseded and corrected records. F4 is held out: no training reward ever uses it.
 
 Each item gets at least one *answer-changing* copy, where the gold result changes so that a smuggled literal cannot follow it. It also gets at least one *answer-preserving* copy, where the gold result stays the same but fan-out and duplicate bugs give a different answer. Code generates the copies per bug family; we never build them by hand.
+
+The second kind is real: Spider (Yu et al., 2018), 20 databases and 1034 dev questions written by people, with the test-suite databases of Zhong et al. (2020). We did not build or change any of it. We use it twice: to score eight published systems (Section 4.4) and to test our own trained models (Section 5.4).
 
 | Split | Items | Use |
 |---|---|---|
@@ -96,7 +98,7 @@ Both use the same data and seed, 60 steps, 6 rollouts per prompt, 4 prompts per 
 The test set comes from a **different generator**: a foreign-key-closed sub-database of a larger parent, plus 4 mutated copies that know nothing about the bug families. We sample each of the 331 items 8 times at temperature 0.7. We use these terms throughout:
 - an answer is **verified** if it matches on the original and all 4 copies;
 - it is a **lucky pass** if it matches on the original but fails a copy;
-- it is a **silent error** if the agent claims success, all its tool calls succeeded, and the answer is wrong. This follows AuditKIT's claimed-versus-verified framing.
+- it is a **silent error** if the agent claims success, all its tool calls succeeded, and the answer is wrong. This follows the claimed-versus-verified framing of AuditKIT (Lexsi Labs, 2026).
 
 We also report pass^k (all of k samples verified).
 
@@ -138,7 +140,7 @@ How often a bug hides depends mostly on how small the question's slice of the da
 
 **AgentTune's built-in SQL reward (H3).** On 360 yes/no items, a query padded with `WHERE 1 = 1` plus an answer that is always "yes" earns the same score as honest SQL on every yes item (3.10). We wrote a patch that brings the exploit down to 2.20, with a reproduction script and a regression test. We reported it upstream as [Lexsi-Labs/AgentTune#11](https://github.com/Lexsi-Labs/AgentTune/issues/11). The maintainers merged a fix the next day ([#12](https://github.com/Lexsi-Labs/AgentTune/pull/12)): the WHERE check and an opt-in result-matching reward, both as we proposed, with a regression test.
 
-**SkyRL-SQL's reward** runs the predicted and gold SQL on one database and pays 1 if the two *sets* of rows are equal. Re-implemented from its source and run on the same candidates, it has two holes of about the same size:
+**SkyRL-SQL's reward** (NovaSky-AI, 2025) runs the predicted and gold SQL on one database and pays 1 if the two *sets* of rows are equal. Re-implemented from its source and run on the same candidates, it has two holes of about the same size:
 - **The database hole.** Adding copies closes this one.
 - **The comparator hole.** A strict comparator closes this one, and nearly all of it is a dropped `DISTINCT`.
 
@@ -253,7 +255,7 @@ All of these are reported in full in Appendix B. Most are nulls.
 
 - **One training seed** per reward. The gaps between B and C, on our test set and on Spider, hold across questions but not necessarily across training runs.
 - **One model** (Tiny Aya Global 3.35B) and 60 GRPO steps on one L4.
-- **Synthetic data.** One e-commerce schema with 18 templates; real warehouses have messier semantics. Our real-data checks are Spider with other systems' predictions (Section 4.4) and with our own models, out of distribution (Section 5.4).
+- **Synthetic training data.** We trained on one synthetic e-commerce schema with 18 templates; real warehouses have messier semantics. Our real-data test is Spider (Sections 4.4 and 5.4), where our models are out of distribution and we have no training data of our own.
 - **The copies know the gold query.** We generate them from each item's bug families. A deployable verifier would have to build them from the schema alone, so the voting study in Section 7 is an analysis, not a product.
 - **Strict comparator.** Ours is stricter than the official Spider script, so our absolute Spider numbers are not leaderboard numbers.
 - **The test generator is less strict than the training reward.** It catches 54 of 103 base-blind mutants, so "verified" on the test set is the weaker check.
@@ -271,42 +273,42 @@ Whether the stricter reward also trains a better agent is still open. On our own
 
 ## References
 
-- Ai (2026). Bounded semantic planning and deterministic compilation for reliable enterprise text-to-SQL. arXiv:2608.16663.
-- Chandra, Chawda, Kar, Reddy, et al. (2014). Data generation for testing and grading SQL queries (XData). *The VLDB Journal*. arXiv:1411.6704.
-- Chen, Gan, Chung, Zhang, et al. (2026). DualSQL: Text-to-SQL with multi-agent reinforcement learning. arXiv:2609.18135.
-- ESM+ evaluation code and Spider-dev predictions of published systems. GitHub repository `bossben/ESMp`, commit `91dd85b`.
-- Fu, Sun, Wei, Wei, et al. (2026). SQLoom: Set-contrastive learning of syntactic, semantic, and logical dependencies for text-to-SQL. arXiv:2611.03298.
-- He, Choi, Zhang, Ji, et al. (2025). HardTests: A high-quality RL verifier generation pipeline for LLM algorithmic coding. arXiv:2505.24098.
-- He, Zhao, Wang, et al. (2024). VeriEQL: Bounded equivalence verification for complex SQL queries with integrity constraints. arXiv:2403.03193.
-- Hu, Shen, Wallis, Allen-Zhu, et al. (2021). LoRA: Low-rank adaptation of large language models. *ICLR 2022*. arXiv:2106.09685.
-- Jin, Choi, Zhu, Kang (2026). Pervasive annotation errors break text-to-SQL benchmarks and leaderboards. arXiv:2601.08778.
-- Klopfenstein, He, Tremante, Wang, et al. (2025). SpotIt: Evaluating text-to-SQL evaluation with formal verification. *ICLR 2026*. arXiv:2510.26840.
-- Lexsi Labs (2026). AuditKIT: agent evaluation toolkit. GitHub repository `Lexsi-Labs/AuditKIT`, commit `9da5838`.
-- Li, Hui, Qu, Yang, et al. (2023). Can LLM already serve as a database interface? A big bench for large-scale database grounded text-to-SQLs (BIRD). *NeurIPS 2023*. arXiv:2305.03111.
-- Liu, Shen, Li, Tang, et al. (2025). NL2SQL-BUGs: A benchmark for detecting semantic errors in NL2SQL translation. *KDD 2025*. arXiv:2503.11984.
-- Lv, Xie, Sun, Kang, et al. (2025). The climb carves wisdom deeper than the summit: On the noisy rewards in learning to reason. arXiv:2505.22653.
-- Lyngkhoi, Gupta, Vats, Kadiyala, et al. (2026). AgentTune: A unified training lifecycle for tool-using LLM agents. arXiv:2610.13335. Code: `Lexsi-Labs/AgentTune`, commit `d4db4c1`.
-- Ma, Zhuang, Xu, Jiang, et al. (2025). SQL-R1: Training natural language to SQL reasoning model by reinforcement learning. *NeurIPS 2025*. arXiv:2504.08600.
-- NovaSky-AI (2025). SkyRL, including the SkyRL-SQL reward. GitHub repository `NovaSky-AI/SkyRL`, commit `d870046`.
-- Papicchio, Rossi, Cagliero, Papotti (2025). Think2SQL: Reinforce LLM reasoning capabilities for Text2SQL. arXiv:2504.15077.
+- Ai (2026). Bounded semantic planning and deterministic compilation for reliable enterprise text-to-SQL. [arXiv:2608.16663](https://arxiv.org/abs/2608.16663).
+- Chandra, Chawda, Kar, Reddy, et al. (2014). Data generation for testing and grading SQL queries (XData). *The VLDB Journal*. [arXiv:1411.6704](https://arxiv.org/abs/1411.6704).
+- Chen, Gan, Chung, Zhang, et al. (2026). DualSQL: Text-to-SQL with multi-agent reinforcement learning. [arXiv:2609.18135](https://arxiv.org/abs/2609.18135).
+- ESM+ evaluation code and Spider-dev predictions of published systems. GitHub repository [`bossben/ESMp`](https://github.com/bossben/ESMp), commit `91dd85b`.
+- Fu, Sun, Wei, Wei, et al. (2026). SQLoom: Set-contrastive learning of syntactic, semantic, and logical dependencies for text-to-SQL. [arXiv:2611.03298](https://arxiv.org/abs/2611.03298).
+- He, Choi, Zhang, Ji, et al. (2025). HardTests: A high-quality RL verifier generation pipeline for LLM algorithmic coding. [arXiv:2505.24098](https://arxiv.org/abs/2505.24098).
+- He, Zhao, Wang, et al. (2024). VeriEQL: Bounded equivalence verification for complex SQL queries with integrity constraints. [arXiv:2403.03193](https://arxiv.org/abs/2403.03193).
+- Hu, Shen, Wallis, Allen-Zhu, et al. (2021). LoRA: Low-rank adaptation of large language models. *ICLR 2022*. [arXiv:2106.09685](https://arxiv.org/abs/2106.09685).
+- Jin, Choi, Zhu, Kang (2026). Pervasive annotation errors break text-to-SQL benchmarks and leaderboards. [arXiv:2601.08778](https://arxiv.org/abs/2601.08778).
+- Klopfenstein, He, Tremante, Wang, et al. (2025). SpotIt: Evaluating text-to-SQL evaluation with formal verification. *ICLR 2026*. [arXiv:2510.26840](https://arxiv.org/abs/2510.26840).
+- Lexsi Labs (2026). AuditKIT: agent evaluation toolkit. GitHub repository [`Lexsi-Labs/AuditKIT`](https://github.com/Lexsi-Labs/AuditKIT), commit `9da5838`.
+- Li, Hui, Qu, Yang, et al. (2023). Can LLM already serve as a database interface? A big bench for large-scale database grounded text-to-SQLs (BIRD). *NeurIPS 2023*. [arXiv:2305.03111](https://arxiv.org/abs/2305.03111).
+- Liu, Shen, Li, Tang, et al. (2025). NL2SQL-BUGs: A benchmark for detecting semantic errors in NL2SQL translation. *KDD 2025*. [arXiv:2503.11984](https://arxiv.org/abs/2503.11984).
+- Lv, Xie, Sun, Kang, et al. (2025). The climb carves wisdom deeper than the summit: On the noisy rewards in learning to reason. [arXiv:2505.22653](https://arxiv.org/abs/2505.22653).
+- Lyngkhoi, Gupta, Vats, Kadiyala, et al. (2026). AgentTune: A unified training lifecycle for tool-using LLM agents. [arXiv:2610.13335](https://arxiv.org/abs/2610.13335). Code: [`Lexsi-Labs/AgentTune`](https://github.com/Lexsi-Labs/AgentTune), commit `d4db4c1`.
+- Ma, Zhuang, Xu, Jiang, et al. (2025). SQL-R1: Training natural language to SQL reasoning model by reinforcement learning. *NeurIPS 2025*. [arXiv:2504.08600](https://arxiv.org/abs/2504.08600).
+- NovaSky-AI (2025). SkyRL, including the SkyRL-SQL reward. GitHub repository [`NovaSky-AI/SkyRL`](https://github.com/NovaSky-AI/SkyRL), commit `d870046`.
+- Papicchio, Rossi, Cagliero, Papotti (2025). Think2SQL: Reinforce LLM reasoning capabilities for Text2SQL. [arXiv:2504.15077](https://arxiv.org/abs/2504.15077).
 - ParSEval (2025). *PVLDB* 18(11).
-- Pasupat, Liang (2016). Inferring logical forms from denotations. *ACL 2016*. arXiv:1606.06900.
-- Pourreza, Talaei, Sun, Wan, et al. (2025). Reasoning-SQL: Reinforcement learning with SQL tailored partial rewards for reasoning-enhanced text-to-SQL. arXiv:2503.23157.
-- Rafailov, Sharma, Mitchell, Ermon, et al. (2023). Direct preference optimization: Your language model is secretly a reward model. *NeurIPS 2023*. arXiv:2305.18290.
-- Razin, Wang, Strauss, Wei, et al. (2025). What makes a reward model a good teacher? An optimization perspective. *NeurIPS 2025*. arXiv:2503.15477.
-- Salamanca, Abagyan, D'souza, et al. (2026). Tiny Aya: Bridging scale and multilingual depth. arXiv:2603.11510.
-- Shao, Wang, Zhu, Xu, et al. (2024). DeepSeekMath: Pushing the limits of mathematical reasoning in open language models (introduces GRPO). arXiv:2402.03300.
-- Team Cohere (2025). Command A: An enterprise-ready large language model. arXiv:2504.00698.
-- Wang, Liu, Sun, Li, et al. (2025). CodeContests+: High-quality test case generation for competitive programming. arXiv:2506.05817.
-- Weng, Wu, Cui, Zhan, et al. (2025). Graph-Reward-SQL: Execution-free reinforcement learning for text-to-SQL via graph matching and stepwise reward. arXiv:2505.12380.
-- Yao, Shinn, Razavi, Narasimhan (2024). τ-bench: A benchmark for tool-agent-user interaction in real-world domains. arXiv:2406.12045.
-- Yao, Sun, Borchmann, Nuti, et al. (2025). Arctic-Text2SQL-R1: Simple rewards, strong reasoning in text-to-SQL. arXiv:2505.20315.
-- Yu, Zhang, Yang, Yasunaga, et al. (2018). Spider: A large-scale human-labeled dataset for complex and cross-domain semantic parsing and text-to-SQL task. *EMNLP 2018*. arXiv:1809.08887.
-- Zhang, Wang, Liu, Lan, et al. (2026a). Progress-SQL: Improving reinforcement learning for text-to-SQL via progressive rewards. arXiv:2606.06825.
-- Zhang, Yan, Huang, Zhao, et al. (2026b). Robust code RL via faulty-code-driven test case synthesis and dense reward shaping (RobustTests). *EMNLP 2026*. arXiv:2608.24135.
-- Zhong, Yu, Klein (2020). Semantic evaluation for text-to-SQL with distilled test suites. *EMNLP 2020*. arXiv:2010.02840.
-- Zhu, Jin, Choi, Kang (2026). Human-level text-to-SQL via reinforcement learning on verified data, without pipeline engineering (ReViSQL). arXiv:2603.20004.
-- `devChaudhari7/rl-sql` (2026). RL rewards on seeded databases per schema. GitHub repository, unreviewed.
+- Pasupat, Liang (2016). Inferring logical forms from denotations. *ACL 2016*. [arXiv:1606.06900](https://arxiv.org/abs/1606.06900).
+- Pourreza, Talaei, Sun, Wan, et al. (2025). Reasoning-SQL: Reinforcement learning with SQL tailored partial rewards for reasoning-enhanced text-to-SQL. [arXiv:2503.23157](https://arxiv.org/abs/2503.23157).
+- Rafailov, Sharma, Mitchell, Ermon, et al. (2023). Direct preference optimization: Your language model is secretly a reward model. *NeurIPS 2023*. [arXiv:2305.18290](https://arxiv.org/abs/2305.18290).
+- Razin, Wang, Strauss, Wei, et al. (2025). What makes a reward model a good teacher? An optimization perspective. *NeurIPS 2025*. [arXiv:2503.15477](https://arxiv.org/abs/2503.15477).
+- Salamanca, Abagyan, D'souza, et al. (2026). Tiny Aya: Bridging scale and multilingual depth. [arXiv:2603.11510](https://arxiv.org/abs/2603.11510).
+- Shao, Wang, Zhu, Xu, et al. (2024). DeepSeekMath: Pushing the limits of mathematical reasoning in open language models (introduces GRPO). [arXiv:2402.03300](https://arxiv.org/abs/2402.03300).
+- Team Cohere (2025). Command A: An enterprise-ready large language model. [arXiv:2504.00698](https://arxiv.org/abs/2504.00698).
+- Wang, Liu, Sun, Li, et al. (2025). CodeContests+: High-quality test case generation for competitive programming. [arXiv:2506.05817](https://arxiv.org/abs/2506.05817).
+- Weng, Wu, Cui, Zhan, et al. (2025). Graph-Reward-SQL: Execution-free reinforcement learning for text-to-SQL via graph matching and stepwise reward. [arXiv:2505.12380](https://arxiv.org/abs/2505.12380).
+- Yao, Shinn, Razavi, Narasimhan (2024). τ-bench: A benchmark for tool-agent-user interaction in real-world domains. [arXiv:2406.12045](https://arxiv.org/abs/2406.12045).
+- Yao, Sun, Borchmann, Nuti, et al. (2025). Arctic-Text2SQL-R1: Simple rewards, strong reasoning in text-to-SQL. [arXiv:2505.20315](https://arxiv.org/abs/2505.20315).
+- Yu, Zhang, Yang, Yasunaga, et al. (2018). Spider: A large-scale human-labeled dataset for complex and cross-domain semantic parsing and text-to-SQL task. *EMNLP 2018*. [arXiv:1809.08887](https://arxiv.org/abs/1809.08887).
+- Zhang, Wang, Liu, Lan, et al. (2026a). Progress-SQL: Improving reinforcement learning for text-to-SQL via progressive rewards. [arXiv:2606.06825](https://arxiv.org/abs/2606.06825).
+- Zhang, Yan, Huang, Zhao, et al. (2026b). Robust code RL via faulty-code-driven test case synthesis and dense reward shaping (RobustTests). *EMNLP 2026*. [arXiv:2608.24135](https://arxiv.org/abs/2608.24135).
+- Zhong, Yu, Klein (2020). Semantic evaluation for text-to-SQL with distilled test suites. *EMNLP 2020*. [arXiv:2010.02840](https://arxiv.org/abs/2010.02840).
+- Zhu, Jin, Choi, Kang (2026). Human-level text-to-SQL via reinforcement learning on verified data, without pipeline engineering (ReViSQL). [arXiv:2603.20004](https://arxiv.org/abs/2603.20004).
+- [`devChaudhari7/rl-sql`](https://github.com/devChaudhari7/rl-sql) (2026). RL rewards on seeded databases per schema. GitHub repository, unreviewed.
 
 ## Appendix A. Artifacts, licences and Lexsi tools
 

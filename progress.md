@@ -31,6 +31,9 @@
   - **Distillation removed** from the abstract, the introduction, §6 (now "Cost against Command A") and Appendix B (old B9 dropped, B10–B13 renumbered B9–B12). Also removed from README and SUBMISSION. The raw results (E9, D2–D4) stay in `results/` and git history.
   - **References** expanded: 36 entries with authors, full titles, venues and arXiv IDs. Added Spider, BIRD, GRPO, LoRA, DPO, VeriEQL, Command A, Tiny Aya, AuditKIT, ESM+ and SkyRL. In-text citations are now author-year.
   - **Project page** (`make_site.py`): paper layout. One 740px serif column (Times New Roman, or Tinos as its web fallback), justified text, left-aligned section headings, a small-caps abstract block, booktabs tables, figures with captions, small outlined link buttons. Bulma dropped.
+- **Aksh + Shreshth follow-up (12:41–12:44 IST): links and the "synthetic" wording.**
+  - **References are links.** Each arXiv ID and GitHub repo in the list is a link. On the project page every in-text citation (45 of them) jumps to its entry; checked in the rendered DOM, with no broken anchors. AuditKIT and SkyRL are now cited in the text.
+  - **"Synthetic" fixed.** §3.1 no longer says "all our data is synthetic". It now names both kinds: synthetic for training, the audit and our test set, and real Spider data (Sections 4.4 and 5.4). The limitation now reads "Synthetic training data". The dataset card's "synthetic" stays, because the released data is synthetic; we do not redistribute Spider.
 - **Second seed:** VM still in L4 stockout (375 tries by 12:14 IST). The driver keeps retrying until 16 Nov 06:00 IST.
 
 ### Nov 14
