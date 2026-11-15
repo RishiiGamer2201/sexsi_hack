@@ -419,4 +419,5 @@
   GPU quota is 1 L4 across all regions, so the seed-1 retry on sqlcf-l4 cannot start while E14 runs.
 - E14 attempt 2 (16:33 IST) never trained: the temp VM's `git pull` fails silently, so it ran the old train.py, which
   rejected `--max-completion`; both arms exited in seconds and the driver stopped the VM (~25 min billed).
-  The driver now copies train.py to the VM. Attempt 3 relaunched.
+  The driver now copies train.py to the VM. Attempt 3 (19:2x IST) relaunched by hand on the same VM after a
+  first try at the scp edit did not apply; B_cur training with the new flags from 19:27 IST.

@@ -54,7 +54,8 @@ want=$(md5sum runs/sft/adapter/adapter_model.safetensors | cut -c1-32)
 got=$(ssh_ "cd ~/sexsi_hack && git pull -q; md5sum runs/sft/adapter/adapter_model.safetensors | cut -c1-32")
 [ "$want" = "$got" ] || { echo "== SFT adapter mismatch (VM: '$got')"; cleanup; exit 1; }
 gcloud compute scp $ITEMS "$VM:~/sexsi_hack/$ITEMS" --project $P --zone $Z &&
-  gcloud compute scp scripts/vm_grpo.sh scripts/vm_autostop.sh "$VM:~/sexsi_hack/scripts/" --project $P --zone $Z ||
+  gcloud compute scp scripts/vm_grpo.sh scripts/vm_autostop.sh "$VM:~/sexsi_hack/scripts/" --project $P --zone $Z &&
+  gcloud compute scp train.py "$VM:~/sexsi_hack/train.py" --project $P --zone $Z ||  # its git pull fails
   { echo "== scp failed"; cleanup; exit 1; }
 # the second run autostops (after the HOLD is released or 30 min), so a dead laptop cannot leave the VM billing
 ssh_ "cd ~/sexsi_hack && touch runs/HOLD_AUTOSTOP && (setsid nohup bash -c 'export $ENV; NO_AUTOSTOP=1 bash scripts/vm_grpo.sh R_exec_rex grpo_B_cur $ARGS > runs/grpo_B_cur.log 2>&1; bash scripts/vm_grpo.sh R_cf_strict grpo_Cmin_cur $ARGS > runs/grpo_Cmin_cur.log 2>&1' > /dev/null 2>&1 < /dev/null &) && sleep 5 && pgrep -fc '[v]m_grpo.sh'"
