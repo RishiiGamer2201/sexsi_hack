@@ -1,4 +1,4 @@
-"""ARTICLE.md -> Nerfies-style project page (Bulma hero + link buttons, KaTeX math) as the static HF Space
+"""ARTICLE.md -> paper-style project page (one serif column, booktabs tables, KaTeX math) as the static HF Space
 sqlcf-lexsi/counterfactual-sql-article. Math is cut out before Markdown parsing (so `_` and `\\` survive) and
 typeset by KaTeX in the browser; figures are copied into the Space. Private until go_public.py.
 
@@ -55,8 +55,9 @@ def page(md):
     body = absolutize(body).replace(f"]({RAW}/", "](")  # links -> GitHub, figures stay local (copied in)
     body, maths = cut_math(body)
     js = lambda x: json.dumps(x).replace("</", "<\\/")
-    btn = lambda url, icon, label: (f'<a class="button is-dark is-rounded" href="{url}" target="_blank" rel="noopener">'
-                                    f'<span class="icon"><i class="{icon}"></i></span><span>{label}</span></a>')
+    authors, _, venue = sub.partition(" · ")  # "names (team) · Lexsi ... · PS ..." -> author line + venue line
+    btn = lambda url, icon, label: (f'<a class="btn" href="{url}" target="_blank" rel="noopener">'
+                                    f'<i class="{icon}"></i> {label}</a>')
     buttons = "\n".join([
         btn(GITHUB, "fab fa-github", "Code"),
         btn(f"https://huggingface.co/spaces/{ORG}/counterfactual-sql-demo", "fas fa-play", "Demo"),
@@ -67,36 +68,59 @@ def page(md):
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>When Execution Success Lies</title>
 <meta name="description" content="Counterfactual-database rewards for a small SQL agent (Lexsi hackathon, Track 3)">
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.9.4/css/bulma.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Tinos:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
 <style>
-body {{ font-family: 'Noto Sans', sans-serif; background: #fff; }}
-.hero .title {{ font-size: 2.6rem; }}
-.subtitle.meta {{ font-size: 1.05rem; color: #555; }}
-.links .button {{ margin: .25rem; }}
-.page {{ max-width: 960px; margin: 0 auto; padding: 0 16px 4rem; }}
-.page h2 {{ text-align: center; font-size: 1.9rem; margin-top: 3rem; padding-top: 1rem; border-top: 1px solid #eee; }}
-.page h3 {{ font-size: 1.35rem; margin-top: 2rem; }}
-.page img {{ display: block; margin: 1.5rem auto; max-width: 100%; }}
-.page .tw {{ overflow-x: auto; margin-bottom: 1.5rem; }}
-.page table {{ font-size: .88rem; }}
-.page blockquote {{ background: #f6f8fa; border-left-color: #485fc7; }}
+/* paper look: one narrow serif column, justified, booktabs tables. Tinos is metric-compatible with Times New Roman. */
+html {{ background: #fff; }}
+body {{ margin: 0; background: #fff; color: #111; font: 18px/1.5 "Times New Roman", Tinos, Times, serif; }}
+.page {{ max-width: 740px; margin: 0 auto; padding: 0 16px; }}
+header.page {{ text-align: center; padding-top: 3rem; }}
+header h1 {{ font-size: 1.75rem; line-height: 1.25; margin: 0 0 1rem; }}
+.authors {{ font-size: 1.1rem; margin: 0; }}
+.venue {{ font-style: italic; color: #333; margin: .3rem 0 1rem; }}
+.btn {{ display: inline-block; margin: .2rem; padding: .15rem .6rem; border: 1px solid #555; border-radius: 3px;
+        color: #111; font-size: .85rem; text-decoration: none; }}
+.btn:hover {{ background: #f0f0f0; }}
+.note {{ font-size: .8rem; color: #555; margin-top: .6rem; }}
+#body {{ text-align: justify; hyphens: auto; padding-bottom: 2rem; }}
+#body p, #body li {{ text-align: justify; }}
+h2 {{ font-size: 1.25rem; margin: 2.2rem 0 .6rem; }}
+h3 {{ font-size: 1.05rem; margin: 1.5rem 0 .4rem; }}
+.abstract {{ margin: 1.5rem 2.5rem 2rem; font-size: .95rem; }}
+.abstract h2 {{ text-align: center; font-size: 1rem; font-variant: small-caps; letter-spacing: .05em; margin: 0 0 .5rem; }}
+a {{ color: #1a4d8f; }}
+ul, ol {{ padding-left: 1.6rem; }}
+li {{ margin: .15rem 0; }}
+figure {{ margin: 1.5rem 0; text-align: center; }}
+figure img {{ max-width: 100%; }}
+figcaption {{ font-size: .85rem; text-align: justify; margin-top: .4rem; }}
+.tw {{ overflow-x: auto; margin: .6rem 0 1.4rem; }}
+table {{ border-collapse: collapse; margin: 0 auto; font-size: .85rem; border-top: 2px solid #000; border-bottom: 2px solid #000; }}
+thead th {{ border-bottom: 1px solid #000; }}
+th, td {{ padding: .25rem .55rem; text-align: left; vertical-align: top; }}
+code {{ font: .85em/1.3 ui-monospace, Menlo, Consolas, monospace; background: #f4f4f4; padding: 0 .15em; overflow-wrap: anywhere; }}
+pre {{ background: #f7f7f7; padding: .7rem; overflow-x: auto; }}
+pre code {{ background: none; }}
+.katex {{ font-size: 1.05em; }}
 .katex-display {{ overflow-x: auto; overflow-y: hidden; padding: .3rem 0; }}
-pre.bib {{ font-size: .8rem; white-space: pre-wrap; }}
-.page code {{ overflow-wrap: anywhere; }}
-@media (max-width: 600px) {{ .hero .title {{ font-size: 1.7rem; }} .hero-body {{ padding: 2rem 16px; }} .page h2 {{ font-size: 1.4rem; }} }}
+pre.bib {{ font-size: .78rem; white-space: pre-wrap; text-align: left; }}
+@media (max-width: 600px) {{
+  body {{ font-size: 17px; }} header h1 {{ font-size: 1.4rem; }}
+  #body p, #body li {{ text-align: left; }} .abstract {{ margin: 1rem 0 1.5rem; }}
+}}
 </style></head>
 <body>
-<section class="hero"><div class="hero-body"><div class="container has-text-centered" style="max-width: 960px">
-<h1 class="title is-1 publication-title">{title}</h1>
-<p class="subtitle meta">{sub}</p>
+<header class="page">
+<h1>{title}</h1>
+<p class="authors">{authors}</p>
+<p class="venue">{venue}</p>
 <div class="links">{buttons}</div>
-<p class="is-size-7 has-text-grey mt-3">Every number comes from stored runs in <code>results/</code>; <code>python verify_all.py</code> re-derives them.</p>
-</div></div></section>
-<div id="body" class="page content"><noscript>This page needs JavaScript; the plain version is <a href="{GITHUB}/blob/main/ARTICLE.md">ARTICLE.md</a>.</noscript></div>
-<div class="page content"><h2>BibTeX</h2><pre class="bib">@misc{{teenkhapeetars2026counterfactual,
+<p class="note">Every number comes from stored runs in <code>results/</code>; <code>python verify_all.py</code> re-derives them.</p>
+</header>
+<main id="body" class="page"><noscript>This page needs JavaScript; the plain version is <a href="{GITHUB}/blob/main/ARTICLE.md">ARTICLE.md</a>.</noscript></main>
+<div class="page"><h2>BibTeX</h2><pre class="bib">@misc{{teenkhapeetars2026counterfactual,
   title  = {{When Execution Success Lies: Counterfactual-Database Rewards for a Small SQL Agent}},
   author = {{Rai, Shreshth and Singh, Rishii Kumar and Aggarwal, Aksh}},
   year   = {{2026}},
@@ -112,6 +136,14 @@ let html = marked.parse(MD, {{gfm: true}}).replace(/MATHPH(\\d+)END/g, (_, i) =>
 const el = document.getElementById("body");
 el.innerHTML = html;
 el.querySelectorAll("table").forEach(t => {{ const w = document.createElement("div"); w.className = "tw"; t.before(w); w.append(t); }});
+// figure + caption from the image alt text
+el.querySelectorAll("p > img:only-child").forEach(img => {{
+  const f = document.createElement("figure"), c = document.createElement("figcaption");
+  c.textContent = img.alt; img.parentElement.replaceWith(f); f.append(img, c); }});
+// abstract block: the "Abstract" heading and its paragraphs, up to the next h2
+const ah = [...el.querySelectorAll("h2")].find(h => h.textContent.trim() === "Abstract");
+if (ah) {{ const box = document.createElement("section"); box.className = "abstract"; ah.before(box);
+  let n = ah; while (n && !(n !== ah && n.tagName === "H2")) {{ const nx = n.nextElementSibling; box.append(n); n = nx; }} }}
 el.querySelectorAll('a[href^="http"]').forEach(a => {{ a.target = "_blank"; a.rel = "noopener"; }});
 </script>
 </body></html>

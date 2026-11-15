@@ -24,6 +24,15 @@
 
 ## Log
 
+### Nov 15
+
+- **Shreshth's second round on the paper (15 Nov, ~13:00 IST).**
+  - **Abstract** (ABSTRACT.md and the article): the Spider result now leads the training paragraph. C beats B by about 2 points of test-suite accuracy with fewer lucky passes, one seed, second seed under way. 353 words.
+  - **Distillation removed** from the abstract, the introduction, §6 (now "Cost against Command A") and Appendix B (old B9 dropped, B10–B13 renumbered B9–B12). Also removed from README and SUBMISSION. The raw results (E9, D2–D4) stay in `results/` and git history.
+  - **References** expanded: 36 entries with authors, full titles, venues and arXiv IDs. Added Spider, BIRD, GRPO, LoRA, DPO, VeriEQL, Command A, Tiny Aya, AuditKIT, ESM+ and SkyRL. In-text citations are now author-year.
+  - **Project page** (`make_site.py`): paper layout. One 740px serif column (Times New Roman, or Tinos as its web fallback), justified text, left-aligned section headings, a small-caps abstract block, booktabs tables, figures with captions, small outlined link buttons. Bulma dropped.
+- **Second seed:** VM still in L4 stockout (375 tries by 12:14 IST). The driver keeps retrying until 16 Nov 06:00 IST.
+
 ### Nov 14
 
 - **ARTICLE.md restructured as a paper (15 Nov, Shreshth's request).**

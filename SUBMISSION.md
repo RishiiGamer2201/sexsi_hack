@@ -22,7 +22,7 @@ Generate the paste files first: `python scripts/make_hf_article.py` writes `runs
 - **Repos used:** tick [x] AgentTune, [x] AuditKIT, [x] Other.
   - If Other asks for names: SkyRL-SQL reward (`NovaSky-AI/SkyRL` `d870046`, E7); ESM+ predictions (`bossben/ESMp` `91dd85b`) and the Zhong et al. 2020 test-suite DBs (E6).
 - **Models used:** tick [x] Tiny Aya Global, [x] Other.
-  - If Other asks for names: Cohere Command A `command-a-03-2025`, used for the ROI comparison and as the distillation teacher (E9).
+  - If Other asks for names: Cohere Command A `command-a-03-2025`, used for the ROI comparison.
 - **Track:** tick [x] Track 3: Agentic Fine-tuning.
 - **Problem statements (at most 2):** tick [x] Data and database agents, [x] Reward design and reward-hacking defences.
 
@@ -56,9 +56,6 @@ Generate the paste files first: `python scripts/make_hf_article.py` writes `runs
   - Command A reaches 81.0% verified at $4.24 per 1k queries. Tiny Aya B costs $0.061 per 1k on one L4 ($0.74/hr).
   - Tiny Aya is about 70× cheaper per query and about 11× cheaper per verified answer ($0.48 vs $5.24).
   - At 12.7% it is not a replacement for Command A.
-- **Distilling Command A (E9, Rishii's task):**
-  - The copies catch 47 lucky teacher answers, 18.2% of the 258 a single-DB filter keeps.
-  - SFT on the 211 verified ones lowers Tiny Aya from 9.4% to 3.3% (p < 0.001), because the student learns a `status != 'cancelled'` habit the copies never flip.
 - **Aksh's tasks (E10–E12):**
   - DPO from one checkpoint (E10), on the same rollouts with single-DB vs counterfactual labels: 9.7% vs 8.1% verified (start 9.4%). No gain, and lucky passes stay at 4.5% under both.
   - Partial credit (E11) pays mutants 0.66 on average, against 0.30 for the binary reward, and pays literal smuggling 0.86, against 0 for the strict reward. So it was not trained.
