@@ -4,12 +4,21 @@ The form field by field, ready to paste. Submission deadline **Nov 15, 2026, 11:
 
 **Submit-page write-up checklist (Nov 16), required items → where in ARTICLE.md:** title + claim, tracks/problem statements (header) · abstract with before→after · problem and approach (§1–3) · kits used and how they connect (Appendix A) · base model + licence (§3.3, App. A) · data sources, splits, leak check, languages (§3.1) · metrics (§3.4) · setup and hyperparameters (§3.3, §8) · before-vs-after table (Table 2) · limitations (§9) · with more credits + expected before/after (§10) · artifacts and collections (App. A) · repo layout + run instructions (README) · declaration of outside work, teammates tagged with HF + GitHub links (last two sections). Resubmission is allowed and the latest one counts. The form says **every repo in the collections must be public by Nov 15, 11:59 PM AoE**, so the form can go in while the repos are still private. The HF Article field is required; the organisers accept an HTML page on HF (our project-page Space).
 
-Generate the paste files first: `python scripts/make_hf_article.py` writes `runs/abstract.txt` and `runs/hf_article.md`.
 
 ## Page 1: Your team
 
 - **Registered email:** the exact address one of us registered with (Shreshth's, as team lead, unless someone else registered).
-- **Abstract:** paste `runs/abstract.txt`. This is ABSTRACT.md as plain text, under 500 words; the script asserts the count.
+- **Abstract** (369 words, limit 500; plain-text copy of ABSTRACT.md). Paste the block below:
+
+```text
+Text-to-SQL agents trained with reinforcement learning usually get rewarded when their answer matches the gold answer on one database. A wrong query can match by luck, and then the reward teaches the luck. Our defence is to run the agent's final query on a few extra copies of the database as well, and to pay only if it is right on all of them. The agent never sees these copies, and code builds each one to expose a particular kind of bug.
+
+We first checked the reward itself, without training anything. On a single database, almost a third of realistic buggy queries get paid. With the copies, about one in six do, and queries that try to game the reward almost never get through. No correct query was rejected. Two public SQL rewards, AgentTune's and SkyRL-SQL's, have the same holes, and we patched AgentTune's. The problem is not specific to our data: on Spider, between 8 and 15 percent of the answers that eight published systems get right fail on Zhong et al.'s test-suite databases.
+
+We then trained Tiny Aya Global (3.35B) with GRPO, once with each reward. On our own test set the stricter reward did not help. Logging every rollout shows why: the two rewards disagreed on only about 7 percent of them, because our training questions were too easy for lucky answers to come up. The real-world benchmark tells a different story. On Spider, a public set of real databases that we did not build, the model trained with the copies beats the model trained on one database by about two points of test-suite accuracy, and it makes fewer lucky passes. A second pair of runs, trained only on hard questions where lucky answers are common, repeats that two-point gap on Spider; on our own test set it is again a null. Self-hosted, our model costs far less per query than Cohere Command A, but it is much less accurate and does not replace it.
+
+We release the data generator, the databases, every rollout with its reward on each database, a browser demo, and a script that re-derives every number. The reward audit is the main result. The training results are reported as they came out.
+```
 - **Discord username:** the submitter's own Discord username.
 
 ## Page 2: Your artifacts

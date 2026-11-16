@@ -467,3 +467,4 @@
   RewardShield/SynSQL/Zhang 2026c, hyperparameters, environment, 3.5 kits, 3.6 metrics, 3.7 threat model, H1/H7, by-family
   table, sample trajectory, compute table, Appendix D prompts, Reproduction, Acknowledgements). Rebuilt page == Aksh page
   except two fixes: seed-1 line (trained, not evaluated: VM had no L4 13:40, user skipped) and Limitations run count.
+- **Submitting (16 Nov ~14:00 IST).** SUBMISSION.md now carries the 369-word plain abstract inline (runs/abstract.txt is not in git).
