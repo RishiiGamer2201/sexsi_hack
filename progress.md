@@ -446,3 +446,5 @@
   driver's adapter check chained `git pull &&` (the VM cannot pull) and stopped it. Fixed (68aae4e: scp the code,
   check the md5 without pulling); relaunched 03:22 IST. GRPO-B seed 1 training at ~207 s/step: B_s1 ~06:50,
   C_s1 ~10:25 IST, then local merge + E4 + Spider (~40 min).
+- Seed 1: GRPO-B seed 1 finished 60/60 at 06:57 IST, no tracebacks (~206 s/step). GRPO-C seed 1 now training on the
+  same VM; ETA ~10:30 IST, then VM autostop and local evals.
