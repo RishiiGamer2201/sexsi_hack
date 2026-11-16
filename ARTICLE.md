@@ -559,15 +559,12 @@ A query that hard-codes a number close to the answer earns 0.86 under `P_cf`, ag
 - **No vLLM sleep mode.** It segfaults on wake-up (vLLM 0.22.1), so we leave it off.
 - **Spider transfer runs.** These are `scripts/local_spider.sh` and `scripts/spider_eval.py`; the results are in `results/e13_spider_ours.json`.
 
-## Team
+## Declaration of work done outside the hackathon
 
-Shreshth Rai (lead, [@hi-phi-r25i](https://huggingface.co/hi-phi-r25i)), Rishii Kumar Singh ([@LogicPalette](https://huggingface.co/LogicPalette)), Aksh Aggarwal ([@AkshAgg](https://huggingface.co/AkshAgg)).
+None. All code, data and experiments were made during the hackathon; the repository's first commit is Nov 8, 2026. Third-party code and data are listed in Appendix A and used under their licences.
 
-**Author contributions.**
-- **Shreshth Rai** led the team: research direction, the reward-audit-first framing, the paper structure and project page, and reviews of every draft.
-- **Rishii Kumar Singh** built the pipeline: data and copy generator, rewards and audit, SFT and GRPO training with AgentTune, the AgentTune fixes, evaluation, the Spider runs, the curriculum runs, the compute setup and the release.
-- **Aksh Aggarwal** ran the one-checkpoint DPO, partial-credit and period-edge experiments (Section 7) and the distillation tests, and checked the references.
+## Teammates tagged
 
-**Work done outside the hackathon.** None. All code, data and experiments were made during the hackathon; the repository's first commit is Nov 8, 2026. Third-party code and data are listed in Appendix A and used under their licences.
-
-**LLM usage.** Most first drafts of the code and of this write-up were written with an AI coding assistant (Claude Code) under the team's direction, roughly 80% of each. The team chose the experiments and pre-registered predictions, reviewed the code, and checked the numbers against the released result files (`verify_all.py` recomputes the main ones).
+- **Shreshth Rai** (team lead): Hugging Face [@hi-phi-r25i](https://huggingface.co/hi-phi-r25i) · GitHub [@shreshth3000](https://github.com/shreshth3000)
+- **Rishii Kumar Singh**: Hugging Face [@LogicPalette](https://huggingface.co/LogicPalette) · GitHub [@RishiiGamer2201](https://github.com/RishiiGamer2201)
+- **Aksh Aggarwal**: Hugging Face [@AkshAgg](https://huggingface.co/AkshAgg) · GitHub [@Aksh2906](https://github.com/Aksh2906)

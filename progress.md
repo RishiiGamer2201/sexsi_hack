@@ -455,3 +455,6 @@
   contributions, declaration of outside work (none; first commit Nov 8), LLM usage (~80% first drafts via Claude Code).
   SUBMISSION.md maps each required item to its section. Seed-1 recovery: VM autostopped before the driver copied the
   adapters (30-min hold vs 15-min poll); driver killed 12:37, recover_s1 restarting the VM to copy, then local evals.
+- **Team section per submit page (user, 13:00 IST).** Removed author contributions and LLM usage. Headings now match the
+  site: "Declaration of work done outside the hackathon" and "Teammates tagged" (HF + GitHub for each: hi-phi-r25i /
+  shreshth3000, LogicPalette / RishiiGamer2201, AkshAgg / Aksh2906).
