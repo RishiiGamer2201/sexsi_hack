@@ -81,5 +81,5 @@ We release the data generator, the databases, every rollout with its reward on e
 - [x] Git history scanned: no tokens or keys in any commit
 - [x] Two collections (models + demo; dataset), as the form asks
 - [x] Article page Space refreshed (`make_site.py`), paper layout, Nov 15
-- [ ] Form sent
+- [x] Form sent (Nov 16, ~14:15 IST, "Submission received"; resubmitting replaces it)
 - [x] `go_public.py --go` run Nov 16 ~14:10 IST; all 12 links return 200 logged out

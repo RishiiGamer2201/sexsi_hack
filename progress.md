@@ -472,3 +472,5 @@
   collections, GitHub repo all public. gh here lacks --accept-visibility-change-consequences, so the script now falls back
   to plain --visibility public. Pre-check: 0 token patterns in git history, no chat exports tracked. All 12 submission links
   return 200 anonymously.
+- **Submitted (16 Nov ~14:15 IST).** Lexsi form: "Submission received"; confirmation email on its way. Latest submission counts,
+  so a resubmit before 17:29 IST replaces it. sqlcf-l4 stays TERMINATED; seed-1 adapters (B_s1, C_s1) remain on its disk, unevaluated.
