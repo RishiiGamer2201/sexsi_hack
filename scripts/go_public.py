@@ -43,7 +43,8 @@ for rid, kind in REPOS:
     api.update_repo_settings(rid, repo_type=kind, private=False, **({"gated": "auto"} if kind == "model" else {}))
 for c in COLLECTIONS:
     api.update_collection_metadata(c, private=False)
-subprocess.run(["gh", "repo", "edit", GITHUB, "--visibility", "public", "--accept-visibility-change-consequences"],
-               check=True)
+gh = ["gh", "repo", "edit", GITHUB, "--visibility", "public"]
+if subprocess.run(gh + ["--accept-visibility-change-consequences"]).returncode:  # flag only exists in newer gh
+    subprocess.run(gh, check=True)
 print("--- after")
 state()

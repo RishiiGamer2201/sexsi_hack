@@ -468,3 +468,7 @@
   table, sample trajectory, compute table, Appendix D prompts, Reproduction, Acknowledgements). Rebuilt page == Aksh page
   except two fixes: seed-1 line (trained, not evaluated: VM had no L4 13:40, user skipped) and Limitations run count.
 - **Submitting (16 Nov ~14:00 IST).** SUBMISSION.md now carries the 369-word plain abstract inline (runs/abstract.txt is not in git).
+- **Public (16 Nov ~14:10 IST, user: "go public").** go_public.py --go: 3 adapters (gated auto), dataset, both Spaces, both
+  collections, GitHub repo all public. gh here lacks --accept-visibility-change-consequences, so the script now falls back
+  to plain --visibility public. Pre-check: 0 token patterns in git history, no chat exports tracked. All 12 submission links
+  return 200 anonymously.

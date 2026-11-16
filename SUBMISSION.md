@@ -82,4 +82,4 @@ We release the data generator, the databases, every rollout with its reward on e
 - [x] Two collections (models + demo; dataset), as the form asks
 - [x] Article page Space refreshed (`make_site.py`), paper layout, Nov 15
 - [ ] Form sent
-- [ ] `go_public.py --go` run; every link opens logged out (by Nov 15, 11:59 PM AoE)
+- [x]  run Nov 16 ~14:10 IST; all 12 links return 200 logged out
