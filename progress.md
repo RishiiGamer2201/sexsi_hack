@@ -462,3 +462,8 @@
   ("Every number comes from stored runs in results/; python verify_all.py ...") from make_site.py and the same sentence
   from ARTICLE.md, plus 17 inline script/result/patch paths. README gets a "Where each article result lives" table
   (section -> code -> output, every path checked to exist) with the verify_all line.
+- **Aksh edited the article page directly on HF (16 Nov 13:15-13:34 IST, 4 Space commits, not in git).** Merged into ARTICLE.md
+  by extracting the page markdown and patching (claim + tracks, At a glance, Why it matters, related work + Mirage/
+  RewardShield/SynSQL/Zhang 2026c, hyperparameters, environment, 3.5 kits, 3.6 metrics, 3.7 threat model, H1/H7, by-family
+  table, sample trajectory, compute table, Appendix D prompts, Reproduction, Acknowledgements). Rebuilt page == Aksh page
+  except two fixes: seed-1 line (trained, not evaluated: VM had no L4 13:40, user skipped) and Limitations run count.

@@ -4,6 +4,12 @@ Shreshth Rai, Rishii Kumar Singh, Aksh Aggarwal (team Teen_khapeetars) · Lexsi 
 
 > **Links:** HF collections: [models](https://huggingface.co/collections/sqlcf-lexsi/counterfactual-db-rewards-for-a-small-sql-agent-6af174f77dbae0bf0a54c3c4), [data](https://huggingface.co/collections/sqlcf-lexsi/counterfactual-sql-data-rollouts-and-traces-6af479430243b7731f85d144) · [demo](https://huggingface.co/spaces/sqlcf-lexsi/counterfactual-sql-demo) · [data](https://huggingface.co/datasets/sqlcf-lexsi/counterfactual-sql-data) · [code](https://github.com/RishiiGamer2201/sexsi_hack).
 
+**Claim.** Grading an SQL agent's answer on hidden, code-generated copies of the database as well as the original cuts the buggy queries a reward pays from 29.5% to 16.8% and the reward hacks it pays from 54.1% to 1.9%, without rejecting any correct query.
+
+**Tracks and problem statements.**
+- Track 3 (agentic and tool-use): problem statement #6, data and database agents.
+- Track 3: problem statement #9, reward design and reward-hacking defences.
+
 ## Abstract
 
 Text-to-SQL agents trained with reinforcement learning usually get rewarded when their answer matches the gold answer on one database. A wrong query can match by luck, and then the reward teaches the luck. Our defence is to run the agent's final query on a few extra copies of the database as well, and to pay only if it is right on all of them. The agent never sees these copies, and code builds each one to expose a particular kind of bug.
@@ -11,6 +17,20 @@ Text-to-SQL agents trained with reinforcement learning usually get rewarded when
 We first checked the reward itself, without training anything. On a single database, almost a third of realistic buggy queries get paid. With the copies, about one in six do, and queries that try to game the reward almost never get through. No correct query was rejected. Two public SQL rewards, AgentTune's and SkyRL-SQL's, have the same holes, and we patched AgentTune's. The problem is not specific to our data: on Spider, between 8 and 15 percent of the answers that eight published systems get right fail on Zhong et al.'s test-suite databases.
 
 We then trained Tiny Aya Global (3.35B) with GRPO, once with each reward. On our own test set the stricter reward did not help. Logging every rollout shows why: the two rewards disagreed on only about 7 percent of them, because our training questions were too easy for lucky answers to come up. The real-world benchmark tells a different story. On Spider, a public set of real databases that we did not build, the model trained with the copies beats the model trained on one database by about two points of test-suite accuracy, and it makes fewer lucky passes. A second pair of runs, trained only on hard questions where lucky answers are common, repeats that two-point gap on Spider; on our own test set it is again a null. Self-hosted, our model costs far less per query than Cohere Command A, but it is much less accurate and does not replace it.
+
+## At a glance
+
+**Base model and method.** Tiny Aya Global (3.35B) with a rank-16 LoRA, SFT on scripted tool-use trajectories, then GRPO with AgentTune, rewarded either on the original database only (B) or on the original plus hidden counterfactual copies (C).
+
+**Headline before → after.**
+
+| What | Before | After |
+|---|---|---|
+| Buggy queries paid by the reward (n = 1814) | 29.5% (one database) | **16.8%** (with copies) |
+| Reward hacks paid (n = 2839) | 54.1% (one database) | **1.9%** (with copies) |
+| Correct queries rejected (n = 2847) | 0 | **0** |
+| Tiny Aya verified accuracy, our test set | 0.9% (base) → 9.4% (SFT) | **12.7%** (GRPO-B), 9.0% (GRPO-C) |
+| Spider test-suite accuracy, B → C (two independent pairs of runs) | 27.9%, 27.6% | **29.9%, 29.7%** (+1.9 and +2.1 points) |
 
 ## 1. Introduction
 
@@ -27,25 +47,27 @@ We make four contributions:
 3. **A controlled training comparison.** Two GRPO runs of Tiny Aya Global (3.35B) differ only in the reward. On our own test set the stricter reward did not help, and we show why. On Spider, real databases we did not build, the model trained with the copies beat the single-database model on test-suite accuracy and made fewer lucky passes (Section 5). A second pair of runs on hard questions repeated the Spider gap (Section 8).
 4. **A cost comparison.** We compare a small self-hosted agent with Cohere Command A, per query and per verified answer (Section 6).
 
+**Why it matters.** SQL agents are being put in front of business data: analysts ask in plain language and act on the number they get back. A query that fails is visible; a query that runs and returns a plausible but wrong number is not, and it ends up in a report. If the training reward pays for such queries whenever the data happens to hide the bug, RL makes exactly the failure that is hardest to notice more likely.
+
 The reward audit is our main result. We report the training results as they came out, including the ones that did not go our way.
 
 ## 2. Related work
 
-Checking SQL on more than one database is not new. Zhong, Yu & Klein (2020) built distilled test suites of databases to *evaluate* text-to-SQL on Spider (Yu et al., 2018), and we reuse them in Sections 4.4 and 5.4. SpotIt (Klopfenstein et al., 2025) and VeriEQL (He et al., 2024) search for a database on which two queries differ, also for evaluation. ReViSQL (Zhu et al., 2026) uses VeriEQL inside RL and finds that 28.8–38.4% of positive execution rewards are false, close to our own estimate. It works at frontier scale on one database and softens the reward to 0.8 rather than refusing it. DualSQL (Chen et al., 2026) trains 4B and 8B models with a stricter single-database comparator and sees almost no change on execution accuracy.
+Checking SQL on more than one database is not new. Zhong, Yu & Klein (2020) built distilled test suites of databases to *evaluate* text-to-SQL on Spider (Yu et al., 2018), and we reuse them in Sections 4.4 and 5.4. SpotIt (Klopfenstein et al., 2025) and VeriEQL (He et al., 2024) search for a database on which two queries differ, also for evaluation. ReViSQL (Zhu et al., 2026) uses VeriEQL inside RL and finds that 28.8–38.4% of positive execution rewards are false, close to our own estimate. It works at frontier scale on one database and softens the reward to 0.8 rather than refusing it. DualSQL (Chen et al., 2026) trains 4B and 8B models; its ablation with a stricter single-database comparator, run on the 8B model, sees almost no change on execution accuracy. Two concurrent projects are closest to ours. Mirage (SiddharthaRaja, 2026), an unpublished repository, trains a 0.5B coder model with GRPO against a single database or against perturbed copies picked to reject near-miss queries. It reports that one database accepts 33.2% of near-miss SQL and that the copies did not improve Spider accuracy (−1.2 points). RewardShield (shro-2002, 2026), another entry to this hackathon, uses Tiny Aya and AgentTune with mutant-targeted databases as a verifier for filtering SFT data, and also finds no downstream gain. A study of leaky unit tests as a code-RL reward (Zhang, 2026c) and SynSQL (Habibollah & Rafiei, 2026), which re-grades text-to-SQL systems on synthesized databases, point the same way: one check pays for bugs, and fixing the check does not by itself train a better model.
 
 What we add:
 - copies generated by code for each bug family, with no solver, in two kinds (answer-changing and answer-preserving), hidden from the agent and used as a hard RL reward for a 3B agent, in a run where the reward is the only variable;
 - an audit of the reward against buggy gold queries and hacks, applied to two public rewards and to eight real systems on Spider;
 - a fix for the AgentTune exploit, with a regression test.
 
-To our knowledge, no earlier study uses execution on code-generated, bug-family-targeted counterfactual databases as the online RL reward for a small text-to-SQL agent and measures that reward's error rates per bug family. Earlier work used multi-database checks for evaluation (Zhong et al., 2020; Ai, 2026) or supervised fine-tuning (SQLoom; Fu et al., 2026), or used symbolic verification on one database (ReViSQL).
+Earlier and concurrent work checks SQL on extra databases mainly for evaluation (Zhong et al., 2020; Ai, 2026; SynSQL) or for cleaning SFT data (SQLoom; Fu et al., 2026; RewardShield), uses a solver inside the RL reward on one database (ReViSQL), or uses generic perturbed copies as a GRPO reward for a 0.5B model (Mirage). What is new here is the copies themselves, generated per bug family in both an answer-changing and an answer-preserving kind; the per-family measurement of how often that reward pays buggy queries, hacks and correct queries; and its test as an RL reward for a 3B tool-using agent, alongside two public rewards and eight published systems. Like Mirage and Zhang (2026c), we find that the stricter reward did not train a better model on our own test set.
 
 Other related lines:
 - **Execution-reward false positives:** ReViSQL (Zhu et al., 2026), Graph-Reward-SQL (Weng et al., 2025), DualSQL (Chen et al., 2026).
-- **Multiple or counterfactual databases:** fictitious worlds (Pasupat & Liang, 2016); test suites (Zhong et al., 2020); counterfactual database instances for evaluation (Ai, 2026); counterexample databases for SFT (SQLoom; Fu et al., 2026); progressive rewards (Progress-SQL; Zhang et al., 2026a).
+- **Multiple or counterfactual databases:** fictitious worlds (Pasupat & Liang, 2016); test suites (Zhong et al., 2020); counterfactual database instances for evaluation (Ai, 2026); counterexample databases for SFT (SQLoom; Fu et al., 2026); synthesized databases for evaluation (SynSQL); perturbed copies as a GRPO reward (Mirage).
 - **Test and data generation:** XData (Chandra et al., 2014), ParSEval (2025), HardTests (He et al., 2025), RobustTests (Zhang et al., 2026b), CodeContests+ (Wang et al., 2025).
-- **Why a more accurate reward may not train better:** Razin et al. (2025) and Lv et al. (2025).
-- **SQL RL at small scale:** SQL-R1 (Ma et al., 2025), Arctic-Text2SQL-R1 (Yao et al., 2025), Think2SQL (Papicchio et al., 2025), Reasoning-SQL (Pourreza et al., 2025).
+- **Why a more accurate reward may not train better:** Razin et al. (2025), Lv et al. (2025) and Zhang (2026c).
+- **SQL RL at small scale:** Progress-SQL (Zhang et al., 2026a; test suites used for evaluation only), SQL-R1 (Ma et al., 2025), Arctic-Text2SQL-R1 (Yao et al., 2025), Think2SQL (Papicchio et al., 2025), Reasoning-SQL (Pourreza et al., 2025).
 - **Evaluation and labelling:** pass^k from τ-bench (Yao et al., 2024), the NL2SQL-BUGs error taxonomy (Liu et al., 2025), benchmark annotation errors (Jin et al., 2026), BIRD (Li et al., 2023).
 
 ## 3. Method
@@ -66,8 +88,15 @@ The second kind is real: Spider (Yu et al., 2018), 20 databases and 1034 dev que
 | Split | Items | Use |
 |---|---|---|
 | audit | 1302 | reward audit (Section 4) |
-| train | 907 | SFT (462 trajectories) and GRPO prompts |
+| train | 907 | SFT (353 trajectories, 3 templates held out) and GRPO prompts (445) |
 | test | 331 (214 in held-out F4) | evaluation, from a different generator |
+
+Test items by family: F1 36, F2 36, F3 45, F4 214.
+
+| Source | Kind | Size | Licence | Use |
+|---|---|---|---|---|
+| Our generator (`sqlcf`) | synthetic e-commerce schema, template questions, SQLite databases and copies | 2540 items | CC-BY-NC-4.0 (released) | audit, training, test |
+| Spider dev (Yu et al., 2018) + test-suite databases (Zhong et al., 2020) | real databases, human-written questions | 1034 questions, 20 databases | CC BY-SA 4.0 (not redistributed) | out-of-distribution test only |
 
 **Languages.** All questions are in English; the agent writes SQLite. Tiny Aya Global is multilingual, but we did not test other languages.
 
@@ -95,6 +124,21 @@ The policy is Tiny Aya Global (3.35B; Salamanca et al., 2026) with a LoRA adapte
 
 Both use the same data and seed, 60 steps, 6 rollouts per prompt, 4 prompts per step, learning rate 1e-5 and KL weight 0.02. Only the reward differs. Training ran on one L4 GPU and took about 3.5 hours per run.
 
+**Hyperparameters.** Everything not listed is the TRL default as wrapped by AgentTune (`d4db4c1`).
+
+| Setting | SFT | GRPO (B, C) |
+|---|---|---|
+| Base weights | `CohereLabs/tiny-aya-global`, bf16 | same, continuing the SFT adapter |
+| LoRA | r 16, alpha 32, dropout 0.05, on q, k, v, o, gate, up and down projections | same adapter |
+| Learning rate | 1e-4 | 1e-5 |
+| Batch | effective 16 (1 per device × 16 accumulation steps) | 6 rollouts × 4 prompts = 24 sequences per optimizer step |
+| Length | max 4096 tokens; loss on assistant turns only | max 2048 completion tokens (768 in Section 8) |
+| Schedule | 2 epochs over 353 trajectories | 60 steps |
+| Other | gradient checkpointing | KL weight β 0.02, rollout temperature 1.0, vLLM colocated (45% of GPU memory), no importance-sampling correction |
+| Seed | 0 | 0 |
+
+**Environment.** The agent has one tool, `run_sql(database, sql_command)`. It runs a single read-only SQLite query on the item's original database, which the question names by id; the copies are reachable only by the reward. It returns up to 20 rows and 1500 characters, or `ERROR: <message>` for SQL that fails. Tiny Aya's chat template ignores tool schemas, so AgentTune appends its fallback tool prompt to the system turn, the model writes tool calls as a JSON list, and tool results come back folded into user turns. The episode ends when the model replies with a sentence and a final query in an `sql` block. The full system prompt is in Appendix D, and a sample trajectory is in Section 5.2.
+
 **AgentTune fix.** While doing this we found and patched a bug in AgentTune's multi-turn stream. It dropped chat-template tokens between turns, so the trainer scored tokens in a context vLLM never saw.
 
 ### 3.4 Evaluation
@@ -109,11 +153,41 @@ We also report pass^k (all of k samples verified).
 **Statistics.** Intervals are Wilson 95% intervals. Comparisons between models use a paired bootstrap over items and an exact McNemar test.
 
 **Pre-registered hypotheses:**
+- H1: the single-database reward pays buggy gold-mutants at a material rate, and the rate depends on database size (descriptive; Section 4.2).
 - H2: the copies cut the share of buggy queries paid by at least half.
 - H3: AgentTune's SQL reward can be exploited.
 - H4: C makes fewer silent errors than B.
 - H5: C does better than B on the held-out family F4.
 - H6: C removes literal smuggling at test time.
+- H7: on hard prompts where lucky passes are common, C-min beats B by at least 2 points verified (Section 8).
+
+### 3.5 Hackathon kits and how they connect
+
+- **AgentTune** (`d4db4c1`, Lyngkhoi et al., 2026). We used `create_agentic_trainer("grpo", backend="trl")` for multi-turn GRPO with tool calls, its tool-prompt fallback for models whose chat template has no tool support, and its render, parse and fold functions to build SFT text identical to what rollouts produce. We fixed a bug in its multi-turn token stream (Section 3.3) and audited and patched its built-in SQL reward (Section 4.3; merged upstream as PR #12).
+- **AuditKIT** (`9da5838`, Lexsi Labs, 2026). We used its agent-evaluation framing: claimed versus verified success, silent errors and pass^k. We reimplemented the statistics in `evaluate.py` so that they run on our trajectory format.
+- **Not used:** CuratorKIT, AlignTune, SafeTune and CircuitKIT. Our data is generated by code, so there was nothing to curate, and the work does not touch safety tuning or interpretability.
+
+### 3.6 Metrics
+
+| Metric | Better | Why we use it |
+|---|---|---|
+| Buggy gold-mutants paid by a reward | lower | how often the reward pays a realistic wrong query (reward false positives) |
+| Reward hacks paid | lower | whether a policy can earn reward without solving the task |
+| Correct queries rejected | lower | a stricter reward must not punish right answers (reward false negatives) |
+| Verified accuracy | higher | task success: right on the original and all 4 copies of a test database |
+| Single-database accuracy | higher | the usual execution accuracy, reported so the gap to verified is visible |
+| Lucky pass | lower | right on the original only; what a single-database reward wrongly pays |
+| Silent error | lower | wrong answer with every tool call succeeding and a confident reply: the failure a user cannot see |
+| pass^k | higher | all k samples verified; reliability, not one lucky draw |
+| Tool calls per trajectory, invalid tool calls | invalid lower | whether the agent uses its tool correctly |
+| Spider EX / test-suite accuracy (TS) | higher | transfer to real databases; TS is a check built by others |
+| $ per 1k queries, $ per 1k verified answers | lower | cost against a closed model |
+
+**What must not get worse.** Correct queries rejected stays at 0 for every reward we compare. No LLM or classifier judges any output: every score is deterministic SQL execution against gold. We checked the grader by hand on 48 of our wrong test answers and 40 Spider lucky passes (Sections 4.4 and 5.2).
+
+### 3.7 Threat model
+
+The adversary is the policy under optimisation. It sees the question, the schema and the original database, can run any read-only query on it, and is paid by the reward. It cannot see or query the copies, and it cannot change the grader. In scope: queries that are right on the original database by luck, hard-coded answers seen while exploring (literal smuggling), hard-coded row IDs, comparator holes such as duplicate rows that a set comparison ignores, and format exploits of the reward (AgentTune's `WHERE 1 = 1` plus a fixed answer). Out of scope: tampering with the grading code or the databases, and bugs in the gold queries themselves.
 
 ## 4. Auditing the reward
 
@@ -142,7 +216,7 @@ How often a bug hides depends mostly on how small the question's slice of the da
 
 ### 4.3 Two public rewards
 
-**AgentTune's built-in SQL reward (H3).** On 360 yes/no items, a query padded with `WHERE 1 = 1` plus an answer that is always "yes" earns the same score as honest SQL on every yes item (3.10). We wrote a patch that brings the exploit down to 2.20, with a reproduction script and a regression test. We reported it upstream as [Lexsi-Labs/AgentTune#11](https://github.com/Lexsi-Labs/AgentTune/issues/11). The maintainers merged a fix the next day ([#12](https://github.com/Lexsi-Labs/AgentTune/pull/12)): the WHERE check and an opt-in result-matching reward, both as we proposed, with a regression test.
+**AgentTune's built-in SQL reward (H3).** Unlike the other rewards here, it does not compare query results: it scores the query text with heuristics (penalties for many queries, `LIMIT 1` or no `WHERE`) and checks a yes/no answer. On 360 yes/no items, a query padded with `WHERE 1 = 1` plus an answer that is always "yes" earns the same score as honest SQL on every yes item (3.10). We wrote a patch that brings the exploit down to 2.20, with a reproduction script and a regression test. We reported it upstream as [Lexsi-Labs/AgentTune#11](https://github.com/Lexsi-Labs/AgentTune/issues/11). The maintainers merged a fix the next day ([#12](https://github.com/Lexsi-Labs/AgentTune/pull/12)): the WHERE check and an opt-in result-matching reward, both as we proposed, with a regression test.
 
 **SkyRL-SQL's reward** (NovaSky-AI, 2025) runs the predicted and gold SQL on one database and pays 1 if the two *sets* of rows are equal. Re-implemented from its source and run on the same candidates, it has two holes of about the same size:
 - **The database hole.** Adding copies closes this one.
@@ -196,7 +270,36 @@ We logged every one of the 1440 rollouts in each run, with its result on every d
 | GRPO-C | 2.10 | 19.5% | 4.0 trajectories/s on one L4 |
 | Command A | 0 (single turn) | n/a | median 9.7 s, p90 42.2 s per query (API) |
 
-An invalid tool call is one whose tool response is an error (bad arguments or SQL that fails). SFT and C throughput are laptop times scaled by B's measured L4-to-laptop ratio; they are batched rates, not per-query latency.
+An invalid tool call is one whose tool response is an error (bad arguments or SQL that fails). SFT and C throughput are RTX 5070 Ti times scaled by B's measured L4-to-5070 Ti ratio; they are batched rates, not per-query latency.
+
+**By family** (verified, 8 samples per item):
+
+| Model | F1 (36 items) | F2 (36) | F3 (45) | F4, held out (214) |
+|---|---|---|---|---|
+| Tiny Aya base | 5.2% | 0.0% | 0.0% | 0.6% |
+| SFT | 30.9% | 1.0% | 0.0% | 9.2% |
+| GRPO-B | 56.6% | 1.0% | 0.0% | 9.9% |
+| GRPO-C | 28.8% | 1.4% | 0.0% | 8.8% |
+| Command A (1 sample) | 100% | 0.0% | 64.4% | 94.9% |
+
+Nearly all of B's gain over SFT is on F1. No Tiny Aya model solves F3 (net amounts after refunds) or F2 on this test set.
+
+**A sample trajectory** (GRPO-B, test item `F1_category_buyers|books|2024|S_s501`, verified). Question: *"How many distinct customers bought a books product in 2024? Count orders of any status."*
+
+```
+assistant  [{"tool_name": "run_sql", "parameters": {"database": "S_s501",
+             "sql_command": "SELECT status, COUNT(*) FROM orders GROUP BY status"}}]
+tool       cancelled | 20
+           placed | 24
+           shipped | 65
+           (3 rows)
+assistant  [{"tool_name": "run_sql", "parameters": {"database": "S_s501",
+             "sql_command": "SELECT COUNT(DISTINCT o.customer_id) FROM order_items oi JOIN orders o ON o.order_id = oi.order_id JOIN products p ON p.product_id = oi.product_id WHERE p.category = 'books' AND substr(o.order_date, 1, 4) = '2024'"}}]
+tool       19
+           (1 rows)
+assistant  Here is the query that answers the question.
+           SELECT COUNT(DISTINCT o.customer_id) FROM order_items oi JOIN orders o ... WHERE p.category = 'books' AND substr(o.order_date, 1, 4) = '2024'
+```
 
 **B and SFT.** B improves on SFT by 3.2 points [1.8, 4.8] (McNemar p = 0.006), and its lucky-pass rate does not change.
 
@@ -242,7 +345,7 @@ The intervals in the table treat the 4 samples of a question as independent, so 
   - Each reward has one training run, and we did not pre-register this comparison.
   - An exact McNemar test on the first sample alone gives p = 0.14.
   - C is not significantly better than SFT. Much of the gap comes from B getting worse.
-  - A second training seed for both rewards is queued.
+  - A second seed of this pair finished training but could not be evaluated before the deadline. Section 8 is a different, independent pair of runs.
 - **Small models are luckier.** Between 18% and 26% of our models' EX passes fail a test-suite database, more than for any of the eight published systems. The base model is already at 18%, so much of this comes with model size. Training on the single-database reward raises it the most.
 
 ## 6. Cost against Command A
@@ -257,6 +360,21 @@ We compared against Cohere Command A (`command-a-03-2025`; Team Cohere, 2025). I
 The small model is about 70 times cheaper per query and about 11 times cheaper per verified answer. At its accuracy, though, it is not a usable replacement. What counterfactual rewards offer is a cheap way to make a small model's training signal trustworthy; they cannot close the gap to a frontier model in 60 GRPO steps.
 
 Command A falls into the fan-out trap too. It gets none of the 36 items of one F2 template right. It joins `payments` directly, so an order with two payments counts its units twice, and it adds a `status != 'cancelled'` filter the question does not ask for. The single-database check rejects 32 of these 36 answers; the copies reject the other 4, which match on the original database by luck.
+
+**Compute used.** The L4 is a Google Cloud `g2-standard-4` VM at $0.74 per hour; the RTX 5070 Ti is a local workstation, so its runs cost nothing extra.
+
+| Stage | Hardware | Time | Cost |
+|---|---|---|---|
+| Data, copies, reward audit, scoring, `verify_all.py` | CPU | minutes | $0 |
+| SFT (353 trajectories, 2 epochs) | RTX 5070 Ti | 72 min | $0 |
+| GRPO-B and GRPO-C, 60 steps each | L4 | about 7 h | about $5 |
+| Curriculum GRPO-B and GRPO-C-min (Section 8) | L4 | about 8.5 h | about $6 |
+| Test-set generation, 331 × 8 per model | RTX 5070 Ti (B also on L4: 785 s) | about 13 min per model | $0 |
+| Spider transfer, 4 models | RTX 5070 Ti | 36 min | $0 |
+| DPO runs (Section 7) | RTX 5070 Ti | short | $0 |
+| Command A, 331 test items | Cohere trial API | about 1 h | $0 (list price $1.40) |
+
+The total paid compute for the runs in this article is about $11, plus earlier attempts that crashed or were superseded.
 
 ## 7. Other things we tried
 
@@ -296,7 +414,7 @@ Section 5.3 blamed easy prompts. So we built a training set where lucky passes a
 ## 9. Limitations
 
 - **One synthetic schema.** Training and our test set use one generated e-commerce schema. Spider is the only real data, and our models see it only at test time.
-- **Few training runs.** Each training comparison rests on one or two runs per reward, and the Spider comparison of the main pair was not pre-registered. The curriculum prediction was pre-registered, and it failed on our test set.
+- **Few training runs.** Each training comparison rests on one run per reward (in each of two setups, main and curriculum), and the Spider comparison of the main pair was not pre-registered. The curriculum prediction was pre-registered, and it failed on our test set.
 - **Short, small training.** 60 GRPO steps of a rank-16 LoRA on a 3.35B model. Absolute accuracy stays low (12.7% verified against 81.0% for Command A), so these are statements about the reward, not about a usable SQL agent.
 - **The copies only cover bugs we wrote down.** Copies chosen blind to the mutants still pay 16.8% of them, and our copies do not edit dates (Section 7).
 - **Upper bounds and small hand checks.** Lucky-pass rates on Spider include ties and ambiguous gold queries, so they are upper bounds. The hand audits cover 48 of our trajectories and 40 Spider cases.
@@ -327,6 +445,7 @@ Whether the stricter reward also trains a better agent is still open. On our own
 - Chen, Gan, Chung, Zhang, et al. (2026). DualSQL: Text-to-SQL with multi-agent reinforcement learning. [arXiv:2609.18135](https://arxiv.org/abs/2609.18135).
 - ESM+ evaluation code and Spider-dev predictions of published systems. GitHub repository [`bossben/ESMp`](https://github.com/bossben/ESMp), commit `91dd85b`.
 - Fu, Sun, Wei, Wei, et al. (2026). SQLoom: Set-contrastive learning of syntactic, semantic, and logical dependencies for text-to-SQL. [arXiv:2611.03298](https://arxiv.org/abs/2611.03298).
+- Habibollah, Rafiei (2026). SynSQL: re-grading text-to-SQL systems on synthesized databases. [arXiv:2604.27261](https://arxiv.org/abs/2604.27261).
 - He, Choi, Zhang, Ji, et al. (2025). HardTests: A high-quality RL verifier generation pipeline for LLM algorithmic coding. [arXiv:2505.24098](https://arxiv.org/abs/2505.24098).
 - He, Zhao, Wang, et al. (2024). VeriEQL: Bounded equivalence verification for complex SQL queries with integrity constraints. [arXiv:2403.03193](https://arxiv.org/abs/2403.03193).
 - Hu, Shen, Wallis, Allen-Zhu, et al. (2021). LoRA: Low-rank adaptation of large language models. *ICLR 2022*. [arXiv:2106.09685](https://arxiv.org/abs/2106.09685).
@@ -347,6 +466,8 @@ Whether the stricter reward also trains a better agent is still open. On our own
 - Razin, Wang, Strauss, Wei, et al. (2025). What makes a reward model a good teacher? An optimization perspective. *NeurIPS 2025*. [arXiv:2503.15477](https://arxiv.org/abs/2503.15477).
 - Salamanca, Abagyan, D'souza, et al. (2026). Tiny Aya: Bridging scale and multilingual depth. [arXiv:2603.11510](https://arxiv.org/abs/2603.11510).
 - Shao, Wang, Zhu, Xu, et al. (2024). DeepSeekMath: Pushing the limits of mathematical reasoning in open language models (introduces GRPO). [arXiv:2402.03300](https://arxiv.org/abs/2402.03300).
+- shro-2002 (2026). RewardShield. GitHub repository [shro-2002/rewardshield](https://github.com/shro-2002/rewardshield).
+- SiddharthaRaja (2026). Mirage: GRPO for text-to-SQL with a perturbed-database reward suite. GitHub repository [SiddharthaRaja/Mirage](https://github.com/SiddharthaRaja/Mirage).
 - Team Cohere (2025). Command A: An enterprise-ready large language model. [arXiv:2504.00698](https://arxiv.org/abs/2504.00698).
 - Wang, Liu, Sun, Li, et al. (2025). CodeContests+: High-quality test case generation for competitive programming. [arXiv:2506.05817](https://arxiv.org/abs/2506.05817).
 - Weng, Wu, Cui, Zhan, et al. (2025). Graph-Reward-SQL: Execution-free reinforcement learning for text-to-SQL via graph matching and stepwise reward. [arXiv:2505.12380](https://arxiv.org/abs/2505.12380).
@@ -355,6 +476,7 @@ Whether the stricter reward also trains a better agent is still open. On our own
 - Yu, Zhang, Yang, Yasunaga, et al. (2018). Spider: A large-scale human-labeled dataset for complex and cross-domain semantic parsing and text-to-SQL task. *EMNLP 2018*. [arXiv:1809.08887](https://arxiv.org/abs/1809.08887).
 - Zhang, Wang, Liu, Lan, et al. (2026a). Progress-SQL: Improving reinforcement learning for text-to-SQL via progressive rewards. [arXiv:2606.06825](https://arxiv.org/abs/2606.06825).
 - Zhang, Yan, Huang, Zhao, et al. (2026b). Robust code RL via faulty-code-driven test case synthesis and dense reward shaping (RobustTests). *EMNLP 2026*. [arXiv:2608.24135](https://arxiv.org/abs/2608.24135).
+- Zhang (2026c). When the reward suite is leaky. [arXiv:2607.11022](https://arxiv.org/abs/2607.11022).
 - Zhong, Yu, Klein (2020). Semantic evaluation for text-to-SQL with distilled test suites. *EMNLP 2020*. [arXiv:2010.02840](https://arxiv.org/abs/2010.02840).
 - Zhu, Jin, Choi, Kang (2026). Human-level text-to-SQL via reinforcement learning on verified data, without pipeline engineering (ReViSQL). [arXiv:2603.20004](https://arxiv.org/abs/2603.20004).
 
@@ -377,6 +499,8 @@ Whether the stricter reward also trains a better agent is still open. On our own
 | [`sqlcf-lexsi/tiny-aya-global-sqlcf-sft`](https://huggingface.co/sqlcf-lexsi/tiny-aya-global-sqlcf-sft) | SFT, the init of both GRPO runs | baseline, 9.4% verified |
 | [`sqlcf-lexsi/tiny-aya-global-sqlcf-grpo-b`](https://huggingface.co/sqlcf-lexsi/tiny-aya-global-sqlcf-grpo-b) | GRPO-B, single-DB reward | improved: 12.7%, beats SFT (p = 0.006) |
 | [`sqlcf-lexsi/tiny-aya-global-sqlcf-grpo-c`](https://huggingface.co/sqlcf-lexsi/tiny-aya-global-sqlcf-grpo-c) | GRPO-C, counterfactual reward | null: 9.0%, no gain over SFT (p = 0.21) |
+
+The two curriculum adapters of Section 8 are not released; their test and Spider trajectories are in the data collection.
 
 **Adapter licence and use.**
 - The adapters are derivatives of a gated, non-commercial model. Each repo ships the base model's CC-BY-NC-4.0 licence and a notice pointing to Cohere's licence addendum and Acceptable Use Policy. The repos are gated with automatic approval, as the organisers ruled on Nov 9.
@@ -557,6 +681,50 @@ A query that hard-codes a number close to the answer earns 0.86 under `P_cf`, ag
 - **Why some templates are held out of SFT.** With all 11 train templates in SFT, only 8 of 2670 GRPO rollouts passed the original database but failed a copy. B and C would have seen almost the same reward. We held 3 templates out of SFT so that the rewards differ. Test templates were never touched.
 - **Merging before evaluation.** vLLM's LoRA path crashes on Tiny Aya's tied embeddings, so GRPO adapters are merged (fp32 merge, saved as fp16) before evaluation.
 - **No vLLM sleep mode.** It segfaults on wake-up (vLLM 0.22.1), so we leave it off.
+
+## Appendix D. Prompts
+
+**Agent system prompt** (`sqlcf/agent.py`; the schema and business definitions are filled in from `sqlcf/db.py`):
+
+```
+You are a careful data analyst working with a retail SQLite database.
+
+Schema:
+{SCHEMA}
+
+Business definitions:
+{GLOSSARY}
+
+Use the run_sql tool to explore the data and check your query before answering. Watch for
+duplicate rows, joins that multiply rows, missing business filters and superseded records.
+When you are done, reply with one short sentence and your final query in a ```sql block.
+The final query must compute the answer from the tables; do not hard-code values.
+```
+
+AgentTune then appends its fallback tool prompt with the `run_sql` schema. The user turn is `Database: <id>` followed by `Question: <question>`.
+
+**Command A prompt** (`scripts/e5_command_a.py`): the same system prompt, with the tool sentence replaced by *"You cannot run queries; answer from the schema and definitions."* Single turn, one sample.
+
+## Reproduction
+
+**Environment.** Python 3.12 for training (AgentTune `d4db4c1` with our patch, TRL, PEFT, vLLM 0.22.1) and any Python 3.11+ for the CPU parts (pandas, numpy, scipy, matplotlib, pytest). SFT and evaluation fit a 16 GB GPU; GRPO needs a 24 GB GPU (we used an L4). The data, the reward audit and every scoring step run on a CPU. Tiny Aya is gated: accept its licence and use a Hugging Face read token.
+
+**Repository layout.** `sqlcf/` holds the data generator, templates, counterfactual copies, comparator, rewards, audit and agent tool; `train.py` runs SFT, GRPO and merging; `evaluate.py` generates and scores test trajectories; `scripts/` holds one script per experiment; `patches/` the AgentTune fixes; `tests/` the reward and regression tests; `results/` every stored result. The [README](https://github.com/RishiiGamer2201/sexsi_hack#readme) lists every command; the core path is:
+
+```bash
+python -m sqlcf.cf --name train --split train --seeds 101 102 103 104 105 106 --size S   # data + copies
+python -m sqlcf.audit e0                                         # reward audit (Section 4)
+python train.py sft  --out runs/sft                              # SFT
+python train.py grpo --reward R_exec_rex --out runs/grpo_B       # GRPO-B
+python train.py grpo --reward R_cf_mean  --out runs/grpo_C       # GRPO-C
+python evaluate.py gen --model runs/grpo_B/merged --name B       # test trajectories
+python evaluate.py score --traj results/traj_*.jsonl             # Tables 2 and B6
+python verify_all.py                                             # re-derive every results/*.json
+```
+
+## Acknowledgements
+
+Lexsi Labs organised the hackathon and maintains AgentTune and AuditKIT; its maintainers reviewed and merged our reward fix within a day. Cohere provided Tiny Aya Global and a trial API key for Command A. Spider (Yu et al., 2018), the test-suite databases (Zhong et al., 2020) and the ESM+ prediction files made the real-data checks possible.
 
 ## Declaration of work done outside the hackathon
 
