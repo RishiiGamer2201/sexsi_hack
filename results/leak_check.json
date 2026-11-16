@@ -1,0 +1,44 @@
+{
+ "train_vs_test": {
+  "question": {
+   "exact": 0,
+   "same_up_to_numbers": 0,
+   "test_items_near_dup_of_train": 0,
+   "n_test": 331
+  },
+  "gold_sql": {
+   "exact": 0,
+   "same_up_to_numbers": 0,
+   "test_items_near_dup_of_train": 36,
+   "n_test": 331
+  }
+ },
+ "train_vs_audit": {
+  "question": {
+   "exact": 297,
+   "same_up_to_numbers": 219,
+   "audit_items_near_dup_of_train": 739,
+   "n_audit": 1302
+  },
+  "gold_sql": {
+   "exact": 164,
+   "same_up_to_numbers": 119,
+   "audit_items_near_dup_of_train": 802,
+   "n_audit": 1302
+  }
+ },
+ "audit_vs_test": {
+  "question": {
+   "exact": 120,
+   "same_up_to_numbers": 84,
+   "test_items_near_dup_of_audit": 331,
+   "n_test": 331
+  },
+  "gold_sql": {
+   "exact": 120,
+   "same_up_to_numbers": 84,
+   "test_items_near_dup_of_audit": 331,
+   "n_test": 331
+  }
+ }
+}

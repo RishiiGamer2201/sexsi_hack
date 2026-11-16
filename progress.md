@@ -448,3 +448,10 @@
   C_s1 ~10:25 IST, then local merge + E4 + Spider (~40 min).
 - Seed 1: GRPO-B seed 1 finished 60/60 at 06:57 IST, no tracebacks (~206 s/step). GRPO-C seed 1 now training on the
   same VM; ETA ~10:30 IST, then VM autostop and local evals.
+- **Submit-page checklist pass (16 Nov, 12:40 IST, user approved).** The submit page lists required write-up items. Added to
+  ARTICLE.md: languages + leak check (§3.1; new scripts/leak_check.py: 0 question overlap train/test, 0 exact gold-SQL
+  overlap, 36 near-duplicate gold SQL from a sibling template), trajectory metrics table (§5.2: tool calls, invalid tool
+  calls, throughput/latency), §9 Limitations (re-added, short), §10 With more compute (plan + forecast), Team: author
+  contributions, declaration of outside work (none; first commit Nov 8), LLM usage (~80% first drafts via Claude Code).
+  SUBMISSION.md maps each required item to its section. Seed-1 recovery: VM autostopped before the driver copied the
+  adapters (30-min hold vs 15-min poll); driver killed 12:37, recover_s1 restarting the VM to copy, then local evals.

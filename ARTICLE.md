@@ -69,6 +69,10 @@ The second kind is real: Spider (Yu et al., 2018), 20 databases and 1034 dev que
 | train | 907 | SFT (462 trajectories) and GRPO prompts |
 | test | 331 (214 in held-out F4) | evaluation, from a different generator |
 
+**Languages.** All questions are in English; the agent writes SQLite. Tiny Aya Global is multilingual, but we did not test other languages.
+
+**Leak check** (`scripts/leak_check.py`, `results/leak_check.json`). No test question matches a train question, exactly, up to numbers, or as a near duplicate (Jaccard ≥ 0.8 on word 3-grams). No test gold query matches a train gold query exactly. 36 test gold queries are near duplicates of a train one: they come from a test template that counts distinct customers where a train template counts distinct products, with different wording. The audit split shares templates with both and is never trained on.
+
 ### 3.2 Rewards
 
 For a predicted query $q$, gold query $g$, original database $D_0$ and hidden copies $D_1,\dots,D_K$, let `match` be a strict multiset comparison of result rows. It is ordered when gold is ordered, columns may be permuted, and floats are rounded to 4 decimal places.
@@ -182,6 +186,18 @@ We logged every one of the 1440 rollouts in each run, with its result on every d
 | GRPO-C (counterfactual reward) | 9.0% [7.9, 10.1] | 5.1% | 61.2% | 2.2% | 8.8% |
 | Command A (1 sample, no tools) | 81.0% [76.4, 84.8] | 1.8% | n/a | n/a | 94.9% |
 
+**Trajectory metrics** (same runs; task success is the verified column above).
+
+| Model | Tool calls per trajectory | Invalid tool calls | Throughput / latency |
+|---|---|---|---|
+| Tiny Aya base | 1.44 | 63.7% | n/a |
+| SFT | 2.11 | 17.2% | 3.8 trajectories/s on one L4 (vLLM, batched) |
+| GRPO-B | 2.11 | 16.2% | 3.4 trajectories/s on one L4 (measured) |
+| GRPO-C | 2.10 | 19.5% | 4.0 trajectories/s on one L4 |
+| Command A | 0 (single turn) | n/a | median 9.7 s, p90 42.2 s per query (API) |
+
+An invalid tool call is one whose tool response is an error (bad arguments or SQL that fails). SFT and C throughput are laptop times scaled by B's measured L4-to-laptop ratio (`results/e5_roi.json`); they are batched rates, not per-query latency.
+
 **B and SFT.** B improves on SFT by 3.2 points [1.8, 4.8] (McNemar p = 0.006), and its lucky-pass rate does not change.
 
 **C.** C does not improve on SFT, and it is 3.7 points below B. The pre-registered hypotheses all fail:
@@ -277,7 +293,28 @@ Section 5.3 blamed easy prompts. So we built a training set where lucky passes a
 
 **On Spider the gap came back.** C-min beats B by 2.1 points of test-suite accuracy, with fewer lucky passes. The main runs gave 1.9 points (Section 5.4). This pair used different prompts and a stricter reward, so it is a second, independent sample of the same comparison, though each pair is still one run per reward. The curriculum B is the only one of our models below SFT on Spider (−1.6 points [−2.8, −0.3]), and it has the highest lucky share of any of them.
 
-## 9. Conclusion
+## 9. Limitations
+
+- **One synthetic schema.** Training and our test set use one generated e-commerce schema. Spider is the only real data, and our models see it only at test time.
+- **Few training runs.** Each training comparison rests on one or two runs per reward, and the Spider comparison of the main pair was not pre-registered. The curriculum prediction was pre-registered, and it failed on our test set.
+- **Short, small training.** 60 GRPO steps of a rank-16 LoRA on a 3.35B model. Absolute accuracy stays low (12.7% verified against 81.0% for Command A), so these are statements about the reward, not about a usable SQL agent.
+- **The copies only cover bugs we wrote down.** Copies chosen blind to the mutants still pay 16.8% of them, and our copies do not edit dates (Section 7).
+- **Upper bounds and small hand checks.** Lucky-pass rates on Spider include ties and ambiguous gold queries, so they are upper bounds. The hand audits cover 48 of our trajectories and 40 Spider cases.
+- **A one-shot baseline.** Command A answers once, in one turn, without tools; our agent gets 5 tool steps and is scored over 8 samples.
+
+## 10. With more compute
+
+| Next step | Why | Expected result |
+|---|---|---|
+| 3–5 seeds per reward, main and curriculum setups | Separate the reward's effect from run-to-run variance | A seed-averaged Spider gap of about +2 test-suite points for the copies, with an interval that excludes zero if the effect is real |
+| Generate copies for Spider and BIRD training databases, and train on them | Our copy generator knows one schema; real schemas give real, varied lucky passes | Fewer lucky passes on Spider (from about 24% of EX passes towards the 8–15% of published systems) and a test-suite gain over the single-database reward of 2–4 points |
+| 300+ GRPO steps, an 8B-class policy | Our runs are short and small | Higher absolute accuracy for both rewards; a larger B-vs-C gap, because a stronger policy finds more lucky passes for B to be paid for |
+| Copies for dates, and for the bug families the policy actually makes | Close the 16.8% blind spot found in Section 4.1 and Section 7 | Buggy queries paid falls from 16.8% towards the 1.5% bound of copies chosen against the mutants |
+| Questions in other languages | Tiny Aya Global is multilingual; the reward does not depend on the question language | The audit numbers carry over unchanged; training effects untested |
+
+These are forecasts, not results.
+
+## 11. Conclusion
 
 A reward that checks an SQL answer on one database pays for bugs that the data happens to hide. In our audit that happened to almost a third of realistic bugs, in two public rewards, and in the outputs of published systems on Spider. Running the same query on a few generated copies closes most of that hole and turns away nearly every reward hack, without rejecting correct queries.
 
@@ -525,3 +562,12 @@ A query that hard-codes a number close to the answer earns 0.86 under `P_cf`, ag
 ## Team
 
 Shreshth Rai (lead, [@hi-phi-r25i](https://huggingface.co/hi-phi-r25i)), Rishii Kumar Singh ([@LogicPalette](https://huggingface.co/LogicPalette)), Aksh Aggarwal ([@AkshAgg](https://huggingface.co/AkshAgg)).
+
+**Author contributions.**
+- **Shreshth Rai** led the team: research direction, the reward-audit-first framing, the paper structure and project page, and reviews of every draft.
+- **Rishii Kumar Singh** built the pipeline: data and copy generator, rewards and audit, SFT and GRPO training with AgentTune, the AgentTune fixes, evaluation, the Spider runs, the curriculum runs, the compute setup and the release.
+- **Aksh Aggarwal** ran the one-checkpoint DPO, partial-credit and period-edge experiments (Section 7) and the distillation tests, and checked the references.
+
+**Work done outside the hackathon.** None. All code, data and experiments were made during the hackathon; the repository's first commit is Nov 8, 2026. Third-party code and data are listed in Appendix A and used under their licences.
+
+**LLM usage.** Most first drafts of the code and of this write-up were written with an AI coding assistant (Claude Code) under the team's direction, roughly 80% of each. The team chose the experiments and pre-registered predictions, reviewed the code, and checked the numbers against the released result files (`verify_all.py` recomputes the main ones).

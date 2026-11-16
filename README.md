@@ -75,6 +75,7 @@ source .secrets.env && .venv/bin/python scripts/e5_command_a.py            # E5:
 .venv/bin/python scripts/agenttune_repro.py                                # AgentTune reward exploit: before / after patch
 .venv/bin/python scripts/partial_credit.py                                 # E11: partial-credit rewards
 .venv/bin/python scripts/period_copies.py                                  # E12: period-edge copies vs date bugs
+python3 scripts/leak_check.py                                              # train/test/audit overlap -> results/leak_check.json
 bash scripts/local_dpo.sh                                                  # E10: DPO std vs cf labels (16 GB GPU)
 # E6 needs external/testsuite_db/database (Zhong et al. test-suite DBs, Google Drive 1mkCx2GOFIqNesD4y8TDAO1yX1QZORP5w)
 # and external/ESMp (git clone https://github.com/bossben/ESMp, checkout 91dd85b)
