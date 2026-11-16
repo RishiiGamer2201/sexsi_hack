@@ -2,7 +2,7 @@
 
 Shreshth Rai, Rishii Kumar Singh, Aksh Aggarwal (team Teen_khapeetars) · Lexsi hackathon, Track 3 · problem statements #6 (data and database agents) and #9 (reward design and reward-hacking defences)
 
-> **Links:** HF collections: [models](https://huggingface.co/collections/sqlcf-lexsi/counterfactual-db-rewards-for-a-small-sql-agent-6af174f77dbae0bf0a54c3c4), [data](https://huggingface.co/collections/sqlcf-lexsi/counterfactual-sql-data-rollouts-and-traces-6af479430243b7731f85d144) · [demo](https://huggingface.co/spaces/sqlcf-lexsi/counterfactual-sql-demo) · [data](https://huggingface.co/datasets/sqlcf-lexsi/counterfactual-sql-data) · [code](https://github.com/RishiiGamer2201/sexsi_hack). All numbers are from stored runs in `results/`, and `python verify_all.py` re-derives them.
+> **Links:** HF collections: [models](https://huggingface.co/collections/sqlcf-lexsi/counterfactual-db-rewards-for-a-small-sql-agent-6af174f77dbae0bf0a54c3c4), [data](https://huggingface.co/collections/sqlcf-lexsi/counterfactual-sql-data-rollouts-and-traces-6af479430243b7731f85d144) · [demo](https://huggingface.co/spaces/sqlcf-lexsi/counterfactual-sql-demo) · [data](https://huggingface.co/datasets/sqlcf-lexsi/counterfactual-sql-data) · [code](https://github.com/RishiiGamer2201/sexsi_hack).
 
 ## Abstract
 
@@ -71,7 +71,7 @@ The second kind is real: Spider (Yu et al., 2018), 20 databases and 1034 dev que
 
 **Languages.** All questions are in English; the agent writes SQLite. Tiny Aya Global is multilingual, but we did not test other languages.
 
-**Leak check** (`scripts/leak_check.py`, `results/leak_check.json`). No test question matches a train question, exactly, up to numbers, or as a near duplicate (Jaccard ≥ 0.8 on word 3-grams). No test gold query matches a train gold query exactly. 36 test gold queries are near duplicates of a train one: they come from a test template that counts distinct customers where a train template counts distinct products, with different wording. The audit split shares templates with both and is never trained on.
+**Leak check.** No test question matches a train question, exactly, up to numbers, or as a near duplicate (Jaccard ≥ 0.8 on word 3-grams). No test gold query matches a train gold query exactly. 36 test gold queries are near duplicates of a train one: they come from a test template that counts distinct customers where a train template counts distinct products, with different wording. The audit split shares templates with both and is never trained on.
 
 ### 3.2 Rewards
 
@@ -95,7 +95,7 @@ The policy is Tiny Aya Global (3.35B; Salamanca et al., 2026) with a LoRA adapte
 
 Both use the same data and seed, 60 steps, 6 rollouts per prompt, 4 prompts per step, learning rate 1e-5 and KL weight 0.02. Only the reward differs. Training ran on one L4 GPU and took about 3.5 hours per run.
 
-**AgentTune fix.** While doing this we found and patched a bug in AgentTune's multi-turn stream. It dropped chat-template tokens between turns, so the trainer scored tokens in a context vLLM never saw (`patches/agenttune-multiturn-ids.patch`).
+**AgentTune fix.** While doing this we found and patched a bug in AgentTune's multi-turn stream. It dropped chat-template tokens between turns, so the trainer scored tokens in a context vLLM never saw.
 
 ### 3.4 Evaluation
 
@@ -196,7 +196,7 @@ We logged every one of the 1440 rollouts in each run, with its result on every d
 | GRPO-C | 2.10 | 19.5% | 4.0 trajectories/s on one L4 |
 | Command A | 0 (single turn) | n/a | median 9.7 s, p90 42.2 s per query (API) |
 
-An invalid tool call is one whose tool response is an error (bad arguments or SQL that fails). SFT and C throughput are laptop times scaled by B's measured L4-to-laptop ratio (`results/e5_roi.json`); they are batched rates, not per-query latency.
+An invalid tool call is one whose tool response is an error (bad arguments or SQL that fails). SFT and C throughput are laptop times scaled by B's measured L4-to-laptop ratio; they are batched rates, not per-query latency.
 
 **B and SFT.** B improves on SFT by 3.2 points [1.8, 4.8] (McNemar p = 0.006), and its lucky-pass rate does not change.
 
@@ -362,9 +362,9 @@ Whether the stricter reward also trains a better agent is still open. On our own
 
 **Lexsi repositories used.**
 - **AgentTune** (`d4db4c1`) provides the multi-turn GRPO trainer with tool calls, its tool-prompt fallback, its render, parser and fold functions, and `lexsi_provenance.json`.
-  - Our trainer fix: `patches/agenttune-multiturn-ids.patch`. Before it, the importance ratio was about 1e-5.
-  - Our reward fix: `patches/agenttune-sql-reward-hardening.patch`, with `scripts/agenttune_repro.py` and `tests/test_agenttune_reward.py`. We reported the exploit as issue [Lexsi-Labs/AgentTune#11](https://github.com/Lexsi-Labs/AgentTune/issues/11); the maintainers fixed it upstream the next day in [PR #12](https://github.com/Lexsi-Labs/AgentTune/pull/12) (`e56a109`).
-- **AuditKIT** (`9da5838`) provides the agent-evaluation framing (claimed versus verified success, silent errors) and pass^k. We reimplemented the statistics in `evaluate.py`.
+  - Our trainer fix: a patch to the multi-turn token stream. Before it, the importance ratio was about 1e-5.
+  - Our reward fix: a patch, with a reproduction script and a regression test. We reported the exploit as issue [Lexsi-Labs/AgentTune#11](https://github.com/Lexsi-Labs/AgentTune/issues/11); the maintainers fixed it upstream the next day in [PR #12](https://github.com/Lexsi-Labs/AgentTune/pull/12) (`e56a109`).
+- **AuditKIT** (`9da5838`) provides the agent-evaluation framing (claimed versus verified success, silent errors) and pass^k. We reimplemented the statistics in our own evaluation code.
 
 **Models.**
 - `CohereLabs/tiny-aya-global` (3.35B, CC-BY-NC-4.0, gated) is the policy we train.
@@ -381,11 +381,11 @@ Whether the stricter reward also trains a better agent is still open. On our own
 **Adapter licence and use.**
 - The adapters are derivatives of a gated, non-commercial model. Each repo ships the base model's CC-BY-NC-4.0 licence and a notice pointing to Cohere's licence addendum and Acceptable Use Policy. The repos are gated with automatic approval, as the organisers ruled on Nov 9.
 - Using them requires access to `CohereLabs/tiny-aya-global`.
-- vLLM's LoRA path crashes on Tiny Aya's tied embeddings, so merge first (`train.py merge`, fp32 merge saved as fp16).
+- vLLM's LoRA path crashes on Tiny Aya's tied embeddings, so merge first (fp32 merge, saved as fp16).
 
 **Data collection.** [Collection](https://huggingface.co/collections/sqlcf-lexsi/counterfactual-sql-data-rollouts-and-traces-6af479430243b7731f85d144) with [`sqlcf-lexsi/counterfactual-sql-data`](https://huggingface.co/datasets/sqlcf-lexsi/counterfactual-sql-data). It contains the items, all SQLite databases, SFT trajectories, results, test trajectories for every model, and every GRPO rollout with its per-database pass vector and reward. Released under CC-BY-NC-4.0, because the rollouts contain model outputs.
 
-**Spider data.** The Spider data is not ours: questions from `xlangai/spider` (CC BY-SA 4.0), gold SQL from ESM+, and test-suite databases from Zhong et al. We do not redistribute any of it. `results/spider_*.jsonl` keep only our models' turns and the tool outputs. The tool outputs include up to 20 rows from a Spider database, so those files fall under CC BY-SA 4.0.
+**Spider data.** The Spider data is not ours: questions from `xlangai/spider` (CC BY-SA 4.0), gold SQL from ESM+, and test-suite databases from Zhong et al. We do not redistribute any of it. Our released Spider trajectories keep only our models' turns and the tool outputs. The tool outputs include up to 20 rows from a Spider database, so those files fall under CC BY-SA 4.0.
 
 ## Appendix B. Detailed results
 
@@ -403,7 +403,7 @@ On the 360 yes/no items, the AgentTune exploit scores +2.45 overall against +3.1
 
 **B2. Bugs invisible on one database (Figure 2).** Share of gold-mutants that pass the single-database check: 29.2% at 50 customers, 0.8% at 500, 0.2% at 5,000.
 
-**B3. SkyRL-SQL reward** (`NovaSky-AI/SkyRL` at `d870046`, re-implemented in `scripts/audit_skyrl.py`).
+**B3. SkyRL-SQL reward** (`NovaSky-AI/SkyRL` at `d870046`, re-implemented from its source).
 
 | Reward | Mutants paid (n = 1814) | Hacks paid (n = 2839) | Correct rejected (n = 2847) |
 |---|---|---|---|
@@ -414,7 +414,7 @@ On the 360 yes/no items, the AgentTune exploit scores +2.45 overall against +3.1
 
 Copies close the database hole (10.3 points); a strict comparator closes the comparator hole (10.4 points more). 188 of the 203 dropped-`DISTINCT` mutants are paid by set comparison on every database.
 
-**B4. Published systems on Spider dev** (`scripts/a2_spider_lucky.py`, 1034 questions). EX = original database; TS = original plus every test-suite database.
+**B4. Published systems on Spider dev** (1034 questions). EX = original database; TS = original plus every test-suite database.
 
 | System | EX | TS | Lucky share of EX passes [95% CI] |
 |---|---|---|---|
@@ -429,7 +429,7 @@ Copies close the database hole (10.3 points); a strict comparator closes the com
 
 Our scorer keeps `DISTINCT` and uses our strict comparator, so our EX and TS run a few points below the official script's. The lucky share uses the same comparator on both sides.
 
-**B5. Training rollouts (Figure 3)**, from `results/figure3_training_rewards.json`, 1440 rollouts per run.
+**B5. Training rollouts (Figure 3)**, 1440 rollouts per run.
 
 | Run | Rollouts passing the original DB | Share of those failing a copy | First half | Second half |
 |---|---|---|---|---|
@@ -454,7 +454,7 @@ Replaying all rollouts, C's reward was lower than B's on 7.1% (B run) and 7.2% (
 - **Silent errors, C against B:** −2.9 points [−5.3, −0.5] by bootstrap over all 8 samples; McNemar on sample 0 gives p = 0.61.
 - **Release labels (gate G3):** B beats SFT and is released as improved; C is released labelled as a null.
 
-**B7. Hand audit of wrong answers** (`results/manual_audit.jsonl`). 48 wrong test trajectories, 16 per model (SFT, B, C), sampled with seed 0 and stratified by family. Each model contributes 6 lucky passes and 10 other wrong answers.
+**B7. Hand audit of wrong answers**. 48 wrong test trajectories, 16 per model (SFT, B, C), sampled with seed 0 and stratified by family. Each model contributes 6 lucky passes and 10 other wrong answers.
 
 | Error | NL2SQL-BUGs category | All (48) | Lucky passes (18) |
 |---|---|---|---|
@@ -484,7 +484,7 @@ The three models' error mixes are similar. With 16 per model, the audit cannot s
 
 Scaling: GRPO-B's test generation took 785 s on the L4 and 524 s on an RTX 5070 Ti, with the same accuracy. SFT and C were timed on the 5070 Ti only and scaled by that ratio (1.50). Per-query latency was not measured for Tiny Aya.
 
-**B9. Voting without gold** (`scripts/a4_selfconsistency.py`; paired bootstrap over items).
+**B9. Voting without gold** (paired bootstrap over items).
 
 | Model | First sample | Vote, 1 DB | Vote, 5 DBs | Any of 8 (oracle) | 5-DB vote minus first [95% CI] |
 |---|---|---|---|---|---|
@@ -495,7 +495,7 @@ Scaling: GRPO-B's test generation took 785 s on the L4 and 524 s on an RTX 5070 
 - **Shaky-answer flag.** Flagging answers where fewer than half of the samples agree catches 53–59% of wrong answers at 94–98% precision. The extra databases add nothing here either (AUROC 0.67–0.74 either way).
 - **Pass@8.** All three trained models reach about the same pass@8, so B's gain is in picking its right answer more often, not in finding new ones.
 
-**B10. DPO from one checkpoint** (`scripts/dpo.py`).
+**B10. DPO from one checkpoint**.
 
 **Source rollouts.** SFT's 2670 rollouts on the 445 GRPO prompts (6 per prompt, T = 1.0) grade into 1971 verified, 170 lucky and 529 failed.
 
@@ -519,7 +519,7 @@ Scaling: GRPO-B's test generation took 785 s on the L4 and 524 s on an RTX 5070 
 
 **By family.** Both runs lose on F1 (from 30.9% to 21.2% and 10.4%) and gain a little on F2 (from 1.0% to 4.5%). There is one seed each, and the counterfactual run has fewer pairs.
 
-**B11. Partial credit** (`scripts/partial_credit.py`).
+**B11. Partial credit**.
 
 **How the credit is computed.** Each database gives 1 for a match; for a single number, its closeness, 1 − |pred − gold| / |gold|; otherwise the F1 of the result rows. `P_single` is the credit on the original; `P_cf` is the mean over the original and every copy.
 
@@ -533,7 +533,7 @@ Scaling: GRPO-B's test generation took 785 s on the L4 and 524 s on an RTX 5070 
 
 A query that hard-codes a number close to the answer earns 0.86 under `P_cf`, against 0 under `R_cf_strict`.
 
-**B12. Period-edge copies** (`scripts/period_copies.py`, 19 s on a CPU).
+**B12. Period-edge copies** (19 s on a CPU).
 
 **How each copy is built:**
 - Half of the slice's orders in year Y move to Jan 1 and Dec 31 of Y, alternating.
@@ -557,7 +557,6 @@ A query that hard-codes a number close to the answer earns 0.86 under `P_cf`, ag
 - **Why some templates are held out of SFT.** With all 11 train templates in SFT, only 8 of 2670 GRPO rollouts passed the original database but failed a copy. B and C would have seen almost the same reward. We held 3 templates out of SFT so that the rewards differ. Test templates were never touched.
 - **Merging before evaluation.** vLLM's LoRA path crashes on Tiny Aya's tied embeddings, so GRPO adapters are merged (fp32 merge, saved as fp16) before evaluation.
 - **No vLLM sleep mode.** It segfaults on wake-up (vLLM 0.22.1), so we leave it off.
-- **Spider transfer runs.** These are `scripts/local_spider.sh` and `scripts/spider_eval.py`; the results are in `results/e13_spider_ours.json`.
 
 ## Declaration of work done outside the hackathon
 

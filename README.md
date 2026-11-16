@@ -88,3 +88,24 @@ source .secrets.env && .venv/bin/python scripts/push_models.py             # ada
 
 `sqlcf/` data generator, templates, counterfactual DBs, comparator, rewards, audit, agent tool ·
 `train.py` SFT + GRPO · `evaluate.py` E4 · `vertex/` Vertex AI job files · `tests/` reward tests.
+
+## Where each article result lives
+
+Every number in the article comes from stored runs in `results/`; `python verify_all.py` re-derives the main ones.
+
+| Article | Code | Output |
+|---|---|---|
+| §3.1 leak check | `scripts/leak_check.py` | `results/leak_check.json` |
+| §3.3 AgentTune trainer fix | `patches/agenttune-multiturn-ids.patch` | |
+| §4.1 reward audit, Figures 1–2 | `sqlcf/audit.py` | `results/` (E0, E1) |
+| §4.3 AgentTune reward exploit | `patches/agenttune-sql-reward-hardening.patch`, `scripts/agenttune_repro.py`, `tests/test_agenttune_reward.py` | |
+| §4.3 SkyRL-SQL reward (B3) | `scripts/audit_skyrl.py` | |
+| §4.4 published systems on Spider (B4) | `scripts/a2_spider_lucky.py` | |
+| §5.1 training rollouts, Figure 3 (B5) | `scripts/figure3.py` | `results/figure3_training_rewards.json` |
+| §5.2 test set, trajectory metrics | `evaluate.py` | `results/e4_eval.json`, `results/traj_*.jsonl` |
+| §5.2 hand audit (B7) | `scripts/audit_sample.py`, `scripts/audit_labels.py` | `results/manual_audit.jsonl` |
+| §5.4 Spider transfer | `scripts/local_spider.sh`, `scripts/spider_eval.py` | `results/e13_spider_ours.json`, `results/spider_*.jsonl` |
+| §6 cost | `scripts/e5_command_a.py`, `scripts/e5_roi.py` | `results/e5_roi.json` |
+| §7 voting (B9), DPO (B10), partial credit (B11), period-edge copies (B12) | `scripts/a4_selfconsistency.py`, `scripts/dpo.py`, `scripts/partial_credit.py`, `scripts/period_copies.py` | |
+| §8 curriculum | `scripts/laptop_e14.sh`, `scripts/spider_eval.py` | `results/e14/`, `results/e14_spider.json` |
+| Adapter merge before eval | `train.py merge` (fp32 merge, saved as fp16) | |

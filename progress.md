@@ -458,3 +458,7 @@
 - **Team section per submit page (user, 13:00 IST).** Removed author contributions and LLM usage. Headings now match the
   site: "Declaration of work done outside the hackathon" and "Teammates tagged" (HF + GitHub for each: hi-phi-r25i /
   shreshth3000, LogicPalette / RishiiGamer2201, AkshAgg / Aksh2906).
+- **Repo paths out of the article (Shreshth, 12:52 IST: "justification yeh deke hatado").** Removed the page-header note
+  ("Every number comes from stored runs in results/; python verify_all.py ...") from make_site.py and the same sentence
+  from ARTICLE.md, plus 17 inline script/result/patch paths. README gets a "Where each article result lives" table
+  (section -> code -> output, every path checked to exist) with the verify_all line.

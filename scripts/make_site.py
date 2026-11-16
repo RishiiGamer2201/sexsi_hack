@@ -117,7 +117,6 @@ pre.bib {{ font-size: .78rem; white-space: pre-wrap; text-align: left; }}
 <p class="authors">{authors}</p>
 <p class="venue">{venue}</p>
 <div class="links">{buttons}</div>
-<p class="note">Every number comes from stored runs in <code>results/</code>; <code>python verify_all.py</code> re-derives them.</p>
 </header>
 <main id="body" class="page"><noscript>This page needs JavaScript; the plain version is <a href="{GITHUB}/blob/main/ARTICLE.md">ARTICLE.md</a>.</noscript></main>
 <div class="page"><h2>BibTeX</h2><pre class="bib">@misc{{teenkhapeetars2026counterfactual,
