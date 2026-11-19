@@ -30,7 +30,7 @@ Nothing pending. Round 1 is over and we did not reach Stage 2. The organisers of
 
 ### Nov 19
 
-- **Result: Top 10% of 369 submissions (not in Stage 2).** From the results page and the team certificate (ID `LX26-SG3KM-YBE7G`, 19 Nov 2026). The page says Stage 2 places were very limited and the organisers will give feedback or technical help if we continue. The certificate image is not committed: it stays with the team.
+- **Result: Top 10% of 369 submissions (not in Stage 2).** From the results page and the team certificate (ID `LX26-SG3KM-YBE7G`, 19 Nov 2026). The page says Stage 2 places were very limited and the organisers will give feedback or technical help if we continue. The certificate image is not committed: it stays with the team. Organiser on Discord (Nov 19): result tiers are top 5% / top 10% / top 25% / participation; only top 5% (~20 teams) go to the final stage. Judge feedback is available on request via a ticket in Discord #report_issues (the bot was timing out that evening). Mentorship is offered to any team that extends the work or aims for a publication.
 
 ### Nov 15
 
