@@ -2,7 +2,9 @@
 
 > **Rule: update this file after each and every step** (a run launched or finished, a bug found or fixed, a decision made, access changed). Add a dated entry at the top of the log, and keep "Current state" and "Next" accurate. Commit and push it with the work it describes.
 
-## Current state (Nov 9)
+## Current state (Nov 19)
+
+- **Final result (Nov 19): Top 10% of 369 submissions**, Track 3 Agentic Fine-tuning, Lexsi AI Safety & Alignment Hackathon 2026 (Lexsi Labs with Cohere Labs and Hugging Face). Not selected for Stage 2. Certificate ID `LX26-SG3KM-YBE7G`, issued 19 Nov 2026, verify at hackathon.lexsi.ai/results. Project listed as "Counterfactual-DB SQL Rewards". Submitted 16 Nov ~14:15 IST; all artifacts public. The notes below are the Nov 9 state, kept for history.
 
 - **All experiments done** (E0, E1, E2, E3 B + C, E4, E5, manual audit, plus zero-GPU E6 Spider, E7 SkyRL, E8 self-consistency, AgentTune patch). Training comparison is a null: B 12.7% verified, C 9.0%, SFT 9.4%.
 - **Nov 14: D3 + D4 distillation from int4 Command A done (RunPod A100).** No student beats sft_ho: D3 3.7%, kd_a0 6.9%, kd_a1x (fixed logit distillation) 6.9%. B stays best. See the Nov 14 log entry.
@@ -17,12 +19,18 @@
 
 ## Next
 
+Nothing pending. Round 1 is over and we did not reach Stage 2. The organisers offered feedback and technical help if we keep working on the idea. Possible follow-ups: evaluate the seed-1 B/C adapters stranded on the `sqlcf-l4` disk, or ask the organisers for feedback. The items below are the old pre-submission list.
+
 1. **Submission pack ready (Nov 11): follow [SUBMISSION.md](SUBMISSION.md)**, which is laid out like the real form's pages. The form's HF Article URL is the project-page Space (`scripts/make_site.py`). Then `scripts/go_public.py --go` (adapters, dataset, Space, both collections, GitHub). The form says every repo must be public by Nov 15, 11:59 PM AoE.
 2. Null decision made: **accept and polish** (user, Nov 9). No GPU runs; VM stays off.
 3. (Done Nov 10) AgentTune#11 fixed upstream by PR #12.
 4. Optional polish: demo "shaky answer" flag (D5).
 
 ## Log
+
+### Nov 19
+
+- **Result: Top 10% of 369 submissions (not in Stage 2).** From the results page and the team certificate (ID `LX26-SG3KM-YBE7G`, 19 Nov 2026). The page says Stage 2 places were very limited and the organisers will give feedback or technical help if we continue. The certificate image is not committed: it stays with the team.
 
 ### Nov 15
 
