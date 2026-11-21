@@ -55,9 +55,15 @@ for split in ("audit", "train", "test"):
 | `results/e12_period_copies.json` | E12: period-edge copies vs date-filter bugs, and replayed on real answers (the copies are in `<split>/dbs/*/period/`) |
 | `runs/grpo_<B,C>_rewards.jsonl` | Every GRPO rollout: final SQL, reward, per-DB pass vector |
 | `runs/grpo_<B,C>/` | `lexsi_provenance.json`, training config and stats |
+| `runs/grpo_<B_cur,Cmin_cur>_rewards.jsonl`, `results/traj_<B_cur,Cmin_cur>.jsonl` | E14 curriculum pair (single-DB vs strict counterfactual): every rollout and the test trajectories |
+| `results/e14/e4_eval.json`, `results/e14_spider.json` | E14 evaluated on the test split and on Spider dev |
+| `results/spider_<model>.jsonl`, `results/e13_spider_ours.json` | E13: our models on Spider dev (test-suite accuracy, lucky share) |
+| `results/leak_check.json`, `results/*int4*` | Train/test leak check; int4 Command A teacher and accuracy |
 
 Synthetic e-commerce data from a seeded generator; no personal data. Rollouts contain outputs of
 Tiny Aya Global (CC-BY-NC-4.0) and Cohere Command A, hence the non-commercial licence.
+Exception: `results/spider_*.jsonl` hold up to 20 rows per tool call from Spider databases
+(Yu et al. 2018; test-suite DBs from Zhong et al. 2020), so those files are CC BY-SA 4.0.
 """.replace("@@LINKS@@", LINKS)
 
 ap = argparse.ArgumentParser()
@@ -83,7 +89,8 @@ shutil.copy(ROOT / "runs/traj_sft_ho_grpoprompts.jsonl", stage / "runs/traj_sft_
 for f in (ROOT / "results").iterdir():
     if f.is_file() and not f.name.startswith("_"):
         shutil.copy(f, stage / "results" / f.name)
-for run in ("B", "C"):
+shutil.copytree(ROOT / "results/e14", stage / "results/e14")
+for run in ("B", "C", "B_cur", "Cmin_cur"):
     log = ROOT / f"runs/grpo_{run}_rewards.jsonl"
     if not log.exists():
         print(f"skip GRPO-{run}: no reward log")

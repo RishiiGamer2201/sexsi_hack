@@ -80,6 +80,23 @@ Nothing pending. Round 1 is over and we did not reach Stage 2. The organisers of
       - Nova models are listed in the Bedrock catalog. Invoke access was not tested.
       - So the GCP L4 is the only GPU before Nov 30.
     - Nothing was launched, invoked or requested. Every paid step waits for the user's go.
+  - **User decisions (Nov 21):**
+    - No AWS quota request.
+    - HF re-push: yes.
+    - LeakySQL pilot: go.
+    - Authors and the submitter: decided later.
+    - Code licence: recommended Apache-2.0; waiting for the OK.
+  - **Budget check (Nov 21):**
+    - AWS free-tier plan credit left: $159.65, from `aws freetier get-account-plan-state`. EC2 and SageMaker GPU quotas are both 0, so this credit covers Bedrock only.
+    - GCP: gcloud on Windows is logged in (the WSL `gcloud` is the same binary).
+    - From the audit logs, the VM ran about 16.5 h after the Nov 10 credit reading of ₹2,972.81.
+    - The 150 GB pd-balanced disk bills about $0.55/day even while stopped.
+    - So the estimate is roughly ₹1,400 (about $16) left. The exact figure is only on the console Billing > Credits page.
+    - Free GPU: the local RTX 5070 Ti (16 GB) does evals, SFT and, if it fits, GRPO.
+  - **HF dataset re-pushed (Nov 21):**
+    - `scripts/push_dataset.py` now adds the E14 curriculum reward logs and `results/e14/`.
+    - The card lists the curriculum, Spider, E13, leak-check and int4 files, and marks the Spider trajectories CC BY-SA 4.0.
+    - `sqlcf-lexsi/counterfactual-sql-data` is public: 81 files, lastModified 2026-11-21T16:18Z. ARTICLE.md L503 is true again.
 
 ### Nov 19
 
