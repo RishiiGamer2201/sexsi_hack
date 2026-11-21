@@ -28,6 +28,27 @@ Nothing pending. Round 1 is over and we did not reach Stage 2. The organisers of
 
 ## Log
 
+### Nov 21
+
+- **Amazon Trusted AI Symposium 2027 started (user's request).** Rules:
+  - deadline Nov 30, 2026; submit by email to trusted-ai-symposium@amazon.com;
+  - official NeurIPS 2025 LaTeX style (zip in `amazon/paper/`);
+  - 4 pages, with references and appendices on extra pages;
+  - the abstract in intro/methods/results/conclusions form;
+  - author names, affiliations and emails;
+  - non-archival; double submission OK.
+
+  This replaces the Nov 11 "no Amazon" rule, which was only for the Lexsi deadline. Everything goes in `amazon/`. Downloaded third-party PDFs (`amazon/research_notes/pdfs/`) and the style zip are gitignored.
+  - Step 1: full project report, `amazon/PROJECT_REPORT.md`.
+  - Steps 2–3: NeurIPS 2020–2026 paper study, a study of the template and 4-page workshop papers, and past Amazon symposium papers. Notes go in `amazon/research_notes/` and are then merged into `amazon/NEURIPS_PAPER_RULES.md`.
+  - Step 4: rules from `C:\developer\research_ai\paper-writing` that are missing from the rules file get added to it.
+  - Diagrams in TikZ (user preference).
+  - **Steps 1–4 done (Nov 21):**
+    - `amazon/PROJECT_REPORT.md` (~17k words): every experiment, number and source, plus 22 inconsistencies between sources.
+    - `amazon/research_notes/`: NeurIPS 2020–22 (13 papers), 2023–24 (12), 2025–26 (14); the template plus 8 four-page workshop papers; the past Amazon symposium (one earlier edition, Jan 2026 in New York, with 7 works found).
+    - `amazon/NEURIPS_PAPER_RULES.md`: Part I has 274 rules with era conflicts resolved; Part II has 139 rules from the user's paper-writing guides, plus a conflicts list.
+    - Template builds in WSL after `sudo apt install texlive-latex-extra cm-super`, with the `[preprint]` option, on US Letter and with 0 Type 3 fonts.
+
 ### Nov 19
 
 - **Result: Top 10% of 369 submissions (not in Stage 2).** From the results page and the team certificate (ID `LX26-SG3KM-YBE7G`, 19 Nov 2026). The page says Stage 2 places were very limited and the organisers will give feedback or technical help if we continue. The certificate image is not committed: it stays with the team. Organiser on Discord (Nov 19): result tiers are top 5% / top 10% / top 25% / participation; only top 5% (~20 teams) go to the final stage. Judge feedback is available on request via a ticket in Discord #report_issues (the bot was timing out that evening). Mentorship is offered to any team that extends the work or aims for a publication.

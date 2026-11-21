@@ -18,3 +18,8 @@ results/_selfcheck_*
 *:Zone.Identifier
 *.jpeg
 external/
+
+# Amazon symposium: downloaded third-party papers and the duplicate style zip (not ours, not committed)
+amazon/research_notes/pdfs/
+amazon/paper/*.zip
+amazon/research_notes/template_test/
