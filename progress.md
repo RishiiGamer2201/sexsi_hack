@@ -48,6 +48,22 @@ Nothing pending. Round 1 is over and we did not reach Stage 2. The organisers of
     - `amazon/research_notes/`: NeurIPS 2020–22 (13 papers), 2023–24 (12), 2025–26 (14); the template plus 8 four-page workshop papers; the past Amazon symposium (one earlier edition, Jan 2026 in New York, with 7 works found).
     - `amazon/NEURIPS_PAPER_RULES.md`: Part I has 274 rules with era conflicts resolved; Part II has 139 rules from the user's paper-writing guides, plus a conflicts list.
     - Template builds in WSL after `sudo apt install texlive-latex-extra cm-super`, with the `[preprint]` option, on US Letter and with 0 Type 3 fonts.
+  - **Step 5: paper draft, iteration 0 done (Nov 21).** Everything is in `amazon/paper/iteration0/`; build with `./build.sh` (WSL).
+    - `main.pdf` has 8 pages, with the body ending on page 4. Then come the refs, and Appendices A–E on pages 6–8.
+    - It has 1 TikZ figure and 2 tables, built from `results/` by `scripts/make_tables.py`. `scripts/check_numbers.py` passes 41/41.
+    - The abstract is 176 words.
+    - Decisions (user said "go with your recommendations"):
+      - Spider gain reported as modest, with both the bootstrap and McNemar results.
+      - F1–F4 family names follow the code.
+      - No Amazon Nova baseline.
+      - Authors: Shreshth Rai, Rishii Kumar Singh, Aksh Aggarwal.
+    - Red placeholders still open: affiliations, emails, funding/competing interests, and the LLM-use statement.
+    - `notes/` holds:
+      - `claim_source_map.md`;
+      - `citations_to_verify.md` (10 entries are incomplete);
+      - `self_review.md` (top 3 weaknesses: thin training signal, one synthetic schema, bug families we wrote ourselves);
+      - `llm_disclosure.md`.
+    - Waiting for the user's next instructions; more project work is planned before any symposium presentation.
 
 ### Nov 19
 

@@ -23,3 +23,12 @@ external/
 amazon/research_notes/pdfs/
 amazon/paper/*.zip
 amazon/research_notes/template_test/
+# LaTeX build files (main.pdf stays committed)
+amazon/paper/**/*.aux
+amazon/paper/**/*.bbl
+amazon/paper/**/*.blg
+amazon/paper/**/*.fdb_latexmk
+amazon/paper/**/*.fls
+amazon/paper/**/*.log
+amazon/paper/**/*.out
+amazon/paper/**/*.synctex.gz
