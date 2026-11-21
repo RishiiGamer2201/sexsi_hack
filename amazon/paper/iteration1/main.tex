@@ -99,7 +99,7 @@ A seeded generator builds 8-table retail SQLite databases; 18 question templates
 We use Tiny Aya Global (3.35B)~\citep{salamanca2026tinyaya} with a rank-16 LoRA~\citep{hu2022} in AgentTune~\citep{lyngkhoi2026agenttune}; the agent has one tool, \texttt{run\_sql} on $D_0$, and up to 5 steps. SFT uses 353 scripted trajectories and holds out 3 of 11 training templates, so GRPO sees questions SFT gets wrong. GRPO runs 60 steps on 445 prompts (6 rollouts $\times$ 4 prompts, temperature 1.0, KL weight 0.02). Arms share initialization, data, seed and hyperparameters; only the reward differs. A pre-registered curriculum pair trains on 36 hard prompts where 89\% of SFT's passes are lucky (Appendix~\ref{app:hyper}).
 
 \paragraph{Evaluation.}
-We draw 8 samples per test item and 4 per Spider question (temperature 0.7) and report Wilson 95\% intervals, paired bootstrap intervals for differences, and an exact McNemar test on the first sample. Each arm has one seed.
+We draw 8 samples per test item and 4 per Spider question (temperature 0.7) and report Wilson 95\% intervals over samples, paired bootstrap intervals for differences that resample questions (samples averaged per question), and an exact McNemar test on the first sample. Each arm has one seed.
 
 % ======================================================================
 \begin{table}[t]
@@ -139,7 +139,7 @@ GRPO on $\tilde R$ raises verified accuracy over SFT from 9.4\% to 12.7\% ($+3.2
 % src: e4_eval.json comparisons; e14/e4_eval.json Cmin_cur_vs_B_cur; figure3_training_rewards.json; A1 replay (progress.md Nov 9); manual_audit_summary.json
 
 \paragraph{On Spider, the CF reward suggests a small transfer gain.}
-The CF-trained policy reaches 29.9\% test-suite accuracy against 27.9\% for the single-DB policy ($+1.9$ [$+0.6$, $+3.3$]), with a lower lucky share (23.6\% vs 26.4\%); the curriculum pair shows the same gap ($+2.1$ [$+0.9$, $+3.4$]). The effects are modest (McNemar $p = 0.14$ and $p = 0.94$; the bootstrap treats samples as independent; the main comparison was not pre-registered), and part of the gap is the single-DB policy falling below SFT ($-1.2$ [$-2.5$, $+0.1$]).
+The CF-trained policy reaches 29.9\% test-suite accuracy against 27.9\% for the single-DB policy ($+1.9$ [$+0.6$, $+3.3$]), with a lower lucky share (23.6\% vs 26.4\%); the curriculum pair shows the same gap ($+2.1$ [$+0.9$, $+3.4$]). The effects are modest (McNemar on one sample per question: $p = 0.14$ and $p = 0.94$; the main comparison was not pre-registered), and part of the gap is the single-DB policy falling below SFT ($-1.2$ [$-2.5$, $+0.1$]).
 % src: e13_spider_ours.json, e14_spider.json
 
 % ======================================================================
