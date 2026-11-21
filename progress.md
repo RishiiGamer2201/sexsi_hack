@@ -64,6 +64,22 @@ Nothing pending. Round 1 is over and we did not reach Stage 2. The organisers of
       - `self_review.md` (top 3 weaknesses: thin training signal, one synthetic schema, bug families we wrote ourselves);
       - `llm_disclosure.md`.
     - Waiting for the user's next instructions; more project work is planned before any symposium presentation.
+  - **Symposium upgrade research done (Nov 21).**
+    - Plan: `amazon/reports/Counterfactual SQL symposium upgrade plan.md`. Notes from 7 parallel researchers are in `amazon/research_notes/Counterfactual SQL symposium upgrade plan/`: related work, real-data copies, training signal, baselines and attacks, Amazon audience, compute, and an internal repo audit.
+    - Facts we didn't have before:
+      - The 2027 call is posters only. Feb 18, 2027 in New Delhi; decisions Dec 31.
+      - ReViSQL already found false-positive SQL rewards (32.8%). Our claim narrows to hidden counterfactual-DB rewards organised by bug family.
+      - arXiv 2607.11022 is a preregistered null very close to ours; cite it.
+      - In main GRPO, only 27 of 240 groups had any reward variance, and 442 of 445 prompts got 2 copies, not 3. Only about 23% of training copies kill a mutant.
+      - Curriculum lucky share rose under single-DB (0.59→0.73) and stayed flat under CF (~0.53). This comes from a scratchpad script; commit it before the paper uses the number.
+      - The HF dataset is stale against ARTICLE.md. The GitHub repo has no licence.
+      - The iteration-0 draft has 7 framing fixes, including a Table 2 tie that is bolded and an abstract that describes the strict reward instead of the mean form.
+    - Live AWS check after the user re-ran `aws login`:
+      - G and VT GPU quota is 0 vCPU (on-demand and spot) in us-east-1, us-west-2 and ap-south-1.
+      - The CLI is logged in as the root user.
+      - Nova models are listed in the Bedrock catalog. Invoke access was not tested.
+      - So the GCP L4 is the only GPU before Nov 30.
+    - Nothing was launched, invoked or requested. Every paid step waits for the user's go.
 
 ### Nov 19
 
