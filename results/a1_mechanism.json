@@ -1,0 +1,328 @@
+{
+ "per_family_audit": {
+  "F1": {
+   "hack_cf_informed": {
+    "rate": 0.049,
+    "ci95": [
+     0.0368,
+     0.065
+    ],
+    "n": 918
+   },
+   "mutant_cf_informed": {
+    "rate": 0.0109,
+    "ci95": [
+     0.005,
+     0.0236
+    ],
+    "n": 551
+   },
+   "hack_cf_blind": {
+    "rate": 0.0414,
+    "ci95": [
+     0.0303,
+     0.0563
+    ],
+    "n": 918
+   },
+   "mutant_cf_blind": {
+    "rate": 0.0853,
+    "ci95": [
+     0.0648,
+     0.1116
+    ],
+    "n": 551
+   },
+   "hack_single_db": {
+    "rate": 0.5893,
+    "ci95": [
+     0.5572,
+     0.6207
+    ],
+    "n": 918
+   },
+   "mutant_single_db": {
+    "rate": 0.2214,
+    "ci95": [
+     0.1887,
+     0.2579
+    ],
+    "n": 551
+   }
+  },
+  "F2": {
+   "hack_cf_informed": {
+    "rate": 0.0,
+    "ci95": [
+     0.0,
+     0.0092
+    ],
+    "n": 416
+   },
+   "mutant_cf_informed": {
+    "rate": 0.0337,
+    "ci95": [
+     0.0164,
+     0.0678
+    ],
+    "n": 208
+   },
+   "hack_cf_blind": {
+    "rate": 0.0,
+    "ci95": [
+     0.0,
+     0.0092
+    ],
+    "n": 416
+   },
+   "mutant_cf_blind": {
+    "rate": 0.2019,
+    "ci95": [
+     0.153,
+     0.2617
+    ],
+    "n": 208
+   },
+   "hack_single_db": {
+    "rate": 0.5,
+    "ci95": [
+     0.4522,
+     0.5478
+    ],
+    "n": 416
+   },
+   "mutant_single_db": {
+    "rate": 0.3029,
+    "ci95": [
+     0.2445,
+     0.3684
+    ],
+    "n": 208
+   }
+  },
+  "F3": {
+   "hack_cf_informed": {
+    "rate": 0.0,
+    "ci95": [
+     0.0,
+     0.0055
+    ],
+    "n": 696
+   },
+   "mutant_cf_informed": {
+    "rate": 0.0052,
+    "ci95": [
+     0.0018,
+     0.0151
+    ],
+    "n": 579
+   },
+   "hack_cf_blind": {
+    "rate": 0.0,
+    "ci95": [
+     0.0,
+     0.0055
+    ],
+    "n": 696
+   },
+   "mutant_cf_blind": {
+    "rate": 0.2332,
+    "ci95": [
+     0.2005,
+     0.2693
+    ],
+    "n": 579
+   },
+   "hack_single_db": {
+    "rate": 0.5,
+    "ci95": [
+     0.463,
+     0.537
+    ],
+    "n": 696
+   },
+   "mutant_single_db": {
+    "rate": 0.3627,
+    "ci95": [
+     0.3246,
+     0.4026
+    ],
+    "n": 579
+   }
+  },
+  "F4": {
+   "hack_cf_informed": {
+    "rate": 0.0161,
+    "ci95": [
+     0.0094,
+     0.0273
+    ],
+    "n": 809
+   },
+   "mutant_cf_informed": {
+    "rate": 0.0231,
+    "ci95": [
+     0.013,
+     0.0409
+    ],
+    "n": 476
+   },
+   "hack_cf_blind": {
+    "rate": 0.0198,
+    "ci95": [
+     0.0122,
+     0.0319
+    ],
+    "n": 809
+   },
+   "mutant_cf_blind": {
+    "rate": 0.1702,
+    "ci95": [
+     0.1391,
+     0.2065
+    ],
+    "n": 476
+   },
+   "hack_single_db": {
+    "rate": 0.5439,
+    "ci95": [
+     0.5094,
+     0.5779
+    ],
+    "n": 809
+   },
+   "mutant_single_db": {
+    "rate": 0.2941,
+    "ci95": [
+     0.255,
+     0.3366
+    ],
+    "n": 476
+   }
+  }
+ },
+ "replay": {
+  "B": {
+   "groups": 240,
+   "rollouts": 1440,
+   "lucky_rollouts": 102,
+   "signal_groups_B": 27,
+   "signal_groups_C_mean": 33,
+   "sign_flips_vs_B_C_mean": 52,
+   "signal_groups_C_strict": 25,
+   "sign_flips_vs_B_C_strict": 76,
+   "signal_groups_C_pen": 31,
+   "sign_flips_vs_B_C_pen": 40
+  },
+  "C": {
+   "groups": 240,
+   "rollouts": 1440,
+   "lucky_rollouts": 104,
+   "signal_groups_B": 26,
+   "signal_groups_C_mean": 28,
+   "sign_flips_vs_B_C_mean": 25,
+   "signal_groups_C_strict": 22,
+   "sign_flips_vs_B_C_strict": 50,
+   "signal_groups_C_pen": 27,
+   "sign_flips_vs_B_C_pen": 19
+  },
+  "B_cur": {
+   "groups": 240,
+   "rollouts": 1440,
+   "lucky_rollouts": 908,
+   "signal_groups_B": 53,
+   "signal_groups_C_mean": 105,
+   "sign_flips_vs_B_C_mean": 374,
+   "signal_groups_C_strict": 82,
+   "sign_flips_vs_B_C_strict": 515,
+   "signal_groups_C_pen": 107,
+   "sign_flips_vs_B_C_pen": 357
+  },
+  "Cmin_cur": {
+   "groups": 240,
+   "rollouts": 1440,
+   "lucky_rollouts": 680,
+   "signal_groups_B": 105,
+   "signal_groups_C_mean": 102,
+   "sign_flips_vs_B_C_mean": 55,
+   "signal_groups_C_strict": 33,
+   "sign_flips_vs_B_C_strict": 477,
+   "signal_groups_C_pen": 107,
+   "sign_flips_vs_B_C_pen": 22
+  }
+ },
+ "monitor": {
+  "B": {
+   "first10": 0.104,
+   "last10": 0.075
+  },
+  "C": {
+   "first10": 0.133,
+   "last10": 0.058
+  },
+  "B_cur": {
+   "first10": 0.588,
+   "last10": 0.729
+  },
+  "Cmin_cur": {
+   "first10": 0.529,
+   "last10": 0.533
+  }
+ },
+ "effective_copies": {
+  "grpo_prompts": 445,
+  "copies_per_prompt": {
+   "2": 442,
+   "3": 3
+  },
+  "copies": 893,
+  "copies_killing_a_mutant": 202,
+  "prompts_with_base_blind_mutant": 178,
+  "by_edit": {
+   "new_customers": {
+    "chosen": 206,
+    "kill": 84
+   },
+   "dup_order": {
+    "chosen": 118,
+    "kill": 29
+   },
+   "drop_customers": {
+    "chosen": 93,
+    "kill": 0
+   },
+   "cancelled_orders": {
+    "chosen": 83,
+    "kill": 31
+   },
+   "refunds": {
+    "chosen": 83,
+    "kill": 26
+   },
+   "split_items": {
+    "chosen": 56,
+    "kill": 13
+   },
+   "adjustments": {
+    "chosen": 56,
+    "kill": 8
+   },
+   "superseded_tier": {
+    "chosen": 52,
+    "kill": 0
+   },
+   "zero_order_customers": {
+    "chosen": 51,
+    "kill": 8
+   },
+   "later_tier": {
+    "chosen": 49,
+    "kill": 0
+   },
+   "split_payments": {
+    "chosen": 46,
+    "kill": 3
+   }
+  }
+ }
+}

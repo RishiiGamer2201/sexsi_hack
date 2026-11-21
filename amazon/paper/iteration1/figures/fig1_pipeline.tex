@@ -1,0 +1,49 @@
+% Figure 1: counterfactual-database reward. Drawn at \linewidth (13.97 cm); no scaling.
+% Example numbers: ARTICLE.md section 1 (test template F2_units_paid); SQL abridged.
+\begin{tikzpicture}
+  % --- agent
+  \node[box=fillQ, text width=15mm] (q) at (0,0) {Question $x$\\ + schema};
+  \node[box, text width=17mm, right=4mm of q] (pi) {Policy $\pi_\theta$\\ (SQL agent)};
+  \node[box=fillQ, text width=13mm, right=4mm of pi] (y) {Final\\ query $y$};
+  \draw[arr] (q) -- (pi);
+  \draw[arr] (pi) -- (y);
+
+  % --- databases: D0 visible, copies hidden
+  \node[box=fillD, text width=31mm, anchor=west] (d0) at ($(y.east)+(7mm,10mm)$) {$D_0$: original DB};
+  \node[box=fillD, text width=31mm, anchor=north west] (d1) at ($(d0.south west)+(0,-5.5mm)$) {$D_1$: answer-changing};
+  \node[box=fillD, text width=31mm, below=1.2mm of d1] (d2) {$D_2$: answer-preserving};
+  \node[font=\footnotesize, below=-0.5mm of d2] (dk) {$\vdots$\;\;$D_K$};
+  \node[group, fit=(d1)(d2)(dk)] (hid) {};
+  \node[font=\scriptsize, text=neutral, anchor=north] at (hid.south) {hidden copies, one rule edit per bug family};
+
+  % agent explores D0 only; the final query runs everywhere
+  \draw[arr, {Stealth[length=4pt]}-{Stealth[length=4pt]}, dashed] (pi.north) |- node[pos=0.72, above, font=\scriptsize] {\texttt{run\_sql} (explore)} (d0.west);
+  \coordinate (fork) at ($(y.east)+(3mm,0)$);
+  \draw[line width=0.7pt, draw=ink] (y.east) -- (fork);
+  \draw[arr] (fork) |- ($(d0.west)+(0,-1.2mm)$);
+  \draw[arr] (fork) |- (hid.west);
+
+  % --- rewards
+  \coordinate (m) at ($(d0.east)+(3mm,0)$);
+  \node[box=white, draw=proxy, line width=0.9pt, text width=28mm, anchor=west] (rp) at ($(d0.east)+(8mm,0)$)
+    {single-DB $\tilde R = C_0$};
+  \node[box=white, accent, text width=28mm, anchor=west] (rc) at (rp.west |- hid.east)
+    {counterfactual\\ $R = \prod_{k=0}^{K} C_k$};
+  \draw[line width=0.7pt, draw=ink] (d0.east) -- (m);
+  \draw[arr] (m) -- node[above, font=\scriptsize] {$C_0$} (rp.west);
+  \draw[arr, draw=ours] (m) |- ($(rc.west)+(0,1.5mm)$);
+  \draw[arr, draw=ours] (hid.east |- {$(rc.west)+(0,-1.5mm)$}) -- node[below=0.5mm, font=\scriptsize, fill=white, inner sep=1pt] {$C_{1..K}$} ($(rc.west)+(0,-1.5mm)$);
+
+  % step badges
+  \node[badge] at (pi.north west) {1};
+  \node[badge] at (hid.north west) {2};
+  \node[badge] at (rc.north east) {3};
+
+  % --- example strip
+  \node[box=white, text width=\dimexpr\linewidth-9pt\relax, align=left, anchor=north west, inner sep=3.5pt]
+    (ex) at ($(q.west |- hid.south)+(0,-5mm)$) {%
+    \textbf{Ex.}~$y$:~{\scriptsize\ttfamily WHERE substr(o.order\_date,1,4)='2025'}\hfill
+    \colorbox{ok}{$D_0$: $y{=}y^\star{=}12$ \cmark}\,
+    \colorbox{hack}{$D_k$: $y{=}12$, $y^\star{=}10$ \xmark}\,
+    $\Rightarrow \tilde R {=} 1$, $R {=} 0$};
+\end{tikzpicture}

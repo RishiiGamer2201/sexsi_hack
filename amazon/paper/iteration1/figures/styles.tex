@@ -1,0 +1,18 @@
+% Shared TikZ styles and palette (NEURIPS_PAPER_RULES.md 11.8, 13.13).
+% \input by main.tex and by figures/fig1_standalone.tex (poster export).
+\usetikzlibrary{positioning,arrows.meta,fit,calc,backgrounds}
+\definecolor{ink}{HTML}{333333}   \definecolor{ours}{HTML}{5484B4}
+\definecolor{proxy}{HTML}{B4543C} \definecolor{neutral}{HTML}{8C8C8C}
+\definecolor{fillM}{HTML}{E4E4FC} \definecolor{fillD}{HTML}{CCE4E4} \definecolor{fillQ}{HTML}{FCFCCC}
+\definecolor{hack}{HTML}{F4B6B6}  \definecolor{ok}{HTML}{B7E1B5}
+\tikzset{
+  box/.style={draw=ink, line width=0.6pt, rounded corners=2pt, fill=#1,
+              align=center, font=\footnotesize, inner sep=3pt, minimum height=6mm},
+  box/.default=fillM,
+  arr/.style={-{Stealth[length=4pt]}, line width=0.7pt, draw=ink},
+  accent/.style={draw=ours, line width=0.9pt},
+  group/.style={draw=ink, dashed, line width=0.4pt, rounded corners=3pt, inner sep=4pt},
+  badge/.style={circle, fill=ink, text=white, font=\scriptsize\bfseries, inner sep=1pt},
+}
+\newcommand{\cmark}{\ding{51}}
+\newcommand{\xmark}{\ding{55}}

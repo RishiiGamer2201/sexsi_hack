@@ -1,0 +1,478 @@
+{
+ "compute_matched_single_db": {
+  "note": "150 customers = 50-customer original + 2 copies; E1 rows for 50/500/5,000 are in e1_blind_rate.json",
+  "row": {
+   "customers": 150,
+   "blind": 93,
+   "n": 1199,
+   "rate_ci95": [
+    0.0776,
+    0.0637,
+    0.0941
+   ]
+  }
+ },
+ "heldout_f4": {
+  "pool_edits": [
+   "cancelled_orders",
+   "drop_customers",
+   "dup_order",
+   "new_customers",
+   "refunds",
+   "split_items",
+   "split_payments",
+   "zero_order_customers"
+  ],
+  "build": {
+   "items": 356,
+   "drops": {
+    "degenerate": 26,
+    "no_preserving_or_changing_cf": 18
+   }
+  },
+  "pay": {
+   "ALL/correct": {
+    "cf_strict@dbs": {
+     "rate": 0.0,
+     "ci95": [
+      0.0,
+      0.0054
+     ],
+     "n": 712
+    },
+    "cf_strict@dbs_random": {
+     "rate": 0.0,
+     "ci95": [
+      0.0,
+      0.0054
+     ],
+     "n": 712
+    },
+    "single_db": {
+     "rate": 0.0,
+     "ci95": [
+      0.0,
+      0.0054
+     ],
+     "n": 712
+    }
+   },
+   "ALL/hack": {
+    "cf_strict@dbs": {
+     "rate": 0.0295,
+     "ci95": [
+      0.0198,
+      0.0439
+     ],
+     "n": 779
+    },
+    "cf_strict@dbs_random": {
+     "rate": 0.0372,
+     "ci95": [
+      0.026,
+      0.053
+     ],
+     "n": 779
+    },
+    "single_db": {
+     "rate": 0.543,
+     "ci95": [
+      0.5079,
+      0.5777
+     ],
+     "n": 779
+    }
+   },
+   "ALL/mutant": {
+    "cf_strict@dbs": {
+     "rate": 0.1547,
+     "ci95": [
+      0.1245,
+      0.1906
+     ],
+     "n": 459
+    },
+    "cf_strict@dbs_random": {
+     "rate": 0.2353,
+     "ci95": [
+      0.1988,
+      0.2762
+     ],
+     "n": 459
+    },
+    "single_db": {
+     "rate": 0.2854,
+     "ci95": [
+      0.246,
+      0.3284
+     ],
+     "n": 459
+    }
+   },
+   "F4/correct": {
+    "cf_strict@dbs": {
+     "rate": 0.0,
+     "ci95": [
+      0.0,
+      0.0054
+     ],
+     "n": 712
+    },
+    "cf_strict@dbs_random": {
+     "rate": 0.0,
+     "ci95": [
+      0.0,
+      0.0054
+     ],
+     "n": 712
+    },
+    "single_db": {
+     "rate": 0.0,
+     "ci95": [
+      0.0,
+      0.0054
+     ],
+     "n": 712
+    }
+   },
+   "F4/hack": {
+    "cf_strict@dbs": {
+     "rate": 0.0295,
+     "ci95": [
+      0.0198,
+      0.0439
+     ],
+     "n": 779
+    },
+    "cf_strict@dbs_random": {
+     "rate": 0.0372,
+     "ci95": [
+      0.026,
+      0.053
+     ],
+     "n": 779
+    },
+    "single_db": {
+     "rate": 0.543,
+     "ci95": [
+      0.5079,
+      0.5777
+     ],
+     "n": 779
+    }
+   },
+   "F4/mutant": {
+    "cf_strict@dbs": {
+     "rate": 0.1547,
+     "ci95": [
+      0.1245,
+      0.1906
+     ],
+     "n": 459
+    },
+    "cf_strict@dbs_random": {
+     "rate": 0.2353,
+     "ci95": [
+      0.1988,
+      0.2762
+     ],
+     "n": 459
+    },
+    "single_db": {
+     "rate": 0.2854,
+     "ci95": [
+      0.246,
+      0.3284
+     ],
+     "n": 459
+    }
+   }
+  }
+ },
+ "family_blind_testops": {
+  "copies": [
+   "clone",
+   "flip_status",
+   "relabel_tier",
+   "resample"
+  ],
+  "build": {
+   "items": 1378,
+   "drops": {
+    "degenerate": 92
+   }
+  },
+  "pay": {
+   "ALL/correct": {
+    "cf_strict@dbs": {
+     "rate": 0.0,
+     "ci95": [
+      0.0,
+      0.0013
+     ],
+     "n": 3017
+    },
+    "single_db": {
+     "rate": 0.0,
+     "ci95": [
+      0.0,
+      0.0013
+     ],
+     "n": 3017
+    }
+   },
+   "ALL/hack": {
+    "cf_strict@dbs": {
+     "rate": 0.0229,
+     "ci95": [
+      0.0181,
+      0.0289
+     ],
+     "n": 3011
+    },
+    "single_db": {
+     "rate": 0.5423,
+     "ci95": [
+      0.5245,
+      0.5601
+     ],
+     "n": 3011
+    }
+   },
+   "ALL/mutant": {
+    "cf_strict@dbs": {
+     "rate": 0.1723,
+     "ci95": [
+      0.1562,
+      0.1898
+     ],
+     "n": 1944
+    },
+    "single_db": {
+     "rate": 0.2953,
+     "ci95": [
+      0.2754,
+      0.3159
+     ],
+     "n": 1944
+    }
+   },
+   "F1/correct": {
+    "cf_strict@dbs": {
+     "rate": 0.0,
+     "ci95": [
+      0.0,
+      0.0033
+     ],
+     "n": 1175
+    },
+    "single_db": {
+     "rate": 0.0,
+     "ci95": [
+      0.0,
+      0.0033
+     ],
+     "n": 1175
+    }
+   },
+   "F1/hack": {
+    "cf_strict@dbs": {
+     "rate": 0.0429,
+     "ci95": [
+      0.0324,
+      0.0566
+     ],
+     "n": 1095
+    },
+    "single_db": {
+     "rate": 0.5826,
+     "ci95": [
+      0.5532,
+      0.6115
+     ],
+     "n": 1095
+    }
+   },
+   "F1/mutant": {
+    "cf_strict@dbs": {
+     "rate": 0.1097,
+     "ci95": [
+      0.0885,
+      0.1351
+     ],
+     "n": 693
+    },
+    "single_db": {
+     "rate": 0.1934,
+     "ci95": [
+      0.1657,
+      0.2244
+     ],
+     "n": 693
+    }
+   },
+   "F2/correct": {
+    "cf_strict@dbs": {
+     "rate": 0.0,
+     "ci95": [
+      0.0,
+      0.0086
+     ],
+     "n": 444
+    },
+    "single_db": {
+     "rate": 0.0,
+     "ci95": [
+      0.0,
+      0.0086
+     ],
+     "n": 444
+    }
+   },
+   "F2/hack": {
+    "cf_strict@dbs": {
+     "rate": 0.0068,
+     "ci95": [
+      0.0023,
+      0.0197
+     ],
+     "n": 444
+    },
+    "single_db": {
+     "rate": 0.5,
+     "ci95": [
+      0.4537,
+      0.5463
+     ],
+     "n": 444
+    }
+   },
+   "F2/mutant": {
+    "cf_strict@dbs": {
+     "rate": 0.2703,
+     "ci95": [
+      0.2161,
+      0.3322
+     ],
+     "n": 222
+    },
+    "single_db": {
+     "rate": 0.3874,
+     "ci95": [
+      0.3257,
+      0.4529
+     ],
+     "n": 222
+    }
+   },
+   "F3/correct": {
+    "cf_strict@dbs": {
+     "rate": 0.0,
+     "ci95": [
+      0.0,
+      0.0055
+     ],
+     "n": 696
+    },
+    "single_db": {
+     "rate": 0.0,
+     "ci95": [
+      0.0,
+      0.0055
+     ],
+     "n": 696
+    }
+   },
+   "F3/hack": {
+    "cf_strict@dbs": {
+     "rate": 0.0029,
+     "ci95": [
+      0.0008,
+      0.0104
+     ],
+     "n": 696
+    },
+    "single_db": {
+     "rate": 0.5,
+     "ci95": [
+      0.463,
+      0.537
+     ],
+     "n": 696
+    }
+   },
+   "F3/mutant": {
+    "cf_strict@dbs": {
+     "rate": 0.2073,
+     "ci95": [
+      0.1762,
+      0.2421
+     ],
+     "n": 579
+    },
+    "single_db": {
+     "rate": 0.3713,
+     "ci95": [
+      0.3329,
+      0.4114
+     ],
+     "n": 579
+    }
+   },
+   "F4/correct": {
+    "cf_strict@dbs": {
+     "rate": 0.0,
+     "ci95": [
+      0.0,
+      0.0054
+     ],
+     "n": 702
+    },
+    "single_db": {
+     "rate": 0.0,
+     "ci95": [
+      0.0,
+      0.0054
+     ],
+     "n": 702
+    }
+   },
+   "F4/hack": {
+    "cf_strict@dbs": {
+     "rate": 0.0219,
+     "ci95": [
+      0.0137,
+      0.0348
+     ],
+     "n": 776
+    },
+    "single_db": {
+     "rate": 0.5477,
+     "ci95": [
+      0.5125,
+      0.5824
+     ],
+     "n": 776
+    }
+   },
+   "F4/mutant": {
+    "cf_strict@dbs": {
+     "rate": 0.1756,
+     "ci95": [
+      0.1432,
+      0.2134
+     ],
+     "n": 450
+    },
+    "single_db": {
+     "rate": 0.3089,
+     "ci95": [
+      0.268,
+      0.353
+     ],
+     "n": 450
+    }
+   }
+  }
+ }
+}

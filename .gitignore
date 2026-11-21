@@ -10,6 +10,7 @@ __pycache__/
 
 # generated data (rebuild with the commands in README.md) and third-party repos
 data/
+data_leaky/
 vendor/
 runs/
 results/_selfcheck_*

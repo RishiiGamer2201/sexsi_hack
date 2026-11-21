@@ -97,6 +97,20 @@ Nothing pending. Round 1 is over and we did not reach Stage 2. The organisers of
     - `scripts/push_dataset.py` now adds the E14 curriculum reward logs and `results/e14/`.
     - The card lists the curriculum, Spider, E13, leak-check and int4 files, and marks the Spider trajectories CC BY-SA 4.0.
     - `sqlcf-lexsi/counterfactual-sql-data` is public: 81 files, lastModified 2026-11-21T16:18Z. ARTICLE.md L503 is true again.
+  - **User go on Horizon A (Nov 21):** laptop first, VM spend within the ~$16 GCP credit; root AWS login and the Bedrock credit OK; Apache-2.0; follow the plan.
+  - **Licence:** `LICENSE` (Apache-2.0) added; README gets a Licence section (code Apache-2.0; HF data, rollouts and adapters CC-BY-NC-4.0; Spider trajectories CC BY-SA 4.0).
+  - **Bedrock blocked:** Nova micro/lite/2-lite invoke returns "ValidationException: Operation not allowed" in us-east-1 and ap-south-1; `get-foundation-model-availability` says NOT_AUTHORIZED. Account-side; the user has to enable model access. The Nova judge baseline (A5) waits.
+  - **A1 mechanism (CPU), `scripts/a1_mechanism.py` -> `results/a1_mechanism.json`, `results/figure_monitor_gap.png`:**
+    - Replay of logged reward checks (TRL RepeatSampler: 6 consecutive log lines = 1 GRPO group). Main CF run: 26 of 240 groups had signal under single-DB, 28 under R_mean, 22 under strict. Single-DB curriculum run: 53 vs 105 (R_mean).
+    - Monitor (share of rollouts that pass D0 but fail a copy, first 10 -> last 10 steps): B 10.4->7.5%, C 13.3->5.8%, B_cur 58.8->72.9%, Cmin_cur 52.9->53.3%.
+    - Effective copies: 442 of 445 prompts got 2 copies (3 got 3); 202 of 893 copies kill a mutant that passes D0.
+  - **A4 baselines (CPU), `scripts/a4_baselines.py` -> `results/a4_baselines.json`:**
+    - Compute-matched single DB (150 customers = original + 2 copies): 7.8% [6.4, 9.4] of mutants pass, below blind CF (16.8%), but it pays every literal / hard-coded-ID hack. Framing: size catches accidental bugs; only hidden data stops exploitation.
+    - Family-blind copies (the TEST_OPS generator only, 1,378 audit items): mutants 29.5 -> 17.2%, hacks 54.2 -> 2.3%, 0 of 3,017 correct rejected.
+    - Held-out F4 (F4-targeted edits removed from the pool, 356 items): F4 mutants 28.5 -> 23.5% (blind), hacks 54.3 -> 3.7%.
+  - **Paper iteration 1 (`amazon/paper/iteration1/`, copy of iteration0):** abstract now names the strict vs mean forms; "two (rarely three) copies"; "no training question covers F4"; Table 2 no longer bolds printed ties; new A4 paragraph, effective-copies sentence, monitor result (+ appendix figure); HF links; public-rewards paragraph merged and SkyRL detail moved to the appendix. Still exactly 4 pages; `check_numbers.py` 53/53 (12 new A1/A4 checks). Seed-dependent fixes (CI on -3.7, seed count, clustered bootstrap, MDE) wait for seed 2.
+  - **Seed 2 (A2/A3) launched:** `scripts/laptop_seed2.sh` (laptop, unattended) retries the sqlcf-l4 start through stockouts until Nov 23 12:00 IST, copies the stranded B_s1/C_s1 adapters, runs `scripts/vm_seed2.sh` (GRPO-B then GRPO-C, --seed 2), and evaluates s1 and s2 locally. As of 17:00 IST: still in stockout retries.
+  - **LeakySQL pilot (A8):** stale `saved_reports` answer cache in every DB (`scripts/leaky_build.py`, data in gitignored `data_leaky/`; demo 481/481 cache reads pass D0 and fail a copy); table shown to the agent only with `SQLCF_LEAKY=1` (`sqlcf/agent.py`, default prompt unchanged). Plain SFT never reads it (probe: 0 of 360), so `scripts/leaky_sft.py` seeds 35 of 353 SFT trajectories with a cache read. Hack-seeded SFT running locally (`scripts/local_leaky_sft.sh`); if its probe is sane, `scripts/laptop_leaky.sh` chains GRPO B vs C-strict on the VM after seed 2 (`scripts/vm_leaky.sh`).
 
 ### Nov 19
 

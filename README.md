@@ -109,3 +109,7 @@ Every number in the article comes from stored runs in `results/`; `python verify
 | §7 voting (B9), DPO (B10), partial credit (B11), period-edge copies (B12) | `scripts/a4_selfconsistency.py`, `scripts/dpo.py`, `scripts/partial_credit.py`, `scripts/period_copies.py` | |
 | §8 curriculum | `scripts/laptop_e14.sh`, `scripts/spider_eval.py` | `results/e14/`, `results/e14_spider.json` |
 | Adapter merge before eval | `train.py merge` (fp32 merge, saved as fp16) | |
+
+## Licence
+
+Code: [Apache-2.0](LICENSE). Data and rollouts on HF: CC-BY-NC-4.0 (they contain Tiny Aya and Command A outputs); the Spider trajectories are CC BY-SA 4.0. Adapters: CC-BY-NC-4.0, from the base model.
