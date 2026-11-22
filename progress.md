@@ -42,6 +42,8 @@ Nothing pending. Round 1 is over and we did not reach Stage 2. The organisers of
   - seed 0 reproduces the paper: B-SFT +3.2 [+1.8, +4.8], McNemar p = 0.006; C-SFT -0.5 [-1.5, +0.6].
   - seed 1: B-SFT **-1.9 [-3.0, -0.8]**; C-SFT -0.6 [-1.7, +0.5]. So "GRPO-B beats SFT" does not replicate either; C sits at SFT level in both seeds.
   - Minimum detectable effect (80% power, from the bootstrap SE) is about 2 points per seed, 1.5 pooled. But the between-seed SD of C-B is 3.5 points (seed 0 -3.7, seed 1 +1.2): question-resampling CIs ignore training variance, so a one-seed CI that excludes 0 is not evidence. That is the methods lesson for the paper.
+  - Seed-1 training log (`scripts/figure3.py B_s1 C_s1`, outputs restored): 84% of rollouts pass the single DB and 8% of passes are lucky (seed 0: 86%, 8%), so the weak-signal explanation holds for seed 1.
+  - Paper edit plan for after seed 2: `amazon/paper/iteration1/notes/seed_rewrite.md`.
 - **README Paper section added (Nov 22, A10 part 1).** Symposium ABSTRACT deferred to the freeze (Nov 27): the abstract numbers change once seed 2 and LeakySQL are in. The GitHub repo is public; fine, since the symposium is non-anonymous and non-archival.
 
 ### Nov 21
