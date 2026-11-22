@@ -21,5 +21,5 @@ Nov 22: every arXiv-backed entry in `refs.bib` was checked against the arXiv API
 ## Still open (low priority)
 
 - `skyrl2025`: SkyRL-SQL was released as a blog post plus code, not a paper. The closest paper is SkyRL-Agent (arXiv 2511.16108), which is a different system, so the entry keeps citing the GitHub commit we used (d870046).
-- `chandra2014`: volume and pages of the VLDB Journal version not added (not on arXiv); add if an author has the DOI.
+- `chandra2014`: done Nov 22. VLDB Journal 24(6):731–755, DOI 10.1007/s00778-015-0395-0, all 6 authors (IAS repository record).
 - `li2023bird` is in `refs.bib` but not cited. plainnat prints only cited entries, so it is harmless.
