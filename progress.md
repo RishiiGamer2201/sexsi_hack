@@ -32,6 +32,11 @@ Nothing pending. Round 1 is over and we did not reach Stage 2. The organisers of
 
 - **VM moved to a new zone (user OK, Nov 22 ~12:00 IST).** asia-south1-a had no L4 for 360 tries (Nov 21 20:27 to Nov 22 12:00 IST). `scripts/vm_migrate.sh` snapshotted the sqlcf-l4 disk (`sqlcf-l4-move`, 78.6 GB) and created **`sqlcf-l4b` in asia-south1-b** from it at 12:58 IST (first try; same region, so no snapshot egress). Instance names are unique project-wide here, hence the new name. The script switched laptop_seed2.sh, laptop_leaky.sh and the vm_*.sh helpers to sqlcf-l4b / asia-south1-b, and relaunched both drivers (deadlines moved to Nov 24 12:00 IST). **Teammates: use `--zone asia-south1-b` and the name `sqlcf-l4b`.** The old sqlcf-l4 (asia-south1-a, stopped) and the snapshot stay until seed 1 is copied off the new VM. A laptop reboot at ~12:45 IST killed the first migration run after the snapshot; the rerun reused the snapshot.
 - **Citations checked (Nov 22)** against the arXiv API: 7 entries fixed in `amazon/paper/iteration1/refs.bib` (SynSQL title was wrong; HardTests is now HardTestGen, ICLR 2026; ESM+ now cites arXiv 2407.07313; full author names for the rest). Details: `amazon/paper/iteration1/notes/citations_to_verify.md`. Paper rebuilt: still 4 pages, 53/53 numbers, 0 undefined refs.
+- **Seed 1 evaluated (Nov 22, 13:40 IST; test set, `scripts/seeds_eval.py` -> `results/seeds_eval.json`).** Verified accuracy, C - B with the question-clustered paired bootstrap:
+  - seed 0 (paper): B 12.7%, C 9.0%, C-B -3.7 [-5.3, -2.3], McNemar p < 0.001;
+  - seed 1: B 7.6%, C 8.8%, C-B +1.2 [-0.0, +2.6], McNemar p = 0.52;
+  - pooled over both seeds: B 10.1%, C 8.9%, C-B -1.2 [-2.3, -0.2].
+  - Same init (runs/sft/adapter, md5-checked), same code and defaults (the only train.py change since Nov 9, 984d9f3, keeps max-completion 2048); only `--seed` differs. So the paper's -3.7 is mostly B's seed-0 luck: C is stable across seeds (9.0, 8.8), B moves 5.1 points. Seed 2 decides the paper wording; do not edit the paper's numbers before it lands. Spider for seed 1 still running.
 - **README Paper section added (Nov 22, A10 part 1).** Symposium ABSTRACT deferred to the freeze (Nov 27): the abstract numbers change once seed 2 and LeakySQL are in. The GitHub repo is public; fine, since the symposium is non-anonymous and non-archival.
 
 ### Nov 21
