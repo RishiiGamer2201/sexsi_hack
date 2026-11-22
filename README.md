@@ -2,6 +2,10 @@
 
 Lexsi hackathon, Track 3 (PS #6 + #9), team Teen_khapeetars. Full write-up, laid out as a paper: [ARTICLE.md](ARTICLE.md) ([project page](https://huggingface.co/spaces/sqlcf-lexsi/counterfactual-sql-article)). Submission pack: [SUBMISSION.md](SUBMISSION.md). Plan: [plan.md](plan.md). Log: [progress.md](progress.md). Background: [research.md](research.md).
 
+## Paper (Amazon Trusted AI Symposium 2027, in progress)
+
+4-page NeurIPS-style paper building on this project: [amazon/paper/iteration1/main.pdf](amazon/paper/iteration1/main.pdf) (draft, authors TBD). Rebuild with `cd amazon/paper/iteration1 && bash build.sh`: it regenerates the tables from `results/`, compiles, and checks every number in the text against the stored results (`scripts/check_numbers.py`). New since the hackathon: mechanism analysis (`scripts/a1_mechanism.py`, `results/a1_mechanism.json`), baselines (family-blind copies, a held-out bug family, a compute-matched larger database; `scripts/a4_baselines.py`, `results/a4_baselines.json`), a second training seed and the LeakySQL model organism (stale cache table; `scripts/laptop_seed2.sh`, `scripts/laptop_leaky.sh`), both running. Plan: [amazon/reports/](amazon/reports/).
+
 ## Judge's 60-second view
 
 A text-to-SQL agent is usually rewarded for matching the gold answer on **one** database, and a wrong query can match by luck. We also check it on code-generated **counterfactual copies** of the database that the agent never sees.

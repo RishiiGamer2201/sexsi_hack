@@ -32,6 +32,7 @@ Nothing pending. Round 1 is over and we did not reach Stage 2. The organisers of
 
 - **VM moved to a new zone (user OK, Nov 22 ~12:00 IST).** asia-south1-a had no L4 for 360 tries (Nov 21 20:27 to Nov 22 12:00 IST). `scripts/vm_migrate.sh` snapshotted the sqlcf-l4 disk (`sqlcf-l4-move`, 78.6 GB) and created **`sqlcf-l4b` in asia-south1-b** from it at 12:58 IST (first try; same region, so no snapshot egress). Instance names are unique project-wide here, hence the new name. The script switched laptop_seed2.sh, laptop_leaky.sh and the vm_*.sh helpers to sqlcf-l4b / asia-south1-b, and relaunched both drivers (deadlines moved to Nov 24 12:00 IST). **Teammates: use `--zone asia-south1-b` and the name `sqlcf-l4b`.** The old sqlcf-l4 (asia-south1-a, stopped) and the snapshot stay until seed 1 is copied off the new VM. A laptop reboot at ~12:45 IST killed the first migration run after the snapshot; the rerun reused the snapshot.
 - **Citations checked (Nov 22)** against the arXiv API: 7 entries fixed in `amazon/paper/iteration1/refs.bib` (SynSQL title was wrong; HardTests is now HardTestGen, ICLR 2026; ESM+ now cites arXiv 2407.07313; full author names for the rest). Details: `amazon/paper/iteration1/notes/citations_to_verify.md`. Paper rebuilt: still 4 pages, 53/53 numbers, 0 undefined refs.
+- **README Paper section added (Nov 22, A10 part 1).** Symposium ABSTRACT deferred to the freeze (Nov 27): the abstract numbers change once seed 2 and LeakySQL are in. The GitHub repo is public; fine, since the symposium is non-anonymous and non-archival.
 
 ### Nov 21
 
