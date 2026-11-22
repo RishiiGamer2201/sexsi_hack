@@ -1,0 +1,16 @@
+{
+ "B_s1": {
+  "steps": 60,
+  "single_pass": 0.8430555555555556,
+  "lucky_share_of_passes": 0.08319604612850082,
+  "lucky_share_first_half": 0.06745362563237774,
+  "lucky_share_second_half": 0.09822866344605476
+ },
+ "C_s1": {
+  "steps": 60,
+  "single_pass": 0.8430555555555556,
+  "lucky_share_of_passes": 0.08072487644151564,
+  "lucky_share_first_half": 0.05564924114671164,
+  "lucky_share_second_half": 0.10466988727858294
+ }
+}

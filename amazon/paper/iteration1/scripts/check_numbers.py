@@ -62,28 +62,46 @@ add("E1 blind rate S", f"{p(e1r['S'])}\\% of realistic buggy queries")
 add("E1 blind rate M", f"against {p(e1r['M'])}\\% at 500")
 add("E1 blind rate L (appendix)", f"{100 * e1r['L']:.2f}\\% at 5,000")
 
-# test-set accuracy
-for m in ("sft_ho", "B", "C"):
-    add(f"verified {m}", p(e4[m]["verified"][0]) + "\\%")
-c = e4["comparisons"]
-v = diff3(c["B_vs_sft_ho"]["verified_diff_bootstrap95"]); add("B-SFT", f"${v[0]}$ [${v[1]}$, ${v[2]}$]")
-add("B-SFT McNemar", f"$p = {c['B_vs_sft_ho']['mcnemar_p_sample0']:.3f}$")
-v = diff3(c["C_vs_B"]["verified_diff_bootstrap95"]); add("C-B", f"${v[0]}$ [${v[1]}$, ${v[2]}$]".replace("$-", "$-"))
+# test-set accuracy: three training seeds (results/seeds_eval.json); seed 0 is e4_eval.json
+se = J("seeds_eval.json")
+seeds = [se["seeds"][k] for k in sorted(se["seeds"])]
+assert len(seeds) == 3 and abs(seeds[0]["C_minus_B"]["diff_bootstrap95"][0] - e4["comparisons"]["C_vs_B"]["verified_diff_bootstrap95"][0]) < 1e-9
+add("verified sft_ho", p(e4["sft_ho"]["verified"][0]) + "\\%")
+add("verified B seed 0 (appendix)", "verifies " + p(e4["B"]["verified"][0]) + "\\%")
+add("pooled verified C vs B", f"verifies {p(se['pooled']['C_verified'])}\\% of test samples against {p(se['pooled']['B_verified'])}\\%")
+add("abstract pooled", f"({p(se['pooled']['C_verified'])}\\% vs {p(se['pooled']['B_verified'])}\\%)")
+v = diff3(se["pooled"]["C_minus_B"]["diff_bootstrap95"]); add("pooled C-B", f"(${v[0]}$ [${v[1]}$, ${v[2]}$])")
+per = lambda k: ", ".join(f"${100 * s[k]['diff_bootstrap95'][0]:+.1f}$" for s in seeds[:2]) + f" and ${100 * seeds[2][k]['diff_bootstrap95'][0]:+.1f}$"
+add("C-SFT per seed", "(" + ", ".join(f"${100 * s['C_minus_SFT']['diff_bootstrap95'][0]:+.1f}$" for s in seeds) + " points)")
+add("B-SFT per seed", "(" + ", ".join(f"${100 * s['B_minus_SFT']['diff_bootstrap95'][0]:+.1f}$" for s in seeds) + " points over SFT)")
+add("C-B per seed", "C$-$B is " + per("C_minus_B") + " by seed")
+sl = se["seed_level"]
+add("seed-level C-B", f"${100 * sl['C_minus_B']['mean']:+.1f}$ [${100 * sl['C_minus_B']['t95'][0]:+.1f}$, ${100 * sl['C_minus_B']['t95'][1]:+.1f}$]")
+add("between-seed SD", f"standard deviation of {100 * sl['C_minus_B']['sd']:.1f} points")
+mdes = [100 * s["C_minus_B"]["mde_80power"] for s in seeds]
+add("MDE", f"{min(mdes):.1f}--{max(mdes):.1f} points and the three-seed pool {100 * se['pooled']['C_minus_B']['mde_80power']:.1f} points")
 v = diff3(e14["comparisons"]["Cmin_cur_vs_B_cur"]["verified_diff_bootstrap95"]); add("Cmin-Bcur", f"${v[0]}$ [${v[1]}$, ${v[2]}$]")
-add("single pass share", f"{100 * f3['B']['single_pass']:.0f}\\% of rollouts passed")
-add("lucky share of passes", f"only {100 * f3['B']['lucky_share_of_passes']:.0f}\\% of passes")
+f3s = [f3, J("figure3_training_rewards_s1.json"), J("figure3_training_rewards_s2.json")]
+runs = [r for f in f3s for r in f.values() if isinstance(r, dict) and "single_pass" in r]
+assert len(runs) == 6
+sp_, ls_, dis = [r["single_pass"] for r in runs], [r["lucky_share_of_passes"] for r in runs], [r["single_pass"] * r["lucky_share_of_passes"] for r in runs]
+add("single pass range", f"{100 * min(sp_):.0f}--{100 * max(sp_):.0f}\\% of rollouts passed")
+add("lucky share range", f"only {100 * min(ls_):.0f}--{100 * max(ls_):.0f}\\% of passes")
+add("disagreement range", f"disagreed on about {100 * min(dis):.0f}--{100 * max(dis):.0f}\\% of rollouts")
 add("lucky first half", f"from {p(f3['B']['lucky_share_first_half'])}\\% to {p(f3['B']['lucky_share_second_half'])}\\%")
 
 # Spider
 sp = s13["models"]
-add("TS C", p(sp["C"]["TS"][0]) + "\\% test-suite")
-add("TS B", p(sp["B"]["TS"][0]) + "\\% for the single-DB")
-v = diff3(s13["comparisons"]["C_vs_B"]["TS_diff_bootstrap95"]); add("Spider C-B", f"${v[0]}$ [${v[1]}$, ${v[2]}$]")
+sc = s13["comparisons"]
+add("Spider pooled TS", f"reach {p(sp['C_pool']['TS'])}\\% test-suite accuracy against {p(sp['B_pool']['TS'])}\\%")
+v = diff3(sc["C_pool_vs_B_pool"]["TS_diff_bootstrap95"]); add("Spider pooled C-B", f"(${v[0]}$ [${v[1]}$, ${v[2]}$])")
+add("abstract Spider", f"gained {100 * sc['C_pool_vs_B_pool']['TS_diff_bootstrap95'][0]:.1f} points")
+g = [100 * sc[k]["TS_diff_bootstrap95"][0] for k in ("C_vs_B", "C_s1_vs_B_s1", "C_s2_vs_B_s2")]
+add("Spider per seed", f"${g[0]:+.1f}$, ${g[1]:+.1f}$ and ${g[2]:+.1f}$")
+ss = sl["spider_TS_C_minus_B"]
+add("Spider seed-level", f"seed-level ${100 * ss['mean']:+.1f}$ [${100 * ss['t95'][0]:+.1f}$, ${100 * ss['t95'][1]:+.1f}$]")
 v = diff3(s14["comparisons"]["Cmin_cur_vs_B_cur"]["TS_diff_bootstrap95"]); add("Spider curriculum", f"${v[0]}$ [${v[1]}$, ${v[2]}$]")
-add("McNemar main", f"$p = {s13['comparisons']['C_vs_B']['TS_mcnemar_p_sample0']:.2f}$")
-add("McNemar curriculum", f"$p = {s14['comparisons']['Cmin_cur_vs_B_cur']['TS_mcnemar_p_sample0']:.2f}$")
-add("lucky share C vs B", f"{p(sp['C']['lucky_share_of_EX'][0])}\\% vs {p(sp['B']['lucky_share_of_EX'][0])}\\%")
-v = diff3(s13["comparisons"]["B_vs_sft_ho"]["TS_diff_bootstrap95"]); add("Spider B-SFT", f"${v[0]}$ [${v[1]}$, ${v[2]}$]")
+add("Spider B vs SFT", f"SFT's {p(sp['sft_ho']['TS'][0])}\\% ({p(sp['B']['TS'][0])}\\%, {p(sp['B_s1']['TS'][0])}\\%, {p(sp['B_s2']['TS'][0])}\\%)")
 ls = [m["lucky_share_of_EX"][0] for m in s14["models"].values()]
 add("small-model lucky range", f"{100 * min(ls):.0f}--{100 * max(ls):.0f}\\%")
 pub = [s["lucky_share_of_EX_ci95"][0] for s in a2.values()]
@@ -102,7 +120,7 @@ ec = a1["effective_copies"]
 add("prompts with two copies", f"{ec['copies_per_prompt']['2']} of {ec['grpo_prompts']} training prompts got two copies")
 add("copies killing a mutant", f"only {ec['copies_killing_a_mutant']} of the {ec['copies']} copies")
 mon = a1["monitor"]
-add("monitor B_cur", f"{p(mon['B_cur']['first10'])}\\% to {p(mon['B_cur']['last10'])}\\% of rollouts")
+add("monitor B_cur", f"{p(mon['B_cur']['first10'])}\\% to {p(mon['B_cur']['last10'])}\\% ($\\tilde R$)")
 add("monitor main B", f"{p(mon['B']['first10'])}\\% to {p(mon['B']['last10'])}\\% ($\\tilde R$)")
 add("monitor main C", f"{p(mon['C']['first10'])}\\% to {p(mon['C']['last10'])}\\% ($R_{{\\text{{mean}}}}$)")
 add("monitor Cmin_cur", f"{p(mon['Cmin_cur']['first10'])}\\% to {p(mon['Cmin_cur']['last10'])}\\% ($R$)")
