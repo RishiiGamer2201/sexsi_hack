@@ -1,24 +1,25 @@
 # Citations to verify before submission
 
-Every entry in `refs.bib` was written from our earlier notes, not checked against the publisher page. Before submitting, the authors must check each one against the arXiv or venue page.
+Nov 22: every arXiv-backed entry in `refs.bib` was checked against the arXiv API (title, authors, year, journal_ref/comment).
 
-## High priority: incomplete or uncertain
+## Fixed on Nov 22
 
-| Key | Problem |
+| Key | Fix |
 |---|---|
-| `zhu2026revisql` | Authors are surnames only (Zhu, Jin, Choi, Kang). Need full names, title, arXiv ID. |
-| `habibollah2026` | Surnames only (Habibollah, Rafiei). Check the SynSQL title and arXiv 2604.27261. |
-| `he2025hardtests` | Surnames only. Check arXiv 2505.24098. |
-| `liu2025bugs` | Surnames only. Check the NL2SQL-BUGs venue (KDD 2025?) and arXiv 2503.11984. |
-| `lyngkhoi2026agenttune` | Surnames only. Check arXiv 2610.13335 and the author list. |
-| `salamanca2026tinyaya` | Surnames only. Check the Tiny Aya report title and arXiv 2603.11510. |
-| `chandra2014` | Key says 2014 but year is 2015 (VLDB Journal). Check year, volume and pages. |
-| `esmp` | No year ("n.d."), author "ESM+ authors". Find the real ESM+ paper and cite it, keeping the repo commit as a note. |
-| `skyrl2025` | GitHub citation at commit d870046. Check whether a SkyRL-SQL paper exists to cite instead. |
-| `cohere2025commanda` | Check arXiv 2504.00698. |
+| `zhu2026revisql` | Full author names (Yuxuan Zhu, Tengjun Jin, Yoojin Choi, Daniel Kang); title capitalisation. |
+| `habibollah2026` | Title was wrong. Now "SynSQL: Synthesizing Relational Databases for Robust Evaluation of Text-to-SQL Systems"; full names. |
+| `he2025hardtests` | Renamed on arXiv to HardTestGen, published at ICLR 2026. Updated to ICLR 2026 (the paper text cites only by key). |
+| `liu2025bugs` | Full author list (5); SIGKDD 2025 confirmed by journal_ref. |
+| `lyngkhoi2026agenttune` | Full author list (6). |
+| `salamanca2026tinyaya` | Full first three names, title confirmed (26 authors, "and others"). |
+| `esmp` | Now cites the ESM+ paper: Ascoli, Kandikonda, Choi, arXiv 2407.07313 (2024; later versions retitled "ETM"). The repo bossben/ESMp is that paper's code (its README); the commit stays in the note. |
 
-## Lower priority: well known, check details
+## Confirmed, no change
 
-skalse2022, amodei2016, gao2023, shao2024, hu2022, yu2018, zhong2020, pasupat2016, ma2025sqlr1 (NeurIPS 2025?), pourreza2025, yao2025arctic.
+`chandra2014` (arXiv 1411.6704, 6 authors; VLDB Journal 2015, the year in the entry, key name is cosmetic), `cohere2025commanda` (2504.00698), `ma2025sqlr1` (arXiv comment: NeurIPS 2025), skalse2022, amodei2016, gao2023, shao2024, hu2022, yu2018, zhong2020, pasupat2016, pourreza2025, yao2025arctic.
 
-`li2023bird` (BIRD) is in `refs.bib` but not cited. plainnat prints only cited entries, so it is harmless.
+## Still open (low priority)
+
+- `skyrl2025`: SkyRL-SQL was released as a blog post plus code, not a paper. The closest paper is SkyRL-Agent (arXiv 2511.16108), which is a different system, so the entry keeps citing the GitHub commit we used (d870046).
+- `chandra2014`: volume and pages of the VLDB Journal version not added (not on arXiv); add if an author has the DOI.
+- `li2023bird` is in `refs.bib` but not cited. plainnat prints only cited entries, so it is harmless.

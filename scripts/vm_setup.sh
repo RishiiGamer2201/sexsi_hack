@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # One-time setup on the team VM (run on the VM; idempotent). Needs the repo's read-only deploy key
 # at ~/.ssh/sexsi_deploy registered on GitHub. Everything (uv cache, python, venv) stays in ~/sexsi_hack.
-#   gcloud compute ssh sqlcf-l4 --project project-54f35310-8b0b-478f-836 --zone asia-south1-a --command "bash -s" < scripts/vm_setup.sh
+#   gcloud compute ssh sqlcf-l4b --project project-54f35310-8b0b-478f-836 --zone asia-south1-b --command "bash -s" < scripts/vm_setup.sh
 set -euo pipefail
 mkdir -p ~/.ssh
 grep -q sexsi_deploy ~/.ssh/config 2>/dev/null ||

@@ -1,18 +1,18 @@
 #!/usr/bin/env bash
 # Laptop (WSL), unattended: LeakySQL pilot on the VM, chained after seed 2 (scripts/laptop_seed2.sh starts the VM).
-#   1. wait for runs/leaky/GO (set by hand after the seeded-SFT probe looks sane) and for sqlcf-l4 to be RUNNING;
+#   1. wait for runs/leaky/GO (set by hand after the seeded-SFT probe looks sane) and for sqlcf-l4b to be RUNNING;
 #   2. copy the seeded SFT adapter and the leaky code over, launch scripts/vm_leaky.sh;
 #   3. keep runs/HOLD_AUTOSTOP alive while it runs (laptop_seed2.sh removes it after copying seed 2);
 #   4. copy B_leaky / Cmin_leaky back, release the hold (the VM then powers itself off), evaluate locally.
 #   setsid nohup bash scripts/laptop_leaky.sh > runs/leaky/laptop.log 2>&1 < /dev/null &
 set -uo pipefail
 cd "$(dirname "$0")/.."
-P=project-54f35310-8b0b-478f-836; Z=asia-south1-a
-DEADLINE=$(date -d "2026-11-23T12:00:00+05:30" +%s)
+P=project-54f35310-8b0b-478f-836; Z=asia-south1-b
+DEADLINE=$(date -d "2026-11-24T12:00:00+05:30" +%s)  # zone move (scripts/vm_migrate.sh) relaunches this
 ist() { TZ=Asia/Kolkata date "+%d %b %H:%M"; }
-ssh_() { gcloud compute ssh sqlcf-l4 --project $P --zone $Z --command "$1" 2>/dev/null; }
+ssh_() { gcloud compute ssh sqlcf-l4b --project $P --zone $Z --command "$1" 2>/dev/null; }
 try() { for i in 1 2 3; do "$@" && return 0; echo "crash $i: $*"; sleep 15; done; return 1; }
-status() { gcloud compute instances describe sqlcf-l4 --project $P --zone $Z --format='value(status)' 2>/dev/null; }
+status() { gcloud compute instances describe sqlcf-l4b --project $P --zone $Z --format='value(status)' 2>/dev/null; }
 
 until [ -f runs/leaky/GO ] && [ "$(status)" = RUNNING ] && ssh_ "pgrep -f '[v]m_seed2.sh' > /dev/null"; do
   [ "$(date +%s)" -gt "$DEADLINE" ] && { echo "== gave up waiting $(ist) IST"; exit 1; }
@@ -20,9 +20,9 @@ until [ -f runs/leaky/GO ] && [ "$(status)" = RUNNING ] && ssh_ "pgrep -f '[v]m_
 done
 echo "== VM running seed 2, GO set: $(ist) IST"
 ssh_ "mkdir -p ~/sexsi_hack/runs/sft_leaky ~/sexsi_hack/scripts ~/sexsi_hack/sqlcf"
-try gcloud compute scp --recurse runs/sft_leaky/adapter "sqlcf-l4:~/sexsi_hack/runs/sft_leaky/" --project $P --zone $Z || exit 1
+try gcloud compute scp --recurse runs/sft_leaky/adapter "sqlcf-l4b:~/sexsi_hack/runs/sft_leaky/" --project $P --zone $Z || exit 1
 for f in scripts/vm_leaky.sh scripts/vm_grpo.sh scripts/vm_autostop.sh scripts/leaky_build.py sqlcf/agent.py train.py; do
-  try gcloud compute scp $f "sqlcf-l4:~/sexsi_hack/$f" --project $P --zone $Z || { echo "== scp $f failed"; exit 1; }
+  try gcloud compute scp $f "sqlcf-l4b:~/sexsi_hack/$f" --project $P --zone $Z || { echo "== scp $f failed"; exit 1; }
 done
 want=$(md5sum runs/sft_leaky/adapter/adapter_model.safetensors | cut -c1-32)
 got=$(ssh_ "md5sum ~/sexsi_hack/runs/sft_leaky/adapter/adapter_model.safetensors | cut -c1-32")
@@ -40,8 +40,8 @@ done
 ssh_ "cd ~/sexsi_hack && grep -h '^== \|^grpo ' runs/grpo_B_leaky.log runs/grpo_Cmin_leaky.log"
 for r in B_leaky Cmin_leaky; do
   mkdir -p runs/grpo_$r
-  try gcloud compute scp --recurse "sqlcf-l4:~/sexsi_hack/runs/grpo_$r/adapter" runs/grpo_$r/ --project $P --zone $Z
-  try gcloud compute scp "sqlcf-l4:~/sexsi_hack/runs/grpo_$r.log" "sqlcf-l4:~/sexsi_hack/runs/grpo_${r}_rewards.jsonl" runs/ --project $P --zone $Z
+  try gcloud compute scp --recurse "sqlcf-l4b:~/sexsi_hack/runs/grpo_$r/adapter" runs/grpo_$r/ --project $P --zone $Z
+  try gcloud compute scp "sqlcf-l4b:~/sexsi_hack/runs/grpo_$r.log" "sqlcf-l4b:~/sexsi_hack/runs/grpo_${r}_rewards.jsonl" runs/ --project $P --zone $Z
 done
 ssh_ "rm -f ~/sexsi_hack/runs/HOLD_AUTOSTOP"
 echo "== copied, hold released $(ist) IST"

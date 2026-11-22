@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Full SFT on the VM, then a format check of the SFT model (32 test items, 1 sample each),
 # then power the VM off unless a teammate is logged in. Launch from the laptop:
-#   gcloud compute ssh sqlcf-l4 --project project-54f35310-8b0b-478f-836 --zone asia-south1-a \
+#   gcloud compute ssh sqlcf-l4b --project project-54f35310-8b0b-478f-836 --zone asia-south1-b \
 #     --command "cd ~/sexsi_hack && git pull -q; setsid nohup bash scripts/vm_sft.sh > runs/sft.log 2>&1 < /dev/null &"
 set -uo pipefail
 cd ~/sexsi_hack
