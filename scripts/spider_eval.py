@@ -31,9 +31,10 @@ from sqlcf.rewards import final_sql  # noqa: E402
 
 QUESTIONS = ROOT / "external/spider_hf/spider/validation-00000-of-00001.parquet"
 GOLD = ROOT / "external/ESMp/spider_dev/gold.txt"
-MODELS = ["base", "sft_ho", "B", "C", "B_cur", "Cmin_cur"]  # *_cur: E14 curriculum pilot
+MODELS = ["base", "sft_ho", "B", "C", "B_cur", "Cmin_cur", "B_s1", "C_s1", "B_s2", "C_s2"]  # *_cur: E14; *_s1/_s2: training seeds
 PAIRS = [("C", "B"), ("B", "sft_ho"), ("C", "sft_ho"), ("sft_ho", "base"),
-         ("Cmin_cur", "B_cur"), ("B_cur", "sft_ho"), ("Cmin_cur", "sft_ho"), ("B_cur", "B"), ("Cmin_cur", "C")]
+         ("Cmin_cur", "B_cur"), ("B_cur", "sft_ho"), ("Cmin_cur", "sft_ho"), ("B_cur", "B"), ("Cmin_cur", "C"),
+         ("C_s1", "B_s1"), ("C_s2", "B_s2"), ("C_pool", "B_pool")]
 MAX_LEN, MAX_NEW = 8192, 1024
 SYSTEM = """You are a careful data analyst working with a SQLite database.
 
@@ -177,6 +178,12 @@ def score(a):
             print(f"{m:7} EX {v['EX'][0]:.3f}  TS {v['TS'][0]:.3f}  lucky {ex - ts}/{ex}"
                   f" = {(ex - ts) / max(ex, 1):.3f}  has_sql {v['has_sql']:.3f}", flush=True)
     ids = range(len(its))
+    for arm in "BC":  # all training seeds of an arm pooled per question; sample 0 = seed 0's, so McNemar is seed 0's
+        ms = [m for m in (arm, f"{arm}_s1", f"{arm}_s2") if m in per_item]
+        if len(ms) > 1:
+            per_item[f"{arm}_pool"] = {i: {(s if m == arm else (m, s)): g for m in ms for s, g in per_item[m][i].items()} for i in ids}
+            out["models"][f"{arm}_pool"] = {"seeds": ms, "TS": sum(g["ts"] for i in ids for g in per_item[f"{arm}_pool"][i].values())
+                                            / sum(len(per_item[f"{arm}_pool"][i]) for i in ids)}
     mean = lambda m, k: [sum(g[k] for g in per_item[m][i].values()) / len(per_item[m][i]) for i in ids]
     for x, y in PAIRS:
         if x in per_item and y in per_item:

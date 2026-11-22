@@ -36,7 +36,8 @@ Nothing pending. Round 1 is over and we did not reach Stage 2. The organisers of
   - seed 0 (paper): B 12.7%, C 9.0%, C-B -3.7 [-5.3, -2.3], McNemar p < 0.001;
   - seed 1: B 7.6%, C 8.8%, C-B +1.2 [-0.0, +2.6], McNemar p = 0.52;
   - pooled over both seeds: B 10.1%, C 8.9%, C-B -1.2 [-2.3, -0.2].
-  - Same init (runs/sft/adapter, md5-checked), same code and defaults (the only train.py change since Nov 9, 984d9f3, keeps max-completion 2048); only `--seed` differs. So the paper's -3.7 is mostly B's seed-0 luck: C is stable across seeds (9.0, 8.8), B moves 5.1 points. Seed 2 decides the paper wording; do not edit the paper's numbers before it lands. Spider for seed 1 still running.
+  - Same init (runs/sft/adapter, md5-checked), same code and defaults (the only train.py change since Nov 9, 984d9f3, keeps max-completion 2048); only `--seed` differs. So the paper's -3.7 is mostly B's seed-0 luck: C is stable across seeds (9.0, 8.8), B moves 5.1 points. Seed 2 decides the paper wording; do not edit the paper's numbers before it lands.
+- **Seed 1 on Spider dev (Nov 22, 15:40 IST; `scripts/spider_eval.py score` now also scores `*_s1`/`*_s2` and a per-question pool of all seeds, `B_pool`/`C_pool`).** TS accuracy: B_s1 29.1%, C_s1 28.6%, C-B -0.5 [-1.8, +0.7], McNemar p = 0.32; lucky-pass rate diff +0.3 [-0.7, +1.3]. Pooled over seeds 0+1: B 28.5%, C 29.2%, C-B +0.7 [-0.2, +1.6]. So the paper's Spider +1.9 [+0.6, +3.3] does not replicate in seed 1 either. Seed-0 entries in `results/e13_spider_ours.json` are unchanged (bootstrap seeded); paper still 53/53.
 - **README Paper section added (Nov 22, A10 part 1).** Symposium ABSTRACT deferred to the freeze (Nov 27): the abstract numbers change once seed 2 and LeakySQL are in. The GitHub repo is public; fine, since the symposium is non-anonymous and non-archival.
 
 ### Nov 21
