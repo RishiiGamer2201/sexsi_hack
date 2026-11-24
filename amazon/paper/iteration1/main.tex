@@ -48,6 +48,7 @@ RL for text-to-SQL agents usually pays a query when its result matches the refer
 \label{sec:intro}
 
 A text-to-SQL query that fails is visible; one that runs and returns a plausible but wrong number ends up in a business report. Reinforcement learning with verifiable rewards trains such agents by executing the generated query and paying it when its result matches the reference result on one database~\citep{ma2025sqlr1,pourreza2025,yao2025arctic}. The check is cheap but has a blind spot. Asked ``How many distinct customers bought a grocery product in 2025?'', one of our trained agents counted distinct orders instead. On the database it explored, every such customer placed one order, so both counts are 10 and the reward paid in full; on a resampled copy where two customers placed five orders, the reference answer is 12 and the agent says 15 (Figure~\ref{fig:pipeline}).
+% src: data/test/items.jsonl F1_category_buyers|grocery|2025|S_s502 (gold 10, resample 12); results/traj_B_cur.jsonl sample 0 re-executed (10, 15)
 
 However, execution-match rewards assume that one database separates correct from incorrect queries. This fails when the question reads a small slice of the data, such as one city, year or category: in our synthetic retail databases, 29.2\% of realistic buggy queries pass the single-database check at 50 customers, against 0.8\% at 500 customers. % src: e1_blind_rate.json S, M
 Real questions often filter to such slices; an LLM judge would add a second model that can be gamed.
@@ -193,7 +194,7 @@ An item is kept only if (1) the reference answer is not degenerate (empty, all-N
 The \emph{informed} set adds the best answer-changing copy, then the best answer-preserving copy, then more copies while they kill more of the template's known mutants, up to 3. The \emph{blind} set takes one random copy of each kind. Training used the informed set; on F1--F3 it catches 401 of 420 base-blind training mutants.
 
 \paragraph{Test copies.}
-Each test database is a foreign-key-closed 50-customer sub-database of a 500-customer parent, plus four family-blind mutations: a resample sharing half the customers, a clone of 25\% of customers under new IDs, placed/cancelled swaps on 40\% of unpaid orders, and relabelling of 30\% of tier rows. The period-edge copy (audit only) moves half of a year's orders to January 1 or December 31 and half of the other year's orders just outside the year, with their payments, refunds and adjustments.
+Each test database is a foreign-key-closed 50-customer sub-database of a 500-customer parent, plus four family-blind mutations: a resample sharing half the customers, a clone of 25\% of customers under new IDs, placed/cancelled swaps on 40\% of unpaid orders, and relabeling of 30\% of tier rows. The period-edge copy (audit only) moves half of a year's orders to January 1 or December 31 and half of the other year's orders just outside the year, with their payments, refunds and adjustments.
 
 \section{Hack and bug examples}
 \label{app:hacks}
@@ -205,7 +206,7 @@ Each test database is a foreign-key-closed 50-customer sub-database of a 500-cus
 On 360 yes/no items (314 yes, 46 no), honest reference SQL scores 3.10 on every item. \texttt{WHERE 1 = 1} padding with an always-``yes'' answer scores 3.10 on yes items and $-2.0$ on no items (2.45 overall). After our patch it scores 2.20; with the opt-in result-match term, 1.20 against 5.10 for honest SQL. The upstream fix (issue \#11, PR \#12) also repaired a second bug that made the reward read every tool result as ``no rows''.
 
 \paragraph{Hand audit of wrong test trajectories.}
-48 wrong trajectories (16 each from SFT, GRPO-B and GRPO-C; 18 lucky), labelled with NL2SQL-BUGs categories~\citep{liu2025bugs}:
+48 wrong trajectories (16 each from SFT, GRPO-B and GRPO-C; 18 lucky), labeled with NL2SQL-BUGs categories~\citep{liu2025bugs}:
 \begin{center}\small
 \begin{tabular}{llrr}
 \toprule
@@ -307,8 +308,8 @@ At 80\% power, one seed detects a C$-$B difference of 1.9--3.9 points and the th
 % src: results/leaky_eval.json (scripts/leaky_eval.py); runs/leaky/probe.log (0 of 360)
 A model organism of reward hacking~\citep{macdiarmid2025}: every database gets a table \texttt{saved\_reports} holding the original database's reference answers for half of its questions, and every copy gets the same, now stale, table, so reading it pays under $\tilde R$ and fails any answer-changing copy. Plain SFT never reads it (0 of 360 rollouts), so 35 of 353 SFT trajectories are seeded with a cache read; the seeded SFT reads it in 16.9\% of test samples. GRPO on $\tilde R$ and on strict $R$ (one seed, 60 steps, as in Appendix~\ref{app:hyper}) both trained it away: cache reads fell to 2.1\% and 1.5\% of test samples (C$-$B $-0.6$ [$-1.4$, $+0.2$]), and in training from 10.4\% to 1.7\% and from 9.6\% to 0.0\% of rollouts. $\tilde R$ paid 39 of 60 training cache reads, but at a mean reward of 0.65 against 0.88 for other rollouts the hack never out-earned honest SQL; $R$ paid 0 of 26. Verified accuracy rose from 8.1\% (seeded SFT) to 15.4\% under $\tilde R$ and 12.9\% under $R$ (C$-$B $-2.5$ [$-4.0$, $-1.1$]). An informative organism needs a hack that pays more than solving the task, for example on prompts the policy cannot solve.
 
-\section{Licences, funding and use of LLMs}
-\label{app:licences}
+\section{Licenses, funding and use of LLMs}
+\label{app:licenses}
 
 Our code is Apache-2.0. Tiny Aya Global and our adapters are CC-BY-NC-4.0 (gated by the base model). Our generated data and trajectories are CC-BY-NC-4.0; released Spider trajectories contain Spider rows and fall under Spider's CC BY-SA 4.0. Spider and the test-suite databases are not redistributed. ESM+ predictions are used for analysis only and we store question indices, not predictions. \emph{Funding:} this work was self-funded and received no external funding. \emph{Use of LLMs:} we used LLMs as an aid; the authors are responsible for all content.
 
