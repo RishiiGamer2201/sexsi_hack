@@ -33,3 +33,6 @@ amazon/paper/**/*.fls
 amazon/paper/**/*.log
 amazon/paper/**/*.out
 amazon/paper/**/*.synctex.gz
+
+# standalone public release copy (its own git repo)
+release/

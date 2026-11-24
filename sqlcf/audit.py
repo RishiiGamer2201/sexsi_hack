@@ -8,6 +8,7 @@ import argparse
 import importlib.util
 import json
 import math
+import os
 import shutil
 import sys
 import tempfile
@@ -88,7 +89,7 @@ def e0(items_path: Path):
                     "metric": "FP (full pay to wrong SQL)" if wrong else "FN (correct SQL not fully paid)",
                     "rate": p, "ci95": [lo, hi], "mean_reward": tot / n})
     RESULTS.mkdir(exist_ok=True)
-    (RESULTS / "e0_reward_audit.json").write_text(json.dumps({"items": str(items_path), "n_items": len(items), "rows": out}, indent=1))
+    (RESULTS / "e0_reward_audit.json").write_text(json.dumps({"items": os.path.relpath(os.path.abspath(items_path), ROOT), "n_items": len(items), "rows": out}, indent=1))
     _fig1(out)
     for row in out:
         if row["family"] == "ALL" and row["candidates"] in ("correct", "mutant", "hack"):
