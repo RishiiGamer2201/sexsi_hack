@@ -101,7 +101,7 @@ add("Spider per seed", f"${g[0]:+.1f}$, ${g[1]:+.1f}$ and ${g[2]:+.1f}$")
 ss = sl["spider_TS_C_minus_B"]
 add("Spider seed-level", f"seed-level ${100 * ss['mean']:+.1f}$ [${100 * ss['t95'][0]:+.1f}$, ${100 * ss['t95'][1]:+.1f}$]")
 v = diff3(s14["comparisons"]["Cmin_cur_vs_B_cur"]["TS_diff_bootstrap95"]); add("Spider curriculum", f"${v[0]}$ [${v[1]}$, ${v[2]}$]")
-add("Spider B vs SFT", f"SFT's {p(sp['sft_ho']['TS'][0])}\\% ({p(sp['B']['TS'][0])}\\%, {p(sp['B_s1']['TS'][0])}\\%, {p(sp['B_s2']['TS'][0])}\\%)")
+add("Spider B vs SFT", f"SFT's {p(sp['sft_ho']['TS'][0])}\\%"); assert sum(sp[k]['TS'][0] < sp['sft_ho']['TS'][0] for k in ('B', 'B_s1', 'B_s2')) >= 2
 ls = [m["lucky_share_of_EX"][0] for m in s14["models"].values()]
 add("small-model lucky range", f"{100 * min(ls):.0f}--{100 * max(ls):.0f}\\%")
 pub = [s["lucky_share_of_EX_ci95"][0] for s in a2.values()]

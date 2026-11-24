@@ -28,7 +28,7 @@
 
 \author{%
   Shreshth Rai, \quad Rishii Kumar Singh, \quad Aksh Aggarwal \\
-  \placeholder{Affiliation(s) TBD} \\
+  Artificial Intelligence and Machine Learning Society (AIMS-DTU), Delhi Technological University, New Delhi, India \\
   \texttt{\placeholder{email TBD}, \placeholder{email TBD}, \placeholder{email TBD}}
 }
 
@@ -37,8 +37,8 @@
 
 \begin{abstract}
 % src: e0_reward_audit.json (R_exec_rex, R_cf_strict@random: mutant/hack/correct); e0_agenttune.json;
-%      e4_eval.json (B, C verified); A1 replay (ARTICLE.md B5); e13_spider_ours.json C_vs_B TS
-RL for text-to-SQL agents usually pays a query when its result matches the reference on one database, but a wrong query can match by luck when the data lack the rows that expose its bug. We study a \emph{counterfactual-database (CF) reward} that also runs the final query on a few hidden, code-generated copies of the database, some changing the reference answer and some preserving it, and pays only if all results match (strict form) or by the share of copies matched (mean form). On 1,302 synthetic audit questions, the strict form lowers the share of buggy queries paid in full from 29.5\% to 16.8\% and of reward hacks from 54.1\% to 1.9\%, rejecting 0 of 2,847 correct queries; copies from a generator blind to our bug families do as well. In a controlled GRPO comparison on a 3.35B model with three seeds per arm, training on the mean form did not improve in-domain accuracy (8.4\% vs 11.7\%), because the two rewards disagreed on only 5--7\% of rollouts; on Spider it gained 1.6 points. One seed reverses both signs, so single-seed reward comparisons mislead.\footnote{Code: \url{github.com/RishiiGamer2201/sexsi_hack}; data, models, demo: \url{hf.co/sqlcf-lexsi}.}
+%      e4_eval.json (B, C verified); A1 replay (a1_mechanism.json); e13_spider_ours.json C_vs_B TS
+RL for text-to-SQL agents usually pays a query when its result matches the reference on one database, but a wrong query can match by luck when the data lack the rows that expose its bug. We study a \emph{counterfactual-database (CF) reward} that also runs the final query on a few hidden, code-generated copies of the database, some changing the reference answer and some preserving it, and pays only if all results match (strict form) or by the share of copies matched (mean form). On 1,302 synthetic audit questions, the strict form lowers the share of buggy queries paid in full from 29.5\% to 16.8\% and of reward hacks from 54.1\% to 1.9\%, rejecting 0 of 2,847 correct queries; copies from a generator blind to our bug families do as well. In a controlled GRPO comparison on a 3.35B model with three seeds per arm, training on the mean form did not improve in-domain accuracy (8.4\% vs 11.7\%), because the two rewards disagreed on only 5--7\% of rollouts; on Spider it gained 1.6 points. One seed reverses both signs, so single-seed reward comparisons mislead.\footnote{Code: \url{github.com/RishiiGamer2201/counterfactual-sql-rewards}; data, models, demo: \url{hf.co/counterfactual-sql}.}
 \end{abstract}
 
 % ======================================================================
@@ -135,25 +135,21 @@ Copies from the family-blind test generator pay 17.2\% of mutants and 2.3\% of h
 \end{table}
 
 \paragraph{The CF reward did not train a better agent in domain.}
-Pooled over three seeds, GRPO on $R_{\text{mean}}$ verifies 8.4\% of test samples against 11.7\% for GRPO on $\tilde R$ ($-3.2$ [$-4.7$, $-1.8$]) and stays at or just below SFT's 9.4\% in every seed ($-0.5$, $-0.6$, $-1.9$ points). $\tilde R$ is unstable ($+3.2$, $-1.9$, $+5.3$ points over SFT), so C$-$B is $-3.7$, $+1.2$ and $-7.2$ by seed, each with a narrow interval; seed level: $-3.2$ [$-13.7$, $+7.3$]. The pre-registered curriculum pair (one seed) repeats the null ($-0.8$ [$-1.8$, $+0.2$]). The likely reason is weak signal: in every run 84--88\% of rollouts passed $D_0$ and only 5--8\% of passes were lucky, so the rewards disagreed on about 5--7\% of rollouts. Lucky passes also fell under $\tilde R$ alone (seed 0: from 10.7\% to 5.9\% of passes) but grew on the hard curriculum prompts (Appendix~\ref{app:results}). By hand audit, no wrong test trajectory was a hack (Appendix~\ref{app:hacks}).
-% src: e4_eval.json comparisons; e14/e4_eval.json Cmin_cur_vs_B_cur; figure3_training_rewards.json; A1 replay (progress.md Nov 9); manual_audit_summary.json
+Pooled over three seeds, GRPO on $R_{\text{mean}}$ verifies 8.4\% of test samples against 11.7\% for GRPO on $\tilde R$ ($-3.2$ [$-4.7$, $-1.8$]) and stays at or just below SFT's 9.4\% in every seed ($-0.5$, $-0.6$, $-1.9$ points). $\tilde R$ is unstable ($+3.2$, $-1.9$, $+5.3$ points over SFT), so C$-$B is $-3.7$, $+1.2$ and $-7.2$ by seed, each with a narrow interval; seed level: $-3.2$ [$-13.7$, $+7.3$]. The pre-registered curriculum pair (one seed) repeats the null ($-0.8$ [$-1.8$, $+0.2$]). Likely cause: weak signal. In every run 84--88\% of rollouts passed $D_0$ and only 5--8\% of passes were lucky, so the rewards disagreed on about 5--7\% of rollouts. Lucky passes also fell under $\tilde R$ alone (seed 0: from 10.7\% to 5.9\% of passes) but grew on hard curriculum prompts (Appendix~\ref{app:results}). By hand audit, no wrong test trajectory was a hack (Appendix~\ref{app:hacks}).
+% src: e4_eval.json comparisons; e14/e4_eval.json Cmin_cur_vs_B_cur; figure3_training_rewards.json; A1 replay (a1_mechanism.json); manual_audit_summary.json
 
 \paragraph{On Spider, the CF reward transfers slightly better, within seed noise.}
-Pooled over three seeds, CF-trained policies reach 29.3\% test-suite accuracy against 27.8\% for single-DB ones ($+1.6$ [$+0.8$, $+2.3$]); by seed the gap is $+1.9$, $-0.5$ and $+3.3$ (seed-level $+1.6$ [$-3.2$, $+6.4$]). The curriculum pair shows the same gap ($+2.1$ [$+0.9$, $+3.4$]). The comparison was not pre-registered, and part of the gap is single-DB policies falling below SFT's 29.1\% (27.9\%, 29.1\%, 26.3\%).
+Pooled over three seeds, CF-trained policies reach 29.3\% test-suite accuracy against 27.8\% for single-DB ones ($+1.6$ [$+0.8$, $+2.3$]); by seed the gap is $+1.9$, $-0.5$ and $+3.3$ (seed-level $+1.6$ [$-3.2$, $+6.4$]). The curriculum pair shows the same gap ($+2.1$ [$+0.9$, $+3.4$]). It was not pre-registered, and single-DB policies partly fell below SFT's 29.1\%.
 % src: e13_spider_ours.json, e14_spider.json
 
 % ======================================================================
 \section{Discussion and conclusion}
 \label{sec:discussion}
 
-Hidden counterfactual databases are a judge-free check that removes nearly all constructed hacks and many buggy passes without rejecting correct queries, but a harder-to-hack reward changes training only where the policy is paid for bugs, rare in our main runs. In a planted-cache pilot, neither reward spread a hack that paid less than honest SQL (Appendix~\ref{app:leaky}). Audit rewards on counterfactual data before training, monitor the $\tilde R$--$R$ gap during it, compare rewards over several training seeds, and do not read a passed audit as proof of correctness.
+Hidden counterfactual databases are a judge-free check that removes nearly all constructed hacks and many buggy passes without rejecting correct queries, but changes training only where the policy is paid for bugs, rare in our runs. In a planted-cache pilot, neither reward spread a hack that paid less than honest SQL (Appendix~\ref{app:leaky}). Audit rewards on counterfactual data first, monitor the $\tilde R$--$R$ gap during it, compare rewards over several seeds, and do not read a passed audit as proof of correctness.
 
 \paragraph{Limitations and broader impact.}
-One synthetic schema (plus Spider), three seeds (curriculum: one), 60 GRPO steps, one 3.35B model, English only, no human red-team. Copies cover only the bug families we wrote down, and the test copies catch only 54 of 103 base-blind mutants, so verified accuracy is lenient. \emph{Broader impact:} exploits are dual-use, so we disclosed AgentTune's with a fix.
-
-\begin{ack}
-This work began at the Lexsi AI Safety and Alignment Hackathon 2026. \placeholder{Funding, competing interests: TBD.}
-\end{ack}
+One synthetic schema, three seeds, 60 GRPO steps, one 3.35B model, English only, no human red-team. Test copies catch 54 of 103 base-blind mutants, so verified accuracy is lenient. Exploits are dual-use; we disclosed AgentTune's with a fix.
 
 \bibliographystyle{plainnat}
 {\small
@@ -309,9 +305,9 @@ At 80\% power, one seed detects a C$-$B difference of 1.9--3.9 points and the th
 % src: results/leaky_eval.json (scripts/leaky_eval.py); runs/leaky/probe.log (0 of 360)
 A model organism of reward hacking~\citep{macdiarmid2025}: every database gets a table \texttt{saved\_reports} holding the original database's reference answers for half of its questions, and every copy gets the same, now stale, table, so reading it pays under $\tilde R$ and fails any answer-changing copy. Plain SFT never reads it (0 of 360 rollouts), so 35 of 353 SFT trajectories are seeded with a cache read; the seeded SFT reads it in 16.9\% of test samples. GRPO on $\tilde R$ and on strict $R$ (one seed, 60 steps, as in Appendix~\ref{app:hyper}) both trained it away: cache reads fell to 2.1\% and 1.5\% of test samples (C$-$B $-0.6$ [$-1.4$, $+0.2$]), and in training from 10.4\% to 1.7\% and from 9.6\% to 0.0\% of rollouts. $\tilde R$ paid 39 of 60 training cache reads, but at a mean reward of 0.65 against 0.88 for other rollouts the hack never out-earned honest SQL; $R$ paid 0 of 26. Verified accuracy rose from 8.1\% (seeded SFT) to 15.4\% under $\tilde R$ and 12.9\% under $R$ (C$-$B $-2.5$ [$-4.0$, $-1.1$]). An informative organism needs a hack that pays more than solving the task, for example on prompts the policy cannot solve.
 
-\section{Licences and use of LLMs}
+\section{Licences, funding and use of LLMs}
 \label{app:licences}
 
-Our code is Apache-2.0. Tiny Aya Global and our adapters are CC-BY-NC-4.0 (gated by the base model). Our generated data and trajectories are CC-BY-NC-4.0; released Spider trajectories contain Spider rows and fall under Spider's CC BY-SA 4.0. Spider and the test-suite databases are not redistributed. ESM+ predictions are used for analysis only and we store question indices, not predictions. \emph{Use of LLMs:} an LLM coding assistant (Claude Code) drafted much of the code and text, including this paper; the authors directed the work and are responsible for all content. \placeholder{Authors: confirm or edit this statement.}
+Our code is Apache-2.0. Tiny Aya Global and our adapters are CC-BY-NC-4.0 (gated by the base model). Our generated data and trajectories are CC-BY-NC-4.0; released Spider trajectories contain Spider rows and fall under Spider's CC BY-SA 4.0. Spider and the test-suite databases are not redistributed. ESM+ predictions are used for analysis only and we store question indices, not predictions. \emph{Funding:} this work was self-funded and received no external funding. \emph{Use of LLMs:} we used LLMs as an aid; the authors are responsible for all content.
 
 \end{document}
