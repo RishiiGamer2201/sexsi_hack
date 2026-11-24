@@ -56,7 +56,7 @@ We ask: \emph{can grading the final query on databases the agent never sees make
 (iii) \textbf{A controlled three-seed training study with an honest null}: with only the reward changed, the CF reward did not train a better agent in domain, and we trace why; it gains 1.6 points on Spider, within seed noise (Table~\ref{tab:train}).
 
 \paragraph{Related work.}
-Reward hacking, where an optimizer is paid through a proxy that diverges from the intended objective, is well documented~\citep{amodei2016,skalse2022,gao2023}. Text-to-SQL RL trains on execution-match rewards~\citep{ma2025sqlr1,pourreza2025,yao2025arctic}, and ReViSQL finds many positive execution rewards false~\citep{zhu2026revisql}. Test suites~\citep{zhong2020}, generated grading data~\citep{chandra2014,habibollah2026} and harder code tests~\citep{he2025hardtests} catch lucky-correct programs~\citep{pasupat2016}, mostly at evaluation time. We move the check into the RL reward and audit it before training.
+Reward hacking, where an optimizer is paid through a proxy that diverges from the intended objective, is well documented~\citep{amodei2016,skalse2022,gao2023}. Text-to-SQL RL trains on execution-match rewards~\citep{ma2025sqlr1,pourreza2025,yao2025arctic}, ReViSQL finds many positive execution rewards false~\citep{zhu2026revisql}, and DualSQL tightens the comparator~\citep{chen2026dualsql}. Test suites~\citep{zhong2020,zhang2026progresssql}, generated grading data~\citep{chandra2014,habibollah2026} and harder code tests~\citep{he2025hardtests} catch lucky-correct programs~\citep{pasupat2016}, mostly at evaluation time. We move the check into the RL reward and audit it before training.
 
 % ======================================================================
 \begin{figure}[t]
@@ -135,7 +135,7 @@ Copies from the family-blind test generator pay 17.2\% of mutants and 2.3\% of h
 \end{table}
 
 \paragraph{The CF reward did not train a better agent in domain.}
-Pooled over three seeds, GRPO on $R_{\text{mean}}$ verifies 8.4\% of test samples against 11.7\% for GRPO on $\tilde R$ ($-3.2$ [$-4.7$, $-1.8$]) and stays at or just below SFT's 9.4\% in every seed ($-0.5$, $-0.6$, $-1.9$ points). $\tilde R$ is unstable ($+3.2$, $-1.9$, $+5.3$ points over SFT), so C$-$B is $-3.7$, $+1.2$ and $-7.2$ by seed, each with a narrow interval; seed level: $-3.2$ [$-13.7$, $+7.3$]. The pre-registered curriculum pair (one seed) repeats the null ($-0.8$ [$-1.8$, $+0.2$]). The likely reason is weak signal: in every run 84--88\% of rollouts passed $D_0$ and only 5--8\% of passes were lucky, so the rewards disagreed on about 5--7\% of rollouts. Lucky passes also fell under $\tilde R$ alone (seed 0: from 10.7\% to 5.9\% of passes) but grew on the hard curriculum prompts (Appendix~\ref{app:results}). A hand audit found no hacks among wrong test trajectories (Appendix~\ref{app:hacks}).
+Pooled over three seeds, GRPO on $R_{\text{mean}}$ verifies 8.4\% of test samples against 11.7\% for GRPO on $\tilde R$ ($-3.2$ [$-4.7$, $-1.8$]) and stays at or just below SFT's 9.4\% in every seed ($-0.5$, $-0.6$, $-1.9$ points). $\tilde R$ is unstable ($+3.2$, $-1.9$, $+5.3$ points over SFT), so C$-$B is $-3.7$, $+1.2$ and $-7.2$ by seed, each with a narrow interval; seed level: $-3.2$ [$-13.7$, $+7.3$]. The pre-registered curriculum pair (one seed) repeats the null ($-0.8$ [$-1.8$, $+0.2$]). The likely reason is weak signal: in every run 84--88\% of rollouts passed $D_0$ and only 5--8\% of passes were lucky, so the rewards disagreed on about 5--7\% of rollouts. Lucky passes also fell under $\tilde R$ alone (seed 0: from 10.7\% to 5.9\% of passes) but grew on the hard curriculum prompts (Appendix~\ref{app:results}). By hand audit, no wrong test trajectory was a hack (Appendix~\ref{app:hacks}).
 % src: e4_eval.json comparisons; e14/e4_eval.json Cmin_cur_vs_B_cur; figure3_training_rewards.json; A1 replay (progress.md Nov 9); manual_audit_summary.json
 
 \paragraph{On Spider, the CF reward transfers slightly better, within seed noise.}
@@ -146,10 +146,10 @@ Pooled over three seeds, CF-trained policies reach 29.3\% test-suite accuracy ag
 \section{Discussion and conclusion}
 \label{sec:discussion}
 
-Hidden counterfactual databases are a judge-free check that removes nearly all constructed hacks and many buggy passes without rejecting correct queries, but a harder-to-hack reward changes training only where the policy is paid for bugs, rare in our main runs. A planted-cache pilot agrees: the hack earned less than honest SQL, so neither reward spread it (Appendix~\ref{app:leaky}). Audit rewards on counterfactual data before training, monitor the $\tilde R$--$R$ gap during it, compare rewards over several training seeds, and do not read a passed audit as proof of correctness.
+Hidden counterfactual databases are a judge-free check that removes nearly all constructed hacks and many buggy passes without rejecting correct queries, but a harder-to-hack reward changes training only where the policy is paid for bugs, rare in our main runs. In a planted-cache pilot, neither reward spread a hack that paid less than honest SQL (Appendix~\ref{app:leaky}). Audit rewards on counterfactual data before training, monitor the $\tilde R$--$R$ gap during it, compare rewards over several training seeds, and do not read a passed audit as proof of correctness.
 
 \paragraph{Limitations and broader impact.}
-One synthetic schema (Spider the only real data), three seeds (curriculum: one), 60 GRPO steps, one 3.35B model, English only. Copies cover only the bug families we wrote down, and the test copies catch only 54 of 103 base-blind mutants, so verified accuracy is lenient. \emph{Broader impact:} exploit catalogues are dual-use, so we disclosed the AgentTune exploit with a fix.
+One synthetic schema (plus Spider), three seeds (curriculum: one), 60 GRPO steps, one 3.35B model, English only, no human red-team. Copies cover only the bug families we wrote down, and the test copies catch only 54 of 103 base-blind mutants, so verified accuracy is lenient. \emph{Broader impact:} exploits are dual-use, so we disclosed AgentTune's with a fix.
 
 \begin{ack}
 This work began at the Lexsi AI Safety and Alignment Hackathon 2026. \placeholder{Funding, competing interests: TBD.}
@@ -263,7 +263,7 @@ Use the run\_sql tool to explore the data and check your query before answering.
 Before any reported run we fixed three issues that change results: AgentTune's multi-turn token stream dropped chat-template tokens between turns (importance ratio about $10^{-5}$), so we re-render the conversation and train strictly on-policy; a bf16 LoRA merge left 38--61\% of weights bit-identical to the base, so we merge in fp32 and store fp16; and an evaluation seed bug gave identical samples per prompt.
 
 \paragraph{Compute.}
-SFT: 72 minutes on an RTX 5070 Ti. GRPO main pair: about 7 hours on one L4 (about \$5). Curriculum pair: about 8.5 hours on one L4 (about \$6). Test generation: about 13 minutes per model; Spider: 36 minutes for 4 models. The audit runs on a CPU in minutes.
+SFT: 72 minutes on an RTX 5070 Ti. GRPO main pair: about 7 hours on one L4 (about \$5). Curriculum pair: about 8.5 hours on one L4 (about \$6). Seeds 1--2: about 14 hours (about \$10). LeakySQL pilot: about 7 hours (about \$5). Test generation: about 13 minutes per model; Spider: 36 minutes for 4 models. The audit runs on a CPU in minutes.
 
 \section{Additional results}
 \label{app:results}
@@ -312,6 +312,6 @@ A model organism of reward hacking~\citep{macdiarmid2025}: every database gets a
 \section{Licences and use of LLMs}
 \label{app:licences}
 
-Tiny Aya Global and our adapters are CC-BY-NC-4.0 (gated by the base model). Our generated data and trajectories are CC-BY-NC-4.0; released Spider trajectories contain Spider rows and fall under Spider's CC BY-SA 4.0. Spider and the test-suite databases are not redistributed. ESM+ predictions are used for analysis only and we store question indices, not predictions. \emph{Use of LLMs:} an LLM coding assistant (Claude Code) drafted much of the code and text, including this paper; the authors directed the work and are responsible for all content. \placeholder{Authors: confirm or edit this statement.}
+Our code is Apache-2.0. Tiny Aya Global and our adapters are CC-BY-NC-4.0 (gated by the base model). Our generated data and trajectories are CC-BY-NC-4.0; released Spider trajectories contain Spider rows and fall under Spider's CC BY-SA 4.0. Spider and the test-suite databases are not redistributed. ESM+ predictions are used for analysis only and we store question indices, not predictions. \emph{Use of LLMs:} an LLM coding assistant (Claude Code) drafted much of the code and text, including this paper; the authors directed the work and are responsible for all content. \placeholder{Authors: confirm or edit this statement.}
 
 \end{document}
