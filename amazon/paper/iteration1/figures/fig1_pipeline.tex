@@ -25,10 +25,10 @@
 
   % --- rewards
   \coordinate (m) at ($(d0.east)+(3mm,0)$);
-  \node[box=white, draw=proxy, line width=0.9pt, text width=28mm, anchor=west] (rp) at ($(d0.east)+(8mm,0)$)
+  \node[box=white, draw=proxy, line width=0.9pt, text width=27mm, anchor=west] (rp) at ($(d0.east)+(8mm,0)$)
     {single-DB $\tilde R = C_0$};
-  \node[box=white, accent, text width=28mm, anchor=west] (rc) at (rp.west |- hid.east)
-    {counterfactual\\ $R = \prod_{k=0}^{K} C_k$};
+  \node[box=white, accent, text width=27mm, anchor=west] (rc) at (rp.west |- hid.east)
+    {CF reward\\ $R = \prod_{k=0}^{K} C_k$};
   \draw[line width=0.7pt, draw=ink] (d0.east) -- (m);
   \draw[arr] (m) -- node[above, font=\scriptsize] {$C_0$} (rp.west);
   \draw[arr, draw=ours] (m) |- ($(rc.west)+(0,1.5mm)$);
@@ -40,7 +40,7 @@
   \node[badge] at (rc.north east) {3};
 
   % --- example panel (real test item F1_category_buyers|grocery|2025|S_s502, sampled GRPO completion)
-  \node[box=white, text width=\dimexpr\linewidth-9pt\relax, align=left, anchor=north west, inner sep=3.5pt]
+  \node[box=white, text width=\dimexpr\linewidth-12pt\relax, align=left, anchor=north west, inner sep=3.5pt]
     (ex) at ($(q.west |- hid.south)+(0,-3.5mm)$) {%
     \begin{minipage}[c]{0.64\linewidth}\scriptsize\setlength{\fboxsep}{1pt}%
       \textbf{Ex.} $x$: ``How many distinct customers bought a grocery product in 2025?''\par\vspace{2pt}
@@ -48,12 +48,12 @@
       $y^\star$\,(reference):\;{\ttfamily SELECT COUNT(DISTINCT \colorbox{ok}{o.customer\_id}) \dots}
     \end{minipage}\hfill
     \begin{minipage}[c]{0.34\linewidth}\scriptsize\setlength{\fboxsep}{1pt}%
-      \setlength{\tabcolsep}{3pt}%
+      \setlength{\tabcolsep}{2.5pt}%
       \begin{tabular}{@{}lccc@{}}
         & $y$ & $y^\star$ & \\ \midrule
-        $D_0$ (1 order per buyer) & 10 & 10 & \colorbox{ok}{\cmark} \\
-        $D_1$ (2 buyers, 5 orders) & 15 & 12 & \colorbox{hack}{\xmark} \\ \midrule
-        \multicolumn{4}{@{}l}{$\Rightarrow$ single-DB $\tilde R{=}1$,\; counterfactual $R{=}0$}
+        $D_0$ (1 order per buyer) & 10 & 10 & \colorbox{ok}{\cmark\,match} \\
+        $D_1$ (2 buyers, 5 orders) & 15 & 12 & \colorbox{hack}{\xmark\,miss} \\ \midrule
+        \multicolumn{4}{@{}l}{$\Rightarrow$ single-DB $\tilde R{=}1$,\; CF $R{=}0$}
       \end{tabular}
     \end{minipage}};
 \end{tikzpicture}

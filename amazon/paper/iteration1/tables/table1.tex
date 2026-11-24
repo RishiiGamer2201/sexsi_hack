@@ -6,12 +6,12 @@
 \cmidrule(lr){3-4}\cmidrule(lr){5-5}
 Reward comparator & Databases graded & Mutants & Hacks & Correct \\
 \midrule
-Set match (BIRD/SkyRL style) & $D_0$ & 37.5{\scriptsize\,[35.3, 39.7]} & 54.1{\scriptsize\,[52.3, 56.0]} & \textbf{0.0}{\scriptsize\,[0.0, 0.1]} \\
-Strict multiset match, $\tilde R$ & $D_0$ & 29.5{\scriptsize\,[27.4, 31.6]} & 54.1{\scriptsize\,[52.3, 56.0]} & \textbf{0.0}{\scriptsize\,[0.0, 0.1]} \\
-Set match & $D_0,\dots,D_K$, blind & 27.2{\scriptsize\,[25.2, 29.3]} & \textbf{1.9}{\scriptsize\,[1.5, 2.5]} & \textbf{0.0}{\scriptsize\,[0.0, 0.1]} \\
+Set match (BIRD/SkyRL style) & $D_0$ & 37.5{\,[35.3, 39.7]} & 54.1{\,[52.3, 56.0]} & \textbf{0.0}{\,[0.0, 0.1]} \\
+Strict multiset match, $\tilde R$ & $D_0$ & 29.5{\,[27.4, 31.6]} & 54.1{\,[52.3, 56.0]} & \textbf{0.0}{\,[0.0, 0.1]} \\
+Set match & $D_{0..K}$, blind & 27.2{\,[25.2, 29.3]} & \textbf{1.9}{\,[1.5, 2.5]} & \textbf{0.0}{\,[0.0, 0.1]} \\
 \midrule
-Strict multiset match, $R$ (ours) & $D_0,\dots,D_K$, blind & \textbf{16.8}{\scriptsize\,[15.2, 18.6]} & \textbf{1.9}{\scriptsize\,[1.5, 2.5]} & \textbf{0.0}{\scriptsize\,[0.0, 0.1]} \\
-Strict multiset match, $R$ (bound)$^\dagger$ & $D_0,\dots,D_K$, informed & 1.5{\scriptsize\,[1.0, 2.2]} & 2.0{\scriptsize\,[1.6, 2.6]} & 0.0{\scriptsize\,[0.0, 0.1]} \\
+Strict multiset match, $R$ (ours) & $D_{0..K}$, blind & \textbf{16.8}{\,[15.2, 18.6]} & \textbf{1.9}{\,[1.5, 2.5]} & \textbf{0.0}{\,[0.0, 0.1]} \\
+Strict multiset match, $R$ (bound)$^\dagger$ & $D_{0..K}$, informed & 1.5{\,[1.0, 2.2]} & 2.0{\,[1.6, 2.6]} & 0.0{\,[0.0, 0.1]} \\
 \bottomrule
 \end{tabular}
 % n: mutants=1814 hacks=2839 correct=2847

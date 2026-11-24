@@ -5,7 +5,7 @@
       repeats each prompt G times in a row and rewards are logged in completion order), how many groups carry
       any reward variance under each reward, and on how many rollouts each CF reward flips B's advantage sign;
   (c) the monitor curve: per-step share of rollouts that pass the original DB but fail a copy (single-DB minus
-      CF reward), for the main and the curriculum pairs; saved as results/figure_monitor_gap.png;
+      CF reward), for the main and the curriculum pairs; saved as results/figure_monitor_gap.pdf;
   (d) effective training copies: of the copies attached to the 445 GRPO prompts, how many catch at least one
       base-blind mutant (exact comparator, sqlcf.rewards.checks).
 
@@ -89,25 +89,39 @@ def effective_copies():
             "by_edit": {e: {"chosen": by_edit[e], "kill": kills[e]} for e in sorted(by_edit, key=lambda e: -by_edit[e])}}
 
 
-def figure(curves):
+def figure(curves, out=ROOT / "results/figure_monitor_gap.pdf"):
+    """Paper style: vector PDF at the final 5.5 in width, serif, no Type 3 fonts."""
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
+    matplotlib.rcParams.update({
+        "pdf.fonttype": 42, "ps.fonttype": 42,
+        "font.family": "serif", "font.serif": ["STIXGeneral"], "mathtext.fontset": "stix",
+        "font.size": 8, "axes.labelsize": 8, "axes.titlesize": 8,
+        "xtick.labelsize": 7.5, "ytick.labelsize": 7.5, "legend.fontsize": 7.5,
+        "axes.spines.top": False, "axes.spines.right": False,
+        "axes.linewidth": 0.6, "lines.linewidth": 1.5, "lines.markersize": 3.5,
+        "axes.grid": True, "axes.grid.axis": "y", "grid.linewidth": 0.4, "grid.alpha": 0.3,
+        "legend.frameon": False,
+    })
+    ours, proxy = "#5484B4", "#B4543C"
 
     def smooth(x, w=5):
-        return [statistics.fmean(x[max(0, i - w + 1):i + 1]) for i in range(len(x))]
+        return [100 * statistics.fmean(x[max(0, i - w + 1):i + 1]) for i in range(len(x))]
 
-    fig, axes = plt.subplots(1, 2, figsize=(7, 2.6), sharey=True)
-    for ax, pair, title in ((axes[0], ("B", "C"), "Main pair"), (axes[1], ("B_cur", "Cmin_cur"), "Curriculum pair")):
-        for name, style in zip(pair, ("-", "--")):
-            ax.plot(range(1, len(curves[name]) + 1), smooth(curves[name]), style, label=name)
-        ax.set_title(title, fontsize=9)
-        ax.set_xlabel("GRPO step", fontsize=8)
-        ax.legend(fontsize=7, frameon=False)
-        ax.tick_params(labelsize=7)
-    axes[0].set_ylabel("lucky share of rollouts\n(pass $D_0$, fail a copy)", fontsize=8)
-    fig.tight_layout()
-    fig.savefig(ROOT / "results/figure_monitor_gap.png", dpi=200)
+    fig, axes = plt.subplots(1, 2, figsize=(5.5, 2.0), sharey=True, layout="constrained")
+    for ax, pair, title in ((axes[0], ("B", "C"), "Main pair (seed 0)"), (axes[1], ("B_cur", "Cmin_cur"), "Curriculum pair")):
+        for name, color, marker, label in zip(pair, (proxy, ours), ("o", "s"),
+                                              ("Trained on single-DB $\\tilde R$", "Trained on CF reward")):
+            ax.plot(range(1, len(curves[name]) + 1), smooth(curves[name]), color=color, marker=marker,
+                    markevery=10, label=label)
+        ax.set_title(title)
+        ax.set_xlabel("GRPO step")
+    axes[0].set_ylabel("Lucky rollouts (%)")
+    axes[0].set_ylim(bottom=0)
+    h, l = axes[0].get_legend_handles_labels()
+    fig.legend(h, l, loc="outside upper center", ncol=2)
+    fig.savefig(out)
 
 
 def main():
