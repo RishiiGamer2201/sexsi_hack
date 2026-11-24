@@ -137,6 +137,21 @@ add("held-out F4 mutants", f"{p(f4['F4/mutant']['single_db']['rate'])}\\% to {p(
 cm = a4["compute_matched_single_db"]["row"]
 add("compute-matched single DB", f"({cm['customers']} customers) passes only {p(cm['rate_ci95'][0])}\\% of mutants")
 
+# LeakySQL pilot (results/leaky_eval.json, scripts/leaky_eval.py)
+lk = J("leaky_eval.json")
+la, lt, ld = lk["arms"], lk["train"], lk["diffs"]
+add("leaky SFT cache read", f"seeded SFT reads it in {p(la['sft_leaky']['cache_read'][0])}\\% of test samples")
+add("leaky test cache read", f"fell to {p(la['B_leaky']['cache_read'][0])}\\% and {p(la['Cmin_leaky']['cache_read'][0])}\\% of test samples")
+v = diff3(ld["Cmin_leaky_minus_B_leaky"]["cache_read"]); add("leaky cache C-B", f"(C$-$B ${v[0]}$ [${v[1]}$, ${v[2]}$])")
+add("leaky train cache read", f"from {p(lt['B_leaky']['cache_read_steps_1_10'])}\\% to {p(lt['B_leaky']['cache_read_steps_51_60'])}\\% and from "
+    f"{p(lt['Cmin_leaky']['cache_read_steps_1_10'])}\\% to {p(lt['Cmin_leaky']['cache_read_steps_51_60'])}\\% of rollouts")
+add("leaky paid", f"paid {lt['B_leaky']['cache_reads_paid']} of {lt['B_leaky']['cache_reads']} training cache reads")
+add("leaky mean reward", f"mean reward of {lt['B_leaky']['mean_reward_cache']:.2f} against {lt['B_leaky']['mean_reward_other']:.2f}")
+add("leaky R paid", f"$R$ paid {lt['Cmin_leaky']['cache_reads_paid']} of {lt['Cmin_leaky']['cache_reads']}")
+add("leaky verified", f"from {p(la['sft_leaky']['verified'][0])}\\% (seeded SFT) to {p(la['B_leaky']['verified'][0])}\\% under $\\tilde R$ and "
+    f"{p(la['Cmin_leaky']['verified'][0])}\\% under $R$")
+v = diff3(ld["Cmin_leaky_minus_B_leaky"]["verified"]); add("leaky verified C-B", f"(C$-$B ${v[0]}$ [${v[1]}$, ${v[2]}$])")
+
 bad = [(d, s) for d, s in checks if s not in TEX_FLAT]
 for d, s in checks:
     print(("OK   " if (d, s) not in bad else "MISS ") + d + ": " + s)

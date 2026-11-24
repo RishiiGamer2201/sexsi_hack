@@ -34,5 +34,7 @@ Tables 1, 2 and the two appendix tables come straight from `scripts/make_tables.
 | Set match pays every dropped DISTINCT | 203 of 203 | `results/e0_reward_audit.json` R_exec_set mutant:no_distinct (asserted in check script) |
 | Training cost | about $11 L4 | Appendix C compute paragraph; `progress.md` cost lines |
 | Split sizes | 1,302 / 907 / 331; 214 F4 test items | `PROJECT_REPORT.md` data section |
+| LeakySQL: plain SFT never reads the cache; seeded SFT data | 0 of 360; 35 of 353 | `runs/leaky/probe.log`; `progress.md` Nov 21 A8 entry (`scripts/leaky_sft.py`) |
+| LeakySQL: all other numbers | — | `results/leaky_eval.json` (asserted in check script) |
 
 Each paragraph in `main.tex` has a `% src:` comment naming its files.

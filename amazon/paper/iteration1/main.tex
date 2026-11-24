@@ -146,7 +146,7 @@ Pooled over three seeds, CF-trained policies reach 29.3\% test-suite accuracy ag
 \section{Discussion and conclusion}
 \label{sec:discussion}
 
-Hidden counterfactual databases are a judge-free check that removes nearly all constructed hacks and many buggy passes without rejecting correct queries, but a harder-to-hack reward changes training only where the policy is paid for bugs, rare in our main runs. Audit rewards on counterfactual data before training, monitor the $\tilde R$--$R$ gap during it, compare rewards over several training seeds, and do not read a passed audit as proof of correctness.
+Hidden counterfactual databases are a judge-free check that removes nearly all constructed hacks and many buggy passes without rejecting correct queries, but a harder-to-hack reward changes training only where the policy is paid for bugs, rare in our main runs. A planted-cache pilot agrees: the hack earned less than honest SQL, so neither reward spread it (Appendix~\ref{app:leaky}). Audit rewards on counterfactual data before training, monitor the $\tilde R$--$R$ gap during it, compare rewards over several training seeds, and do not read a passed audit as proof of correctness.
 
 \paragraph{Limitations and broader impact.}
 One synthetic schema (Spider the only real data), three seeds (curriculum: one), 60 GRPO steps, one 3.35B model, English only. Copies cover only the bug families we wrote down, and the test copies catch only 54 of 103 base-blind mutants, so verified accuracy is lenient. \emph{Broader impact:} exploit catalogues are dual-use, so we disclosed the AgentTune exploit with a fix.
@@ -303,6 +303,11 @@ Verified accuracy on the test set (\%) and differences in points with question-b
 \input{tables/tableA_seeds.tex}
 \end{center}
 At 80\% power, one seed detects a C$-$B difference of 1.9--3.9 points and the three-seed pool 2.1 points, while the per-seed differences have a standard deviation of 4.2 points: question-level precision is not the bottleneck, training variance is.
+
+\paragraph{LeakySQL pilot.}
+\label{app:leaky}
+% src: results/leaky_eval.json (scripts/leaky_eval.py); runs/leaky/probe.log (0 of 360)
+A model organism of reward hacking~\citep{macdiarmid2025}: every database gets a table \texttt{saved\_reports} holding the original database's reference answers for half of its questions, and every copy gets the same, now stale, table, so reading it pays under $\tilde R$ and fails any answer-changing copy. Plain SFT never reads it (0 of 360 rollouts), so 35 of 353 SFT trajectories are seeded with a cache read; the seeded SFT reads it in 16.9\% of test samples. GRPO on $\tilde R$ and on strict $R$ (one seed, 60 steps, as in Appendix~\ref{app:hyper}) both trained it away: cache reads fell to 2.1\% and 1.5\% of test samples (C$-$B $-0.6$ [$-1.4$, $+0.2$]), and in training from 10.4\% to 1.7\% and from 9.6\% to 0.0\% of rollouts. $\tilde R$ paid 39 of 60 training cache reads, but at a mean reward of 0.65 against 0.88 for other rollouts the hack never out-earned honest SQL; $R$ paid 0 of 26. Verified accuracy rose from 8.1\% (seeded SFT) to 15.4\% under $\tilde R$ and 12.9\% under $R$ (C$-$B $-2.5$ [$-4.0$, $-1.1$]). An informative organism needs a hack that pays more than solving the task, for example on prompts the policy cannot solve.
 
 \section{Licences and use of LLMs}
 \label{app:licences}
