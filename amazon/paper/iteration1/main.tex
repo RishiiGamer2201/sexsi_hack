@@ -47,7 +47,7 @@ RL for text-to-SQL agents usually pays a query when its result matches the refer
 \section{Introduction}
 \label{sec:intro}
 
-A text-to-SQL query that fails is visible; one that runs and returns a plausible but wrong number ends up in a business report. Reinforcement learning with verifiable rewards trains such agents by executing the generated query and paying it when its result matches the reference result on one database~\citep{ma2025sqlr1,pourreza2025,yao2025arctic}. The check is cheap but has a blind spot. Asked ``How many units of grocery products were in orders that received a payment in 2025 (by payment date)?'', our own agent filtered on the order date. On the database it explored, both columns give 12, so the reward paid in full; on a copy where payment and order dates differ, the reference answer is 10 and the agent still says 12 (Figure~\ref{fig:pipeline}).
+A text-to-SQL query that fails is visible; one that runs and returns a plausible but wrong number ends up in a business report. Reinforcement learning with verifiable rewards trains such agents by executing the generated query and paying it when its result matches the reference result on one database~\citep{ma2025sqlr1,pourreza2025,yao2025arctic}. The check is cheap but has a blind spot. Asked ``How many distinct customers bought a grocery product in 2025?'', one of our trained agents counted distinct orders instead. On the database it explored, every such customer placed one order, so both counts are 10 and the reward paid in full; on a resampled copy where two customers placed five orders, the reference answer is 12 and the agent says 15 (Figure~\ref{fig:pipeline}).
 
 However, execution-match rewards assume that one database separates correct from incorrect queries. This fails when the question reads a small slice of the data, such as one city, year or category: in our synthetic retail databases, 29.2\% of realistic buggy queries pass the single-database check at 50 customers, against 0.8\% at 500 customers. % src: e1_blind_rate.json S, M
 Real questions often filter to such slices; an LLM judge would add a second model that can be gamed.
@@ -124,7 +124,7 @@ With blind copies, the CF reward pays 16.8\% of mutants and 1.9\% of hacks and r
 % src: e0 R_cf_strict@random; a3 rex_cf_min hack:hardcoded_ids (0.2298*235=54); e12_period_copies.json
 
 \paragraph{The copies need not encode our bugs, and a larger database is no substitute.}
-Copies from the family-blind test generator pay 17.2\% of mutants and 2.3\% of hacks (0 of 3,017 correct queries rejected); without the F4-targeted edits, F4 hack pay still falls from 54.3\% to 3.7\% (mutants: 28.5\% to 23.5\%). One database as large as the original plus two copies (150 customers) passes only 7.8\% of mutants but pays every literal and hard-coded-ID hack, which are read off whatever database the agent explores: size catches accidental bugs, hidden data stops exploitation, and the two compose.
+Copies from the family-blind test generator pay 17.2\% of mutants and 2.3\% of hacks (0 of 3,017 correct queries rejected); without the F4-targeted edits, F4 hack pay still falls from 54.3\% to 3.7\% (mutants: 28.5\% to 23.5\%). One database as large as the original plus two copies (150 customers) passes only 7.8\% of mutants but pays every literal and hard-coded-ID hack: size catches accidents, not exploits.
 % src: a4_baselines.json family_blind_testops ALL/*, heldout_f4 F4/*, compute_matched_single_db
 
 
@@ -137,18 +137,18 @@ Copies from the family-blind test generator pay 17.2\% of mutants and 2.3\% of h
 \end{table}
 
 \paragraph{The CF reward did not train a better agent in domain.}
-Pooled over three seeds, GRPO on $R_{\text{mean}}$ verifies 8.4\% of test samples against 11.7\% for GRPO on $\tilde R$ ($-3.2$ [$-4.7$, $-1.8$]) and stays at or just below SFT's 9.4\% in every seed ($-0.5$, $-0.6$, $-1.9$ points). $\tilde R$ is unstable ($+3.2$, $-1.9$, $+5.3$ points over SFT), so C$-$B is $-3.7$, $+1.2$ and $-7.2$ by seed, each with a narrow interval; seed level: $-3.2$ [$-13.7$, $+7.3$]. The pre-registered curriculum pair (one seed) repeats the null ($-0.8$ [$-1.8$, $+0.2$]). Likely cause: weak signal. In every run 84--88\% of rollouts passed $D_0$ and only 5--8\% of passes were lucky, so the rewards disagreed on about 5--7\% of rollouts. Lucky passes also fell under $\tilde R$ alone (seed 0: from 10.7\% to 5.9\% of passes) but grew on hard curriculum prompts (Appendix~\ref{app:results}). By hand audit, no wrong test trajectory was a hack (Appendix~\ref{app:hacks}).
+Pooled over three seeds, GRPO on $R_{\text{mean}}$ verifies 8.4\% of test samples against 11.7\% for GRPO on $\tilde R$ ($-3.2$ [$-4.7$, $-1.8$]) and stays at or just below SFT's 9.4\% in every seed ($-0.5$, $-0.6$, $-1.9$ points). $\tilde R$ is unstable ($+3.2$, $-1.9$, $+5.3$ points over SFT), so C$-$B is $-3.7$, $+1.2$ and $-7.2$ by seed, each with a narrow interval; seed level: $-3.2$ [$-13.7$, $+7.3$]. The pre-registered curriculum pair (one seed) repeats the null ($-0.8$ [$-1.8$, $+0.2$]). Likely cause: weak signal. In every run 84--88\% of rollouts passed $D_0$ and only 5--8\% of passes were lucky, so the rewards disagreed on about 5--7\% of rollouts. Lucky passes also fell under $\tilde R$ alone (seed 0: from 10.7\% to 5.9\% of passes) but grew on hard curriculum prompts (Appendix~\ref{app:results}).
 % src: e4_eval.json comparisons; e14/e4_eval.json Cmin_cur_vs_B_cur; figure3_training_rewards.json; A1 replay (a1_mechanism.json); manual_audit_summary.json
 
 \paragraph{On Spider, the CF reward transfers slightly better, within seed noise.}
-Pooled over three seeds, CF-trained policies reach 29.3\% test-suite accuracy against 27.8\% for single-DB ones ($+1.6$ [$+0.8$, $+2.3$]); by seed the gap is $+1.9$, $-0.5$ and $+3.3$ (seed-level $+1.6$ [$-3.2$, $+6.4$]). The curriculum pair shows the same gap ($+2.1$ [$+0.9$, $+3.4$]). It was not pre-registered, and single-DB policies partly fell below SFT's 29.1\%.
+Pooled over three seeds, CF-trained policies reach 29.3\% test-suite accuracy against 27.8\% for single-DB ones ($+1.6$ [$+0.8$, $+2.3$]); by seed the gap is $+1.9$, $-0.5$ and $+3.3$ (seed-level $+1.6$ [$-3.2$, $+6.4$]). The curriculum pair agrees ($+2.1$ [$+0.9$, $+3.4$]). Not pre-registered; single-DB policies partly fell below SFT's 29.1\%.
 % src: e13_spider_ours.json, e14_spider.json
 
 % ======================================================================
 \section{Discussion and conclusion}
 \label{sec:discussion}
 
-Hidden counterfactual databases are a judge-free check that removes nearly all constructed hacks and many buggy passes without rejecting correct queries, but changes training only where the policy is paid for bugs, rare in our runs. In a planted-cache pilot, neither reward spread a hack that paid less than honest SQL (Appendix~\ref{app:leaky}). Audit rewards on counterfactual data first, monitor the $\tilde R$--$R$ gap during it, compare rewards over several seeds, and do not read a passed audit as proof of correctness.
+Hidden counterfactual databases are a judge-free check that removes nearly all constructed hacks and many buggy passes without rejecting correct queries, but changes training only where the policy is paid for bugs, rare in our runs. A planted-cache pilot spread no underpaying hack under either reward (Appendix~\ref{app:leaky}). Audit rewards on counterfactual data first, monitor the $\tilde R$--$R$ gap during it, compare rewards over several seeds, and do not read a passed audit as proof of correctness.
 
 \paragraph{Limitations and broader impact.}
 One synthetic schema, three seeds, 60 GRPO steps, one 3.35B model, English only, no human red-team. Test copies catch 54 of 103 base-blind mutants, so verified accuracy is lenient. Exploits are dual-use; we disclosed AgentTune's with a fix.

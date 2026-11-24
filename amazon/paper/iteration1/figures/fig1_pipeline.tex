@@ -1,5 +1,5 @@
 % Figure 1: counterfactual-database reward. Drawn at \linewidth (13.97 cm); no scaling.
-% Example numbers: our test template F2_units_paid (results/traj_*.jsonl); SQL abridged.
+% Example: test item F1_category_buyers|grocery|2025|S_s502, completion in results/traj_B_cur.jsonl; SQL abridged.
 \begin{tikzpicture}
   % --- agent
   \node[box=fillQ, text width=15mm] (q) at (0,0) {Question $x$\\ + schema};
@@ -39,11 +39,21 @@
   \node[badge] at (hid.north west) {2};
   \node[badge] at (rc.north east) {3};
 
-  % --- example strip
+  % --- example panel (real test item F1_category_buyers|grocery|2025|S_s502, sampled GRPO completion)
   \node[box=white, text width=\dimexpr\linewidth-9pt\relax, align=left, anchor=north west, inner sep=3.5pt]
-    (ex) at ($(q.west |- hid.south)+(0,-5mm)$) {%
-    \textbf{Ex.}~$y$:~{\scriptsize\ttfamily WHERE substr(o.order\_date,1,4)='2025'}\hfill
-    \colorbox{ok}{$D_0$: $y{=}y^\star{=}12$ \cmark}\,
-    \colorbox{hack}{$D_k$: $y{=}12$, $y^\star{=}10$ \xmark}\,
-    $\Rightarrow \tilde R {=} 1$, $R {=} 0$};
+    (ex) at ($(q.west |- hid.south)+(0,-3.5mm)$) {%
+    \begin{minipage}[c]{0.64\linewidth}\scriptsize\setlength{\fboxsep}{1pt}%
+      \textbf{Ex.} $x$: ``How many distinct customers bought a grocery product in 2025?''\par\vspace{2pt}
+      $y$\phantom{$^\star$}\,(agent):\;\;\;\,{\ttfamily SELECT COUNT(DISTINCT \colorbox{hack}{oi.order\_id}) \dots}\par\vspace{1pt}
+      $y^\star$\,(reference):\;{\ttfamily SELECT COUNT(DISTINCT \colorbox{ok}{o.customer\_id}) \dots}
+    \end{minipage}\hfill
+    \begin{minipage}[c]{0.34\linewidth}\scriptsize\setlength{\fboxsep}{1pt}%
+      \setlength{\tabcolsep}{3pt}%
+      \begin{tabular}{@{}lccc@{}}
+        & $y$ & $y^\star$ & \\ \midrule
+        $D_0$ (1 order per buyer) & 10 & 10 & \colorbox{ok}{\cmark} \\
+        $D_1$ (2 buyers, 5 orders) & 15 & 12 & \colorbox{hack}{\xmark} \\ \midrule
+        \multicolumn{4}{@{}l}{$\Rightarrow$ single-DB $\tilde R{=}1$,\; counterfactual $R{=}0$}
+      \end{tabular}
+    \end{minipage}};
 \end{tikzpicture}
