@@ -15,6 +15,7 @@ Please find attached our submission to the Amazon Trusted AI Symposium 2027, "Si
 - Topics: Evaluation & benchmarking in RAI; Reasoning & verification; Agent safety & reliability
 - Format: NeurIPS 2025 template, 4 pages plus references and appendix
 - Amazon Nova: not used
+- Preprint: https://arxiv.org/abs/2611.34363
 - Code: https://github.com/RishiiGamer2201/counterfactual-sql-rewards (Apache-2.0)
 - Data, models and demo: https://hf.co/counterfactual-sql
 
